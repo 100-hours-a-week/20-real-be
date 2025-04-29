@@ -9,6 +9,8 @@ public class StatusResponse extends ResponseDTO {
             201, StatusCode.CREATED,
             204, StatusCode.NO_CONTENT,
             400, StatusCode.BAD_REQUEST,
+            401, StatusCode.UNAUTHORIZED,
+            403, StatusCode.FORBIDDEN,
             404, StatusCode.NOT_FOUND,
             409, StatusCode.CONFLICT,
             500, StatusCode.INTERNAL_SERVER_ERROR
