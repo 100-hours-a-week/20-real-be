@@ -12,10 +12,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.real.backend.security.JwtUtil;
 import com.real.backend.security.Session;
-import com.real.backend.util.CONSTANT;
 
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -36,18 +38,26 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Authorization 헤더 찾기
-        String authorization = request.getHeader(CONSTANT.AUTHORIZATION_HEADER);
+        String token = resolveTokenFromCookie(request);
 
-        // Authorization 헤더 검증 (Bearer로 시작하는지 검증)
-        if (authorization == null || !authorization.startsWith(CONSTANT.BEARER_PREFIX)) {
-            System.out.println("token null");
+        // token 검증
+        if (token == null) {
+            System.out.println("token is null");
             setBody(response, 401, "Access token is null");
             return;
         }
 
-        // Bearer 접두사 제거 후 순수 토큰 획득
-        String token = authorization.split(" ")[1];
+        // 토큰 검증
+        try {
+            if (jwtUtil.isExpired(token)) {
+                System.out.println("token is expired");
+                setBody(response, 401, "Access token is expired");
+                return;
+            }
+        } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException exception) {
+            setBody(response, 401, "token form is incorrect");
+            return;
+        }
 
         // 토큰에서 정보 획득
         Long id = jwtUtil.getId(token);
@@ -59,8 +69,21 @@ public class JwtFilter extends OncePerRequestFilter {
         Authentication authToken = new UsernamePasswordAuthenticationToken(session, null, session.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken); // user session 생성
 
+        // TODO 블랙리스트 확인 절차
+
         // 다음 필터로 넘기기
         filterChain.doFilter(request, response);
+    }
+
+    private String resolveTokenFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
+
+        return Arrays.stream(cookies)
+            .filter(c -> "ACCESS_COOKIE".equals(c.getName()))
+            .findFirst()
+            .map(Cookie::getValue)
+            .orElse(null);
     }
 
     private void setBody(HttpServletResponse response, int code, String message) throws IOException {

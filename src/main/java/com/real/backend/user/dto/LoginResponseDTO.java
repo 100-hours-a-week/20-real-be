@@ -13,5 +13,4 @@ public class LoginResponseDTO {
     private String nickname;
     private Role role;
     private String profileUrl;
-    private String accessToken;
 }

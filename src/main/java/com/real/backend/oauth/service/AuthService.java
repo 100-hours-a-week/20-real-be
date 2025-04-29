@@ -19,7 +19,9 @@ import com.real.backend.util.CONSTANT;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -27,7 +29,6 @@ public class AuthService {
     private final KakaoUtil kakaoUtil;
     private final JwtUtil jwtUtil;
 
-    // TODO 자체 토큰 발급
     public User oAuthLogin(String accessCode, HttpServletResponse response) {
         KakaoTokenDTO oauthToken = kakaoUtil.getAccessToken(accessCode);
         KakaoProfileDTO kakaoProfile = kakaoUtil.getKakaoProfile(oauthToken);
@@ -35,7 +36,6 @@ public class AuthService {
         String email = kakaoProfile.getKakao_account().getEmail();
 
         User user = userRepository.findByEmail(email).orElseGet(() -> createNewUser(kakaoProfile));
-
         String accessToken = jwtUtil.generateToken("access", user.getId(), user.getNickname(), user.getRole().toString(),
             CONSTANT.ACCESS_TOKEN_EXPIRED);
         String refreshToken = jwtUtil.generateToken("refresh", user.getId(), user.getNickname(), user.getRole().toString(),
@@ -65,6 +65,7 @@ public class AuthService {
     }
 
     // TODO 프로필 사진 s3 버킷 연결
+    // TODO Role 설정
     private User createNewUser(KakaoProfileDTO kakaoProfile) {
         User user = User.builder()
             .email(kakaoProfile.getKakao_account().getEmail())
