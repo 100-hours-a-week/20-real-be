@@ -1,0 +1,19 @@
+version: 0.0
+os: linux
+files:
+    - source: /
+      destination: /home/ubuntu/backend
+permissions:
+    - object: /home/ubuntu/backend
+      owner: ubuntu
+      group: ubuntu
+      mode: 755
+hooks:
+    ApplicationStop:
+        - location: scripts/stop.sh
+          timeout: 60
+          runas: ubuntu
+    ApplicationStart:
+        - location: scripts/start.sh
+          timeout: 60
+          runas: ubuntu
