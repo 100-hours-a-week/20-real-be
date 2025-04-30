@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.oauth.dto.KakaoProfileDTO;
 import com.real.backend.oauth.dto.KakaoTokenDTO;
@@ -15,6 +16,7 @@ import com.real.backend.user.domain.Role;
 import com.real.backend.user.domain.Status;
 import com.real.backend.user.domain.User;
 import com.real.backend.user.repository.UserRepository;
+import com.real.backend.user.service.UserSignupService;
 import com.real.backend.util.CONSTANT;
 import com.real.backend.util.CookieUtils;
 
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
+    private final UserSignupService userSignupService;
     private final KakaoUtil kakaoUtil;
     private final JwtUtil jwtUtil;
     private final CookieUtils cookieUtils;
@@ -37,7 +40,7 @@ public class AuthService {
 
         String email = kakaoProfile.getKakao_account().getEmail();
 
-        User user = userRepository.findByEmail(email).orElseGet(() -> createNewUser(kakaoProfile));
+        User user = userRepository.findByEmail(email).orElseGet(() -> userSignupService.createOAuthUser(kakaoProfile));
         String accessToken = jwtUtil.generateToken("access", user.getId(), user.getNickname(), user.getRole().toString(),
             CONSTANT.ACCESS_TOKEN_EXPIRED);
         String refreshToken = jwtUtil.generateToken("refresh", user.getId(), user.getNickname(), user.getRole().toString(),
@@ -57,21 +60,5 @@ public class AuthService {
 
     }
 
-    // TODO 프로필 사진 s3 버킷 연결
-    // TODO Role 설정
-    // TODO 사용자 닉네임 설정
-    private User createNewUser(KakaoProfileDTO kakaoProfile) {
-        User user = User.builder()
-            .email(kakaoProfile.getKakao_account().getEmail())
-            .nickname(kakaoProfile.getProperties().getNickname())
-            // .profileUrl("")
-            .loginType(LoginType.OAUTH)
-            .role(Role.OUTSIDER)
-            .status(Status.NORMAL)
-            .lastLoginAt(LocalDateTime.now())
-            .build();
 
-        userRepository.save(user);
-        return user;
-    }
 }

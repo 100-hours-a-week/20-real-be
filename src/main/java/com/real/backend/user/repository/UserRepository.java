@@ -1,4 +1,4 @@
-package com.real.backend.user;
+package com.real.backend.user.repository;
 
 import java.util.Optional;
 
