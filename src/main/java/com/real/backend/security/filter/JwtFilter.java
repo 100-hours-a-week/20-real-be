@@ -12,12 +12,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.real.backend.security.JwtUtil;
 import com.real.backend.security.Session;
+import com.real.backend.util.CookieUtils;
 
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final CookieUtils cookieUtils;
 
 
     @Override
@@ -38,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = resolveTokenFromCookie(request);
+        String token = cookieUtils.resolveTokenFromCookie(request);
 
         // token 검증
         if (token == null) {
@@ -73,17 +74,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 다음 필터로 넘기기
         filterChain.doFilter(request, response);
-    }
-
-    private String resolveTokenFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return null;
-
-        return Arrays.stream(cookies)
-            .filter(c -> "ACCESS_COOKIE".equals(c.getName()))
-            .findFirst()
-            .map(Cookie::getValue)
-            .orElse(null);
     }
 
     private void setBody(HttpServletResponse response, int code, String message) throws IOException {

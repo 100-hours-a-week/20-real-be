@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.real.backend.security.dto.CustomUserDetails;
-import com.real.backend.user.UserRepository;
+import com.real.backend.user.repository.UserRepository;
 import com.real.backend.user.domain.User;
 
 import lombok.RequiredArgsConstructor;

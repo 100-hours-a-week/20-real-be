@@ -16,6 +16,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import com.real.backend.security.JwtUtil;
 import com.real.backend.security.filter.CustomLoginFilter;
 import com.real.backend.security.filter.JwtFilter;
+import com.real.backend.util.CookieUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +28,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final CorsConfigurationSource corsConfigurationSource;
     private final JwtUtil jwtUtil;
+    private final CookieUtils cookieUtils;
 
 
     @Bean
@@ -58,7 +60,7 @@ public class SecurityConfig {
                 );
 
         http
-            .addFilterBefore(new JwtFilter(jwtUtil), CustomLoginFilter.class)
+            .addFilterBefore(new JwtFilter(jwtUtil, cookieUtils), CustomLoginFilter.class)
             .addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         //세션 설정
