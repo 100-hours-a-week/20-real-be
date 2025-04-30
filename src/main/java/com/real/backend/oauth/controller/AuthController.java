@@ -1,6 +1,7 @@
 package com.real.backend.oauth.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,11 +15,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api")
 public class AuthController {
 
     private final AuthService authService;
 
-    @GetMapping("/oauth/kakao")
+    @GetMapping("/v1/oauth/kakao")
     public DataResponse<LoginResponseDTO> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse response) {
         User user = authService.oAuthLogin(accessCode, response);
         return DataResponse.of(LoginResponseDTO.builder()

@@ -66,6 +66,7 @@ public class AuthService {
 
     // TODO 프로필 사진 s3 버킷 연결
     // TODO Role 설정
+    // TODO 사용자 닉네임 설정
     private User createNewUser(KakaoProfileDTO kakaoProfile) {
         User user = User.builder()
             .email(kakaoProfile.getKakao_account().getEmail())
