@@ -55,7 +55,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/auth/**").permitAll() // 필터 거치지 않고 통과
-                        .requestMatchers("/api/v1/oauth/**").permitAll()
+                        .requestMatchers("/api/v1/oauth/**", "/api/v1/news").permitAll()
                         .anyRequest().authenticated()  // 나머지는 필터 통과
                 );
 
