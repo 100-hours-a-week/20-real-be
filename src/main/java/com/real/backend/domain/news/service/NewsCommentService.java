@@ -7,7 +7,11 @@ import java.time.LocalDateTime;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.exception.BadRequestException;
+import com.real.backend.exception.ForbiddenException;
+import com.real.backend.exception.NotFoundException;
 import com.real.backend.util.dto.SliceDTO;
 import com.real.backend.domain.news.domain.NewsComment;
 import com.real.backend.domain.news.dto.NewsCommentListResponseDTO;
@@ -45,5 +49,18 @@ public class NewsCommentService {
             NewsComment::getId,                                       // cursor ID
             SliceDTO<NewsCommentListResponseDTO>::new                                  // 최종 DTO 빌더
         );
+    }
+    @Transactional
+    public void deleteNewsComment(Long newsId, Long commentId, Long userId) {
+        if (commentId == null) {
+            throw new BadRequestException("필수 파라미터인 commentId를 받지 못했습니다.");
+        }
+
+        NewsComment newsComment = newsCommentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+
+        if (!newsComment.getUser().getId().equals(userId)) {
+            throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
+        }
+        newsComment.delete();
     }
 }

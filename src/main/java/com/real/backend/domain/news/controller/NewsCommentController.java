@@ -1,11 +1,13 @@
 package com.real.backend.domain.news.controller;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.real.backend.response.StatusResponse;
 import com.real.backend.util.dto.SliceDTO;
 import com.real.backend.domain.news.dto.NewsCommentListResponseDTO;
 import com.real.backend.domain.news.service.NewsCommentService;
@@ -30,9 +32,17 @@ public class NewsCommentController {
         @CurrentSession Session session) {
 
         Long currentUserId = session.getId();
-        SliceDTO<NewsCommentListResponseDTO> newsCommentList = newsCommentService.getNewsCommentListByCursor(newsId, cursorId, cursorStandard, limit, currentUserId);
+        SliceDTO<NewsCommentListResponseDTO> newsCommentList = newsCommentService.getNewsCommentListByCursor(newsId,
+            cursorId, cursorStandard, limit, currentUserId);
 
         return DataResponse.of(newsCommentList);
     }
 
+    @DeleteMapping("v1/news/{newsId}/comments/{commentId}")
+    public StatusResponse deleteNewsComment(@PathVariable Long newsId, @PathVariable Long commentId, @CurrentSession Session session) {
+
+        Long userId = session.getId();
+        newsCommentService.deleteNewsComment(newsId, commentId, userId);
+        return StatusResponse.of(204, "댓글이 정상적으로 삭제됐습니다.");
+    }
 }
