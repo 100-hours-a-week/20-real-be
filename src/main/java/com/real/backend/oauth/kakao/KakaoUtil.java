@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.real.backend.oauth.dto.KakaoProfileDTO;
 import com.real.backend.oauth.dto.KakaoTokenDTO;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Component
 public class KakaoUtil {
 
@@ -84,4 +86,14 @@ public class KakaoUtil {
 
         return kakaoProfile;
     }
+
+    public String redirectToKakaoLogin(){
+        return "https://kauth.kakao.com/oauth/authorize?"
+            + "response_type=code"
+            + "&client_id=" + apiKey
+            + "&redirect_uri=" + redirectUri;
+
+    }
+
+
 }
