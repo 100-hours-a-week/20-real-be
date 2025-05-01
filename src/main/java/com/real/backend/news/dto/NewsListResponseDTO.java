@@ -8,10 +8,10 @@ import lombok.Builder;
 
 @Builder
 public record NewsListResponseDTO(
-    long id,
+    Long id,
     String title,
-    long commentCount,
-    long todayViewCount,
+    Long commentCount,
+    Long todayViewCount,
     String imageUrl,
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm:ss")
     LocalDateTime createdAt) {

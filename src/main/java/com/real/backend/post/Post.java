@@ -28,9 +28,13 @@ public abstract class Post extends BaseEntity {
     private String content;
     @Column(nullable = false)
     private String tag;
+    @Column(nullable = true)
+    private String summary;
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")
-    private long likeCount;
+    private Long likeCount;
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")
-    private long totalViewCount;
+    private Long totalViewCount;
+
+    public void increaseTotalViewCount() {this.totalViewCount++;}
 
 }

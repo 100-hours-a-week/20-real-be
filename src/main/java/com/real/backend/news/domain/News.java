@@ -16,10 +16,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class News extends Post {
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")
-    private long todayViewCount;
+    private Long todayViewCount;
 
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")
-    private long commentCount;
+    private Long commentCount;
 
     private String imageUrl;
+
+    public void increaseTodayViewCount() {this.todayViewCount++;}
 }

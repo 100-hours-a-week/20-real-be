@@ -7,13 +7,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.exception.BadRequestException;
+import com.real.backend.exception.NotFoundException;
 import com.real.backend.news.domain.News;
 import com.real.backend.news.dto.NewsListResponseDTO;
+import com.real.backend.news.dto.NewsResponseDTO;
 import com.real.backend.news.dto.NewsSliceDTO;
 import com.real.backend.news.repository.NewsRepository;
 
+import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -73,5 +77,21 @@ public class NewsService {
             .toList();
 
         return new NewsSliceDTO(dtoList, nextCursor, nextCursorId, hasNext);
+    }
+
+    @Transactional(readOnly = true)
+    public NewsResponseDTO getNews(Long newsId) {
+        News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+
+        return NewsResponseDTO.of(news);
+    }
+
+    @Transactional
+    public void increaseViewCounts(Long newsId) {
+        News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+
+        news.increaseTodayViewCount();
+        news.increaseTotalViewCount();
+        newsRepository.save(news);
     }
 }
