@@ -36,5 +36,7 @@ public abstract class Post extends BaseEntity {
     private Long totalViewCount;
 
     public void increaseTotalViewCount() {this.totalViewCount++;}
+    public void increaseLikesCount() {this.likeCount++;}
+    public void decreaseLikesCount() {this.likeCount--;}
 
 }
