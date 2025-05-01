@@ -79,10 +79,8 @@ public class NewsService {
     }
 
     @Transactional(readOnly = true)
-    public NewsResponseDTO getNews(Long newsId) {
-        News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
-
-        return NewsResponseDTO.of(news);
+    public News getNews(Long newsId) {
+        return newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
     }
 
     @Transactional

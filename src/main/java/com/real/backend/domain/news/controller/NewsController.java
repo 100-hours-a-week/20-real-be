@@ -33,7 +33,7 @@ public class NewsController {
     @GetMapping("/v1/news/{newsId}")
     public DataResponse<NewsResponseDTO> getNewsById(@PathVariable("newsId") Long newsId) {
         newsService.increaseViewCounts(newsId);
-        NewsResponseDTO newsResponseDTO = newsService.getNews(newsId);
+        NewsResponseDTO newsResponseDTO = NewsResponseDTO.of(newsService.getNews(newsId));
 
         return DataResponse.of(newsResponseDTO);
     }

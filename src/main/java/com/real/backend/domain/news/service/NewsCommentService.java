@@ -9,6 +9,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.domain.news.domain.News;
+import com.real.backend.domain.news.dto.NewsCommentRequestDTO;
 import com.real.backend.exception.BadRequestException;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.exception.NotFoundException;
@@ -27,6 +29,7 @@ public class NewsCommentService {
 
     private final NewsCommentRepository newsCommentRepository;
     private final UserService userService;
+    private final NewsService newsService;
 
     public SliceDTO<NewsCommentListResponseDTO> getNewsCommentListByCursor(Long newsId, Long cursorId, String cursorStandard, int limit, Long currentUserId) {
 
@@ -62,5 +65,17 @@ public class NewsCommentService {
             throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
         }
         newsComment.delete();
+    }
+
+    @Transactional
+    public void createNewsComment(Long newsId, Long userId, NewsCommentRequestDTO newsCommentRequestDTO) {
+        User user = userService.getUser(userId);
+        News news = newsService.getNews(newsId);
+
+        newsCommentRepository.save(NewsComment.builder()
+            .content(newsCommentRequestDTO.content())
+            .user(user)
+            .news(news)
+            .build());
     }
 }
