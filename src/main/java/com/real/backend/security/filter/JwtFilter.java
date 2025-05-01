@@ -48,7 +48,6 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 토큰 검증
         try {
             if (jwtUtil.isExpired(token)) {
                 System.out.println("token is expired");
