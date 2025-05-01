@@ -1,14 +1,10 @@
 package com.real.backend.oauth.controller;
 
-import java.io.IOException;
-
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.real.backend.oauth.kakao.KakaoUtil;
 import com.real.backend.oauth.service.AuthService;
 import com.real.backend.response.DataResponse;
 import com.real.backend.user.domain.User;
@@ -20,14 +16,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api")
-public class AuthController {
+public class KakaoController {
+    private final AuthService authService;
 
-    private final KakaoUtil kakaoUtil;
-
-    @GetMapping("/v1/oauth/{provider}")
-    public void oauthLogin(@PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
-        if (provider.equals("kakao")) {
-            response.sendRedirect(kakaoUtil.redirectToKakaoLogin());
-        }
+    @GetMapping("/v1/oauth/kakao/callback")
+    public DataResponse<LoginResponseDTO> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse response) {
+        User user = authService.oAuthLogin(accessCode, response);
+        return DataResponse.of(LoginResponseDTO.builder()
+            .nickname(user.getNickname())
+            .role(user.getRole())
+            .profileUrl(user.getProfileUrl())
+            .build());
     }
+
 }
