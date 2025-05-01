@@ -16,7 +16,7 @@ public class CursorUtils {
     }
 
     public static Pageable buildPageable(int limit) {
-        return PageRequest.of(0, limit + 1);
+        return PageRequest.of(0, limit);
     }
 
     public static <T, D, R> R toCursorDto(

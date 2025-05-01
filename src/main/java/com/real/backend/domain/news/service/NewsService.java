@@ -33,7 +33,7 @@ public class NewsService {
             throw new BadRequestException("sort 파라미터는 latest 또는 popular 이어야 합니다.");
         }
 
-        Pageable pg = PageRequest.of(0, limit + 1);
+        Pageable pg = PageRequest.of(0, limit);
         boolean firstPage = (cursorId == null || cursorStandard == null);
         Slice<News> slice;
 

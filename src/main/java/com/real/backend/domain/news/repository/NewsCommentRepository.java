@@ -17,15 +17,15 @@ public interface NewsCommentRepository extends JpaRepository<NewsComment, Long> 
 	@Query("""
         SELECT n FROM NewsComment n
         WHERE  n.deletedAt IS NULL
-          AND n.id = :newsId
+          AND n.news.id = :newsId
         ORDER  BY n.createdAt DESC, n.id DESC
         """)
-	Slice<NewsComment> fetchLatestFirst(Pageable pg, Long newsId);   // 첫 페이지
+	Slice<NewsComment> fetchLatestFirst(Pageable pg, @Param("newsId") Long newsId);   // 첫 페이지
 
 	@Query("""
         SELECT n FROM NewsComment n
         WHERE  n.deletedAt IS NULL
-          AND n.id = :newsId
+          AND n.news.id = :newsId
           AND ( n.createdAt < :cAt
                 OR (n.createdAt = :cAt AND n.id < :id) )
         ORDER BY n.createdAt DESC, n.id DESC
@@ -33,5 +33,5 @@ public interface NewsCommentRepository extends JpaRepository<NewsComment, Long> 
 	Slice<NewsComment> fetchLatest(@Param("cAt") LocalDateTime cAt,
 		@Param("id") Long id,
 		Pageable pg,
-		Long newsId);
+        @Param("newsId") Long newsId);
 }
