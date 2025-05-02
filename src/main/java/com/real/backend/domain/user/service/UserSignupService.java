@@ -1,5 +1,6 @@
 package com.real.backend.domain.user.service;
 
+import com.real.backend.util.S3Utils;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class UserSignupService {
 
     private final UserRepository userRepository;
     private final InvitedUserRepository invitedUserRepository;
+    private final S3Utils s3Utils;
 
     @Transactional
     public User setKtbUser(String email, User user) {
@@ -37,10 +39,12 @@ public class UserSignupService {
     // TODO Role 설정
     @Transactional
     public User createOAuthUser(KakaoProfileDTO kakaoProfile) {
+        String imageUrl = s3Utils.getRandomProfileImageUrl("images");
+
         User user = setKtbUser(kakaoProfile.getKakao_account().getEmail(), User.builder()
             .email(kakaoProfile.getKakao_account().getEmail())
             .nickname(kakaoProfile.getProperties().getNickname())
-            // .profileUrl("")
+            .profileUrl("imageUrl")
             .loginType(LoginType.OAUTH)
             .role(Role.OUTSIDER)
             .status(Status.NORMAL)
@@ -53,6 +57,8 @@ public class UserSignupService {
 
     @Transactional
     public User createNormalUser(String email, String nickname) {
+        String imageUrl = s3Utils.getRandomProfileImageUrl("images");
+
         User user = User.builder()
             .email(email)
             .nickname(nickname)

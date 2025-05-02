@@ -1,5 +1,7 @@
 package com.real.backend.domain.oauth.controller;
 
+import java.io.IOException;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,13 +22,10 @@ public class KakaoController {
     private final AuthService authService;
 
     @GetMapping("/v1/oauth/kakao/callback")
-    public DataResponse<LoginResponseDTO> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse response) {
+    public void kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse response) throws
+		IOException {
         User user = authService.oAuthLogin(accessCode, response);
-        return DataResponse.of(LoginResponseDTO.builder()
-            .nickname(user.getNickname())
-            .role(user.getRole())
-            .profileUrl(user.getProfileUrl())
-            .build());
+        response.sendRedirect("http://localhost:3000/login/success");
     }
 
 }
