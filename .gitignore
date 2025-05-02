@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 /src/main/resources/application.properties
 /20-real-be-properties
+.env
 
 ### STS ###
 .apt_generated
