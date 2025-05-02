@@ -10,6 +10,8 @@ import com.real.backend.domain.news.service.NewsService;
 import com.real.backend.domain.news.dto.NewsResponseDTO;
 import com.real.backend.domain.news.dto.NewsSliceDTO;
 import com.real.backend.response.DataResponse;
+import com.real.backend.security.CurrentSession;
+import com.real.backend.security.Session;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,9 +33,9 @@ public class NewsController {
     }
 
     @GetMapping("/v1/news/{newsId}")
-    public DataResponse<NewsResponseDTO> getNewsById(@PathVariable("newsId") Long newsId) {
+    public DataResponse<NewsResponseDTO> getNewsById(@PathVariable("newsId") Long newsId, @CurrentSession Session session) {
         newsService.increaseViewCounts(newsId);
-        NewsResponseDTO newsResponseDTO = NewsResponseDTO.of(newsService.getNews(newsId));
+        NewsResponseDTO newsResponseDTO = newsService.getNewsWithUserLiked(newsId, session.getId());
 
         return DataResponse.of(newsResponseDTO);
     }

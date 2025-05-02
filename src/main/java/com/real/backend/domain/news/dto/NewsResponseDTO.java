@@ -30,8 +30,7 @@ public class NewsResponseDTO {
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm")
     private LocalDateTime createdAt;
 
-    // TODO: 실제 userLike 로직 반영
-    public static NewsResponseDTO of(News news) {
+    public static NewsResponseDTO from(News news, boolean userLike) {
         return NewsResponseDTO.builder()
             .id(news.getId())
             .title(news.getTitle())
@@ -41,7 +40,7 @@ public class NewsResponseDTO {
             .viewCount(news.getTotalViewCount())
             .likeCount(news.getLikeCount())
             .commentCount(news.getCommentCount())
-            // .userLike(false)                // 임시값; 실제 로직에서 가져오세요
+            .userLike(userLike)
             .imageUrl(news.getImageUrl())
             .createdAt(news.getCreatedAt())
             .build();

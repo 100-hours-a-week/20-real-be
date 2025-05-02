@@ -17,6 +17,7 @@ import com.real.backend.domain.news.dto.NewsResponseDTO;
 import com.real.backend.domain.news.dto.NewsSliceDTO;
 import com.real.backend.domain.news.repository.NewsRepository;
 
+import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class NewsService {
 
     private final NewsRepository newsRepository;
+    private final NewsLikeService newsLikeService;
 
     public NewsSliceDTO getNewsListByCursor(Long cursorId, int limit, String sort, String cursorStandard) {
 
@@ -81,6 +83,12 @@ public class NewsService {
     @Transactional(readOnly = true)
     public News getNews(Long newsId) {
         return newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public NewsResponseDTO getNewsWithUserLiked(Long newsId, Long userId) {
+        News news = getNews(newsId);
+        return NewsResponseDTO.from(news, newsLikeService.userIsLiked(newsId, userId));
     }
 
     @Transactional
