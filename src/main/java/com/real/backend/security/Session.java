@@ -6,8 +6,6 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.real.backend.user.domain.Role;
-
 import lombok.Builder;
 import lombok.Getter;
 

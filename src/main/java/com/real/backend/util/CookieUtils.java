@@ -15,7 +15,7 @@ public class CookieUtils {
         if (cookies == null) return null;
 
         return Arrays.stream(cookies)
-            .filter(c -> "ACCESS_COOKIE".equals(c.getName()))
+            .filter(c -> "ACCESS_TOKEN".equals(c.getName()))
             .findFirst()
             .map(Cookie::getValue)
             .orElse(null);
