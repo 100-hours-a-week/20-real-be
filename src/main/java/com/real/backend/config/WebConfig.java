@@ -15,7 +15,8 @@ public class WebConfig implements WebMvcConfigurer {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 모든 도메인 허용
-        configuration.addAllowedOrigin("http://localhost:3000");
+        // configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("http://test.kakaotech.com");
 
         // 허용할 HTTP 메소드
         configuration.addAllowedMethod("GET");
