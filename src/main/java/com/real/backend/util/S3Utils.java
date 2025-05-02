@@ -57,6 +57,7 @@ public class S3Utils {
         }
     }
 
+    //차후 이미지 제목 수정 등이 필요함
     public String upload(MultipartFile file, String dirName) {
         try (InputStream inputStream = file.getInputStream()) {
             String fileName = dirName + "/" + file.getOriginalFilename();
