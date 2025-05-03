@@ -1,5 +1,6 @@
 package com.real.backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -9,14 +10,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+    @Value("${spring.server_url}")
+    private String serverUrl;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 모든 도메인 허용
-        // configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOrigin("http://test.kakaotech.com");
+        configuration.addAllowedOrigin(serverUrl);
 
         // 허용할 HTTP 메소드
         configuration.addAllowedMethod("GET");

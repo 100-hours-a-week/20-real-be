@@ -2,6 +2,7 @@ package com.real.backend.domain.oauth.controller;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,12 +21,14 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api")
 public class KakaoController {
     private final AuthService authService;
+    @Value("${spring.server_url}")
+    private String serverUrl;
 
     @GetMapping("/v1/oauth/kakao/callback")
     public void kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse response) throws
 		IOException {
         User user = authService.oAuthLogin(accessCode, response);
-        response.sendRedirect("http://localhost:3000/login/success");
+        response.sendRedirect(serverUrl + "/login/success");
     }
 
 }
