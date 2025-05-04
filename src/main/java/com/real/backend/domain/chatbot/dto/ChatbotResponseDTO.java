@@ -1,6 +1,6 @@
 package com.real.backend.domain.chatbot.dto;
 
 public record ChatbotResponseDTO(
-    String answer
-) {
-}
+    String message,
+    ChatbotResponseDataDTO data
+) {}

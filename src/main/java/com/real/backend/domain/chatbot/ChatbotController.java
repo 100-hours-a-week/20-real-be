@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.FastAPIService;
 import com.real.backend.domain.chatbot.dto.ChatbotRequestDTO;
 import com.real.backend.domain.chatbot.dto.ChatbotResponseDTO;
+import com.real.backend.domain.chatbot.dto.ChatbotResponseDataDTO;
 import com.real.backend.response.DataResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -21,10 +22,10 @@ public class ChatbotController {
     private final FastAPIService fastAPIService;
 
     @PostMapping("/v1/chatbots")
-    public DataResponse<?> makeQuestion(@RequestBody ChatbotRequestDTO chatbotRequestDTO) throws
+    public DataResponse<ChatbotResponseDataDTO> makeQuestion(@RequestBody ChatbotRequestDTO chatbotRequestDTO) throws
         JsonProcessingException {
-        ChatbotResponseDTO chatbotResponseDTO = fastAPIService.makeQuestion(chatbotRequestDTO);
+        ChatbotResponseDataDTO chatbotResponsedataDTO = fastAPIService.makeQuestion(chatbotRequestDTO);
 
-        return DataResponse.of(chatbotResponseDTO);
+        return DataResponse.of(chatbotResponsedataDTO);
     }
 }
