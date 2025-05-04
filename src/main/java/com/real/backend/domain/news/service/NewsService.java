@@ -14,8 +14,8 @@ import com.real.backend.exception.NotFoundException;
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsListResponseDTO;
 import com.real.backend.domain.news.dto.NewsResponseDTO;
-import com.real.backend.domain.news.dto.NewsSliceDTO;
 import com.real.backend.domain.news.repository.NewsRepository;
+import com.real.backend.util.dto.SliceDTO;
 
 import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class NewsService {
     private final NewsRepository newsRepository;
     private final NewsLikeService newsLikeService;
 
-    public NewsSliceDTO getNewsListByCursor(Long cursorId, int limit, String sort, String cursorStandard) {
+    public SliceDTO<NewsListResponseDTO> getNewsListByCursor(Long cursorId, int limit, String sort, String cursorStandard) {
 
         String order = (sort == null || sort.isBlank()) ? "latest" : sort.toLowerCase();
 
@@ -77,7 +77,7 @@ public class NewsService {
             .map(NewsListResponseDTO::of)
             .toList();
 
-        return new NewsSliceDTO(dtoList, nextCursor, nextCursorId, hasNext);
+        return new SliceDTO<>(dtoList, nextCursor, nextCursorId, hasNext);
     }
 
     @Transactional(readOnly = true)
