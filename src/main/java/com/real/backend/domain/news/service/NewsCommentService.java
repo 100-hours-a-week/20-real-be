@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsCommentRequestDTO;
+import com.real.backend.domain.news.repository.NewsRepository;
 import com.real.backend.exception.BadRequestException;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.exception.NotFoundException;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class NewsCommentService {
 
     private final NewsCommentRepository newsCommentRepository;
+    private final NewsRepository newsRepository;
     private final UserService userService;
     private final NewsService newsService;
 
@@ -59,23 +61,28 @@ public class NewsCommentService {
             throw new BadRequestException("필수 파라미터인 commentId를 받지 못했습니다.");
         }
 
+        News news = newsService.getNews(newsId);
         NewsComment newsComment = newsCommentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
 
         if (!newsComment.getUser().getId().equals(userId)) {
             throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
         }
         newsComment.delete();
+        news.decreaseCommentCount();
+        newsRepository.save(news);
     }
 
     @Transactional
     public void createNewsComment(Long newsId, Long userId, NewsCommentRequestDTO newsCommentRequestDTO) {
         User user = userService.getUser(userId);
         News news = newsService.getNews(newsId);
+        news.increaseCommentCount();
 
         newsCommentRepository.save(NewsComment.builder()
             .content(newsCommentRequestDTO.content())
             .user(user)
             .news(news)
             .build());
+        newsRepository.save(news);
     }
 }

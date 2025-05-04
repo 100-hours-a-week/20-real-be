@@ -30,4 +30,6 @@ public class News extends Post {
     private List<NewsComment> newsComments;
 
     public void increaseTodayViewCount() {this.todayViewCount++;}
+    public void increaseCommentCount() {this.commentCount++;}
+    public void decreaseCommentCount() {this.commentCount--;}
 }

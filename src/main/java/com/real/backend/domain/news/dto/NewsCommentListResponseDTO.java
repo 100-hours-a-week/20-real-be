@@ -13,7 +13,7 @@ import lombok.Getter;
 @Getter
 public class NewsCommentListResponseDTO {
     private Long id;
-    private boolean isAuthor;
+    private Boolean isAuthor;
     private String nickname;
     private String content;
     private LocalDateTime createdAt;
