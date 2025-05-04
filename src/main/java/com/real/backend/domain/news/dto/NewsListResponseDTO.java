@@ -4,9 +4,12 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.real.backend.domain.news.domain.News;
+
 import lombok.Builder;
+import lombok.Getter;
 
 @Builder
+@Getter
 public class NewsListResponseDTO{
     private Long id;
     private String title;
