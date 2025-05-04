@@ -17,7 +17,6 @@ import com.real.backend.domain.news.dto.NewsResponseDTO;
 import com.real.backend.domain.news.repository.NewsRepository;
 import com.real.backend.util.dto.SliceDTO;
 
-import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 
 @Service
