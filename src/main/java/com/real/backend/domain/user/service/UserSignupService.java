@@ -39,7 +39,7 @@ public class UserSignupService {
     // TODO Role 설정
     @Transactional
     public User createOAuthUser(KakaoProfileDTO kakaoProfile) {
-        String imageUrl = s3Utils.getRandomProfileImageUrl("images");
+        String imageUrl = s3Utils.getRandomDefaultProfileUrl();
 
         User user = setKtbUser(kakaoProfile.getKakao_account().getEmail(), User.builder()
             .email(kakaoProfile.getKakao_account().getEmail())
@@ -57,7 +57,7 @@ public class UserSignupService {
 
     @Transactional
     public User createNormalUser(String email, String nickname) {
-        String imageUrl = s3Utils.getRandomProfileImageUrl("images");
+        String imageUrl = s3Utils.getRandomDefaultProfileUrl();
 
         User user = User.builder()
             .email(email)
