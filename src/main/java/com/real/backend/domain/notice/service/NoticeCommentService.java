@@ -7,13 +7,19 @@ import java.time.LocalDateTime;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.domain.notice.component.NoticeFinder;
+import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.NoticeComment;
 import com.real.backend.domain.notice.dto.NoticeCommentListResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeCommentRepository;
+import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
-import com.real.backend.domain.user.service.UserService;
+import com.real.backend.exception.BadRequestException;
+import com.real.backend.exception.ForbiddenException;
+import com.real.backend.exception.NotFoundException;
 import com.real.backend.util.dto.SliceDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -22,8 +28,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NoticeCommentService {
     private final NoticeCommentRepository noticeCommentRepository;
-    private final UserService userService;
+    private final NoticeRepository noticeRepository;
     private final UserFinder userFinder;
+    private final NoticeFinder noticeFinder;
+
 
     public SliceDTO<NoticeCommentListResponseDTO> getNoticeCommentListByCursor(Long noticeId, Long cursorId, String cursorStandard, int limit, Long currentUserId) {
 
@@ -46,5 +54,22 @@ public class NoticeCommentService {
             NoticeComment::getId,                                       // cursor ID
             SliceDTO<NoticeCommentListResponseDTO>::new                                  // 최종 DTO 빌더
         );
+    }
+
+    @Transactional
+    public void deleteNoticeComment(Long noticeId, Long commentId, Long userId) {
+        if (commentId == null) {
+            throw new BadRequestException("필수 파라미터인 commentId를 받지 못했습니다.");
+        }
+
+        Notice notice = noticeFinder.getNotice(noticeId);
+        NoticeComment noticeComment = noticeCommentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("해당 id를 가진 댓글이 존재하지 않습니다."));
+
+        if (!noticeComment.getUser().getId().equals(userId)) {
+            throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
+        }
+        noticeComment.delete();
+        notice.decreaseCommentCount();
+        noticeRepository.save(notice);
     }
 }

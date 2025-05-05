@@ -7,7 +7,10 @@ import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.repository.NewsRepository;
 import com.real.backend.exception.NotFoundException;
 
+import lombok.RequiredArgsConstructor;
+
 @Component
+@RequiredArgsConstructor
 public class NewsFinder {
     private NewsRepository newsRepository;
 
