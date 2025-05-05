@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class NoticeInformResponseDTO {
+public class NoticeInfoResponseDTO {
     private Long id;
     private String title;
     private String author;
@@ -26,8 +26,13 @@ public class NoticeInformResponseDTO {
     private List<NoticeFilesResponseDTO> files;
     private List<NoticeFilesResponseDTO> images;
 
-    public static NoticeInformResponseDTO from(Notice notice, Boolean userLike) {
-        return NoticeInformResponseDTO.builder()
+    public static NoticeInfoResponseDTO from(
+        Notice notice,
+        Boolean userLike,
+        List<NoticeFilesResponseDTO> files,
+        List<NoticeFilesResponseDTO> images) {
+
+        return NoticeInfoResponseDTO.builder()
             .id(notice.getId())
             .title(notice.getTitle())
             .author(notice.getUser().getNickname())
@@ -40,6 +45,8 @@ public class NoticeInformResponseDTO {
             .originalUrl(notice.getOriginalUrl())
             .userLike(userLike)
             .createdAt(notice.getCreatedAt())
+            .images(images)
+            .files(files)
             .build();
     }
 }

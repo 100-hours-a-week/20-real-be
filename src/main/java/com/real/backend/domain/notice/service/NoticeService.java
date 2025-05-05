@@ -12,7 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
-import com.real.backend.domain.notice.dto.NoticeInformResponseDTO;
+import com.real.backend.domain.notice.dto.NoticeFileGroups;
+import com.real.backend.domain.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeListResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.notice.repository.UserNoticeReadRepository;
@@ -30,9 +31,11 @@ import lombok.RequiredArgsConstructor;
 public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final NoticeLikeService noticeLikeService;
+    private final NoticeFileService noticeFileService;
     private final UserNoticeReadRepository userNoticeReadRepository;
     private final UserService userService;
 
+    @Transactional(readOnly = true)
     public SliceDTO<NoticeListResponseDTO> getNoticeListByCursor(Long cursorId, int limit, String cursorStandard, Long userId) {
 
         Pageable pg = buildPageable(limit);
@@ -69,8 +72,12 @@ public class NoticeService {
     }
 
     @Transactional(readOnly = true)
-    public Notice getNotice(Long noticeId) {
-        return noticeRepository.findById(noticeId).orElseThrow(() -> new NotFoundException("해당 id를 가진 공지가 존재하지 않습니다."));
+    protected Notice getNotice(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NotFoundException("해당 id를 가진 공지가 존재하지 않습니다."));
+        if (notice.getDeletedAt() != null) {
+            throw new NotFoundException("해당 id를 가진 공지가 존재하지 않습니다.");
+        }
+        return notice;
     }
 
     // TODO summary 구현
@@ -95,8 +102,9 @@ public class NoticeService {
     }
 
     @Transactional(readOnly = true)
-    public NoticeInformResponseDTO getNoticeById(Long noticeId, Long userId) {
+    public NoticeInfoResponseDTO getNoticeById(Long noticeId, Long userId) {
         Notice notice = getNotice(noticeId);
-        return NoticeInformResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId));
+        NoticeFileGroups noticeFileGroups = noticeFileService.getNoticeFileGroups(notice);
+        return NoticeInfoResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId), noticeFileGroups.files(), noticeFileGroups.images());
     }
 }

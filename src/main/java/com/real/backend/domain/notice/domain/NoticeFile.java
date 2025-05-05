@@ -2,9 +2,11 @@ package com.real.backend.domain.notice.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,5 +28,8 @@ public class NoticeFile {
     private String type;
 
     @Column(columnDefinition = "TINYINT UNSIGNED")
-    private Integer fileSize;
+    private Integer fileSeqNo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Notice notice;
 }

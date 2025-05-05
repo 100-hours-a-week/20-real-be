@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
-import com.real.backend.domain.notice.dto.NoticeInformResponseDTO;
+import com.real.backend.domain.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeListResponseDTO;
 import com.real.backend.domain.notice.service.NoticeService;
 import com.real.backend.response.DataResponse;
@@ -49,11 +49,11 @@ public class NoticeController {
     }
 
     @GetMapping("/v1/notices/{noticeId}")
-    public DataResponse<NoticeInformResponseDTO> getNoticeById(
+    public DataResponse<NoticeInfoResponseDTO> getNoticeById(
         @PathVariable Long noticeId,
         @CurrentSession Session session) {
 
-        NoticeInformResponseDTO noticeInformResponseDTO = noticeService.getNoticeById(noticeId, session.getId());
-        return DataResponse.of(noticeInformResponseDTO);
+        NoticeInfoResponseDTO noticeInfoResponseDTO = noticeService.getNoticeById(noticeId, session.getId());
+        return DataResponse.of(noticeInfoResponseDTO);
     }
 }
