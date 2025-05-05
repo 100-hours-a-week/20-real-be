@@ -3,6 +3,7 @@ package com.real.backend.domain.news.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.domain.news.component.NewsFinder;
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.domain.NewsLike;
 import com.real.backend.domain.news.dto.NewsLikeResponseDTO;
@@ -19,13 +20,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NewsLikeService {
     private final NewsLikeRepository newsLikeRepository;
-    private final UserService userService;
     private final NewsRepository newsRepository;
     private final UserFinder userFinder;
+    private final NewsFinder newsFinder;
 
     @Transactional
     public NewsLikeResponseDTO editNewsLike(Long newsId, Long userId) {
-        News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+        News news = newsFinder.getNews(newsId);
         User user = userFinder.getUser(userId);
         NewsLike newsLike = newsLikeRepository.findByNewsAndUser(news, user).orElse(null);
 
@@ -57,7 +58,7 @@ public class NewsLikeService {
 
     @Transactional(readOnly = true)
     public NewsLike getNewsLike(Long newsId, Long userId) {
-        News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+        News news = newsFinder.getNews(newsId);
         User user = userFinder.getUser(userId);
 
         return newsLikeRepository.findByNewsAndUser(news, user).orElse(null);

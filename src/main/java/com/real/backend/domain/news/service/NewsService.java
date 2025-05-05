@@ -9,6 +9,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.domain.news.component.NewsFinder;
 import com.real.backend.exception.BadRequestException;
 import com.real.backend.exception.NotFoundException;
 import com.real.backend.domain.news.domain.News;
@@ -25,6 +26,7 @@ public class NewsService {
 
     private final NewsRepository newsRepository;
     private final NewsLikeService newsLikeService;
+    private final NewsFinder newsFinder;
 
     public SliceDTO<NewsListResponseDTO> getNewsListByCursor(Long cursorId, int limit, String sort, String cursorStandard) {
 
@@ -80,23 +82,14 @@ public class NewsService {
     }
 
     @Transactional(readOnly = true)
-    public News getNews(Long newsId) {
-        News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
-        if (news.getDeletedAt() != null) {
-            throw new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다.");
-        }
-        return news;
-    }
-
-    @Transactional(readOnly = true)
     public NewsResponseDTO getNewsWithUserLiked(Long newsId, Long userId) {
-        News news = getNews(newsId);
+        News news = newsFinder.getNews(newsId);
         return NewsResponseDTO.from(news, newsLikeService.userIsLiked(newsId, userId));
     }
 
     @Transactional
     public void increaseViewCounts(Long newsId) {
-        News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+        News news = newsFinder.getNews(newsId);
 
         news.increaseTodayViewCount();
         news.increaseTotalViewCount();
