@@ -6,19 +6,18 @@ import com.real.backend.post.Post;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
 public class Notice extends Post {
     private String originalUrl;
     private String platform;
+    private String tag;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
