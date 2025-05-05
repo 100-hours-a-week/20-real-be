@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
+import com.real.backend.domain.notice.dto.NoticeInformResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeListResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.notice.repository.UserNoticeReadRepository;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NoticeService {
     private final NoticeRepository noticeRepository;
+    private final NoticeLikeService noticeLikeService;
     private final UserNoticeReadRepository userNoticeReadRepository;
     private final UserService userService;
 
@@ -90,5 +92,11 @@ public class NoticeService {
             .commentCount(0L)
             .likeCount(0L)
             .build());
+    }
+
+    @Transactional(readOnly = true)
+    public NoticeInformResponseDTO getNoticeById(Long noticeId, Long userId) {
+        Notice notice = getNotice(noticeId);
+        return NoticeInformResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId));
     }
 }

@@ -29,4 +29,7 @@ public class Notice extends Post {
     // TODO cascade 전략 수정하기
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoticeComment> noticeComments;
+
+    @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NoticeLike> noticeLikes;
 }

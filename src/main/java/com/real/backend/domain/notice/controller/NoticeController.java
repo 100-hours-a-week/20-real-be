@@ -1,6 +1,7 @@
 package com.real.backend.domain.notice.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
+import com.real.backend.domain.notice.dto.NoticeInformResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeListResponseDTO;
 import com.real.backend.domain.notice.service.NoticeService;
 import com.real.backend.response.DataResponse;
@@ -36,6 +38,7 @@ public class NoticeController {
         return DataResponse.of(noticeList);
     }
 
+    // TODO 파일 받는 로직
     @PostMapping("/v1/notices")
     public StatusResponse createNotice(
         @CurrentSession Session session,
@@ -45,4 +48,12 @@ public class NoticeController {
         return StatusResponse.of(201, "공지가 성공적으로 생성되었습니다.");
     }
 
+    @GetMapping("/v1/notices/{noticeId}")
+    public DataResponse<NoticeInformResponseDTO> getNoticeById(
+        @PathVariable Long noticeId,
+        @CurrentSession Session session) {
+
+        NoticeInformResponseDTO noticeInformResponseDTO = noticeService.getNoticeById(noticeId, session.getId());
+        return DataResponse.of(noticeInformResponseDTO);
+    }
 }
