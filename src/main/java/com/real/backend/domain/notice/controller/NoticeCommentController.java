@@ -3,10 +3,13 @@ package com.real.backend.domain.notice.controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.real.backend.domain.notice.dto.NoticeCommentRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeCommentListResponseDTO;
 import com.real.backend.domain.notice.service.NoticeCommentService;
 import com.real.backend.response.DataResponse;
@@ -45,4 +48,13 @@ public class NoticeCommentController {
         return StatusResponse.of(204, "댓글이 정상적으로 삭제됐습니다.");
     }
 
+    @PostMapping("v1/notice/{noticeId}/comments")
+    public StatusResponse createNoticeComment(@PathVariable Long noticeId,
+        @CurrentSession Session session,
+        @RequestBody NoticeCommentRequestDTO noticeCommentRequestDTO) {
+        Long userId = session.getId();
+        noticeCommentService.createNoticeComment(noticeId, userId, noticeCommentRequestDTO);
+
+        return StatusResponse.of(200, "댓글이 성공적으로 생성되었습니다.");
+    }
 }

@@ -9,9 +9,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.NoticeComment;
+import com.real.backend.domain.notice.dto.NoticeCommentRequestDTO;
+import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.dto.NoticeCommentListResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeCommentRepository;
 import com.real.backend.domain.notice.repository.NoticeRepository;
@@ -70,6 +71,20 @@ public class NoticeCommentService {
         }
         noticeComment.delete();
         notice.decreaseCommentCount();
+        noticeRepository.save(notice);
+    }
+
+    @Transactional
+    public void createNoticeComment(Long noticeId, Long userId, NoticeCommentRequestDTO noticeCommentRequestDTO) {
+        User user = userFinder.getUser(userId);
+        Notice notice = noticeFinder.getNotice(noticeId);
+        notice.increaseCommentCount();
+
+        noticeCommentRepository.save(NoticeComment.builder()
+            .content(noticeCommentRequestDTO.content())
+            .user(user)
+            .notice(notice)
+            .build());
         noticeRepository.save(notice);
     }
 }
