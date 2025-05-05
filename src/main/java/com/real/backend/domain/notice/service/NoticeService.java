@@ -9,8 +9,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.domain.Notice;
+import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeFileGroups;
@@ -20,7 +20,6 @@ import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.notice.repository.UserNoticeReadRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
-import com.real.backend.domain.user.service.UserService;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.util.CursorUtils;
 import com.real.backend.util.dto.SliceDTO;
@@ -34,7 +33,6 @@ public class NoticeService {
     private final NoticeLikeService noticeLikeService;
     private final NoticeFileService noticeFileService;
     private final UserNoticeReadRepository userNoticeReadRepository;
-    private final UserService userService;
     private final NoticeFinder noticeFinder;
     private final UserFinder userFinder;
 
@@ -74,8 +72,6 @@ public class NoticeService {
 
     }
 
-
-
     // TODO summary 구현
     @Transactional
     public void createNotice(Long userId, NoticeCreateRequestDTO noticeCreateRequestDTO) {
@@ -102,5 +98,23 @@ public class NoticeService {
         Notice notice = noticeFinder.getNotice(noticeId);
         NoticeFileGroups noticeFileGroups = noticeFileService.getNoticeFileGroups(notice);
         return NoticeInfoResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId), noticeFileGroups.files(), noticeFileGroups.images());
+    }
+
+    @Transactional
+    public void increaseViewCounts(Long noticeId) {
+        Notice notice = noticeFinder.getNotice(noticeId);
+
+        notice.increaseTotalViewCount();
+        noticeRepository.save(notice);
+    }
+
+    @Transactional
+    public void userReadNotice(Long noticeId, Long userId) {
+        User user = userFinder.getUser(userId);
+        Notice notice = noticeFinder.getNotice(noticeId);
+
+        if (!userNoticeReadRepository.findByUserAndNotice(user, notice).isPresent()) {
+            userNoticeReadRepository.save(UserNoticeRead.builder().user(user).notice(notice).build());
+        }
     }
 }

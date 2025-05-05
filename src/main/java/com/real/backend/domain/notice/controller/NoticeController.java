@@ -31,8 +31,8 @@ public class NoticeController {
         @RequestParam(value = "cursorId", required = false) Long cursorId,
         @RequestParam(value = "cursorStandard", required = false) String cursorStandard,
         @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
-        @CurrentSession Session session) {
-
+        @CurrentSession Session session
+    ) {
         SliceDTO<NoticeListResponseDTO> noticeList = noticeService.getNoticeListByCursor(cursorId, limit,
             cursorStandard, session.getId());
         return DataResponse.of(noticeList);
@@ -51,9 +51,12 @@ public class NoticeController {
     @GetMapping("/v1/notices/{noticeId}")
     public DataResponse<NoticeInfoResponseDTO> getNoticeById(
         @PathVariable Long noticeId,
-        @CurrentSession Session session) {
-
+        @CurrentSession Session session
+    ) {
+        noticeService.increaseViewCounts(noticeId);
+        noticeService.userReadNotice(noticeId, session.getId());
         NoticeInfoResponseDTO noticeInfoResponseDTO = noticeService.getNoticeById(noticeId, session.getId());
+
         return DataResponse.of(noticeInfoResponseDTO);
     }
 }
