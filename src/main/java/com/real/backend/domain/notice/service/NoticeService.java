@@ -9,6 +9,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
@@ -20,7 +21,6 @@ import com.real.backend.domain.notice.repository.UserNoticeReadRepository;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.service.UserService;
 import com.real.backend.exception.ForbiddenException;
-import com.real.backend.exception.NotFoundException;
 import com.real.backend.util.CursorUtils;
 import com.real.backend.util.dto.SliceDTO;
 
@@ -34,6 +34,7 @@ public class NoticeService {
     private final NoticeFileService noticeFileService;
     private final UserNoticeReadRepository userNoticeReadRepository;
     private final UserService userService;
+    private final NoticeFinder noticeFinder;
 
     @Transactional(readOnly = true)
     public SliceDTO<NoticeListResponseDTO> getNoticeListByCursor(Long cursorId, int limit, String cursorStandard, Long userId) {
@@ -64,21 +65,14 @@ public class NoticeService {
     @Transactional(readOnly = true)
     public Boolean getUserRead(Long userId, Long noticeId) {
         User user = userService.getUser(userId);
-        Notice notice = getNotice(noticeId);
+        Notice notice = noticeFinder.getNotice(noticeId);
 
         UserNoticeRead userNoticeRead = userNoticeReadRepository.findByUserAndNotice(user, notice).orElse(null);
         return userNoticeRead != null;
 
     }
 
-    @Transactional(readOnly = true)
-    protected Notice getNotice(Long noticeId) {
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NotFoundException("해당 id를 가진 공지가 존재하지 않습니다."));
-        if (notice.getDeletedAt() != null) {
-            throw new NotFoundException("해당 id를 가진 공지가 존재하지 않습니다.");
-        }
-        return notice;
-    }
+
 
     // TODO summary 구현
     @Transactional
@@ -103,7 +97,7 @@ public class NoticeService {
 
     @Transactional(readOnly = true)
     public NoticeInfoResponseDTO getNoticeById(Long noticeId, Long userId) {
-        Notice notice = getNotice(noticeId);
+        Notice notice = noticeFinder.getNotice(noticeId);
         NoticeFileGroups noticeFileGroups = noticeFileService.getNoticeFileGroups(notice);
         return NoticeInfoResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId), noticeFileGroups.files(), noticeFileGroups.images());
     }

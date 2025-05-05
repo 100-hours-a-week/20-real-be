@@ -81,7 +81,11 @@ public class NewsService {
 
     @Transactional(readOnly = true)
     public News getNews(Long newsId) {
-        return newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+        News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+        if (news.getDeletedAt() != null) {
+            throw new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다.");
+        }
+        return news;
     }
 
     @Transactional(readOnly = true)

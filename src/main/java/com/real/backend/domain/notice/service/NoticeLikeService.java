@@ -3,6 +3,7 @@ package com.real.backend.domain.notice.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.NoticeLike;
 import com.real.backend.domain.notice.repository.NoticeLikeRepository;
@@ -19,6 +20,7 @@ public class NoticeLikeService {
     private final NoticeLikeRepository noticeLikeRepository;
     private final UserService userService;
     private final NoticeRepository noticeRepository;
+    private final NoticeFinder noticeFinder;
 
     // @Transactional
     // public NoticeLikeResponseDTO editNoticeLike(Long noticeId, Long userId) {
@@ -54,7 +56,7 @@ public class NoticeLikeService {
 
     @Transactional(readOnly = true)
     public NoticeLike getNoticeLike(Long noticeId, Long userId) {
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+        Notice notice = noticeFinder.getNotice(noticeId);
         User user = userService.getUser(userId);
 
         return noticeLikeRepository.findByNoticeAndUser(notice, user).orElse(null);
