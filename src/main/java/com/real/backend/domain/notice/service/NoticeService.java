@@ -18,6 +18,7 @@ import com.real.backend.domain.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeListResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.notice.repository.UserNoticeReadRepository;
+import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.service.UserService;
 import com.real.backend.exception.ForbiddenException;
@@ -35,6 +36,7 @@ public class NoticeService {
     private final UserNoticeReadRepository userNoticeReadRepository;
     private final UserService userService;
     private final NoticeFinder noticeFinder;
+    private final UserFinder userFinder;
 
     @Transactional(readOnly = true)
     public SliceDTO<NoticeListResponseDTO> getNoticeListByCursor(Long cursorId, int limit, String cursorStandard, Long userId) {
@@ -64,7 +66,7 @@ public class NoticeService {
 
     @Transactional(readOnly = true)
     public Boolean getUserRead(Long userId, Long noticeId) {
-        User user = userService.getUser(userId);
+        User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
 
         UserNoticeRead userNoticeRead = userNoticeReadRepository.findByUserAndNotice(user, notice).orElse(null);
@@ -77,7 +79,7 @@ public class NoticeService {
     // TODO summary 구현
     @Transactional
     public void createNotice(Long userId, NoticeCreateRequestDTO noticeCreateRequestDTO) {
-        User user = userService.getUser(userId);
+        User user = userFinder.getUser(userId);
         if (!user.getRole().toString().equals("STAFF")) {
             throw new ForbiddenException("운영진 외에는 접근할 수 없습니다.");
         }

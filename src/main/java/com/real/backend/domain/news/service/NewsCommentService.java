@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsCommentRequestDTO;
 import com.real.backend.domain.news.repository.NewsRepository;
+import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.exception.BadRequestException;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.exception.NotFoundException;
@@ -32,10 +33,11 @@ public class NewsCommentService {
     private final NewsRepository newsRepository;
     private final UserService userService;
     private final NewsService newsService;
+    private final UserFinder userFinder;
 
     public SliceDTO<NewsCommentListResponseDTO> getNewsCommentListByCursor(Long newsId, Long cursorId, String cursorStandard, int limit, Long currentUserId) {
 
-        User currentUser = userService.getUser(currentUserId);
+        User currentUser = userFinder.getUser(currentUserId);
         Pageable pg = buildPageable(limit);
 
         Slice<NewsComment> slice = (cursorId == null || cursorStandard == null)
@@ -74,7 +76,7 @@ public class NewsCommentService {
 
     @Transactional
     public void createNewsComment(Long newsId, Long userId, NewsCommentRequestDTO newsCommentRequestDTO) {
-        User user = userService.getUser(userId);
+        User user = userFinder.getUser(userId);
         News news = newsService.getNews(newsId);
         news.increaseCommentCount();
 

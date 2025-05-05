@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.real.backend.domain.notice.domain.NoticeComment;
 import com.real.backend.domain.notice.dto.NoticeCommentListResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeCommentRepository;
+import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.service.UserService;
 import com.real.backend.util.dto.SliceDTO;
@@ -22,10 +23,11 @@ import lombok.RequiredArgsConstructor;
 public class NoticeCommentService {
     private final NoticeCommentRepository noticeCommentRepository;
     private final UserService userService;
+    private final UserFinder userFinder;
 
     public SliceDTO<NoticeCommentListResponseDTO> getNoticeCommentListByCursor(Long noticeId, Long cursorId, String cursorStandard, int limit, Long currentUserId) {
 
-        User currentUser = userService.getUser(currentUserId);
+        User currentUser = userFinder.getUser(currentUserId);
         Pageable pg = buildPageable(limit);
 
         Slice<NoticeComment> slice = (cursorId == null || cursorStandard == null)

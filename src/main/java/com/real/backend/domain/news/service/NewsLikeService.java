@@ -8,6 +8,7 @@ import com.real.backend.domain.news.domain.NewsLike;
 import com.real.backend.domain.news.dto.NewsLikeResponseDTO;
 import com.real.backend.domain.news.repository.NewsLikeRepository;
 import com.real.backend.domain.news.repository.NewsRepository;
+import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.service.UserService;
 import com.real.backend.exception.NotFoundException;
@@ -20,11 +21,12 @@ public class NewsLikeService {
     private final NewsLikeRepository newsLikeRepository;
     private final UserService userService;
     private final NewsRepository newsRepository;
+    private final UserFinder userFinder;
 
     @Transactional
     public NewsLikeResponseDTO editNewsLike(Long newsId, Long userId) {
         News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
-        User user = userService.getUser(userId);
+        User user = userFinder.getUser(userId);
         NewsLike newsLike = newsLikeRepository.findByNewsAndUser(news, user).orElse(null);
 
         if (newsLike == null) {
@@ -56,7 +58,7 @@ public class NewsLikeService {
     @Transactional(readOnly = true)
     public NewsLike getNewsLike(Long newsId, Long userId) {
         News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
-        User user = userService.getUser(userId);
+        User user = userFinder.getUser(userId);
 
         return newsLikeRepository.findByNewsAndUser(news, user).orElse(null);
     }

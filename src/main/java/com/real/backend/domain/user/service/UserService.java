@@ -2,6 +2,7 @@ package com.real.backend.domain.user.service;
 
 import org.springframework.stereotype.Service;
 
+import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.dto.LoginResponseDTO;
 import com.real.backend.exception.NotFoundException;
 import com.real.backend.domain.user.domain.User;
@@ -12,14 +13,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserRepository userRepository;
-
-    public User getUser(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("해당 id를 가진 사용자가 없습니다."));
-    }
+    private final UserFinder userFinder;
 
     public LoginResponseDTO getUserInfo(Long userId) {
-        User user = getUser(userId);
+        User user = userFinder.getUser(userId);
         return LoginResponseDTO.from(user);
     }
 }

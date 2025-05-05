@@ -8,6 +8,7 @@ import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.NoticeLike;
 import com.real.backend.domain.notice.repository.NoticeLikeRepository;
 import com.real.backend.domain.notice.repository.NoticeRepository;
+import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.service.UserService;
 import com.real.backend.exception.NotFoundException;
@@ -21,6 +22,7 @@ public class NoticeLikeService {
     private final UserService userService;
     private final NoticeRepository noticeRepository;
     private final NoticeFinder noticeFinder;
+    private final UserFinder userFinder;
 
     // @Transactional
     // public NoticeLikeResponseDTO editNoticeLike(Long noticeId, Long userId) {
@@ -57,7 +59,7 @@ public class NoticeLikeService {
     @Transactional(readOnly = true)
     public NoticeLike getNoticeLike(Long noticeId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
-        User user = userService.getUser(userId);
+        User user = userFinder.getUser(userId);
 
         return noticeLikeRepository.findByNoticeAndUser(notice, user).orElse(null);
     }
