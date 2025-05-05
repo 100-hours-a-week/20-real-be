@@ -40,7 +40,7 @@ public class NoticeCommentController {
         return DataResponse.of(noticeCommentList);
     }
 
-    @DeleteMapping("v1/notice/{noticeId}/comments/{commentId}")
+    @DeleteMapping("v1/notices/{noticeId}/comments/{commentId}")
     public StatusResponse deleteNoticeComment(@PathVariable Long noticeId, @PathVariable Long commentId, @CurrentSession Session session) {
 
         Long userId = session.getId();
@@ -48,7 +48,7 @@ public class NoticeCommentController {
         return StatusResponse.of(204, "댓글이 정상적으로 삭제됐습니다.");
     }
 
-    @PostMapping("v1/notice/{noticeId}/comments")
+    @PostMapping("v1/notices/{noticeId}/comments")
     public StatusResponse createNoticeComment(@PathVariable Long noticeId,
         @CurrentSession Session session,
         @RequestBody NoticeCommentRequestDTO noticeCommentRequestDTO) {
