@@ -25,8 +25,11 @@ public class News extends Post {
     private String imageUrl;
 
     // TODO cascade 전략 수정하기
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NewsComment> newsComments;
+
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NewsLike> newsLikes;
 
     public void increaseTodayViewCount() {this.todayViewCount++;}
 
