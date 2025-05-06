@@ -1,5 +1,6 @@
 package com.real.backend.domain.news.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,7 @@ public class NewsController {
         return DataResponse.of(newsList);
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("/v1/news/{newsId}")
     public DataResponse<NewsResponseDTO> getNewsById(@PathVariable("newsId") Long newsId, @CurrentSession Session session) {
         newsService.increaseViewCounts(newsId);

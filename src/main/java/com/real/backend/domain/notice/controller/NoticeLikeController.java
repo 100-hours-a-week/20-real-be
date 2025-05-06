@@ -1,5 +1,6 @@
 package com.real.backend.domain.notice.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,7 @@ public class NoticeLikeController {
 
     private final NoticeLikeService noticeLikeService;
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PutMapping("/v1/notices/{noticeId}/likes")
     public DataResponse<NoticeLikeResponseDTO> editNoticeLike(@PathVariable Long noticeId, @CurrentSession Session session) {
         Long userId = session.getId();

@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class NewsFinder {
-    private NewsRepository newsRepository;
+    private final NewsRepository newsRepository;
 
     @Transactional(readOnly = true)
     public News getNews(Long newsId) {

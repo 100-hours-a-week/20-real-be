@@ -1,6 +1,6 @@
-package com.real.backend.domain.notice.domain;
+package com.real.backend.domain.user.domain;
 
-import com.real.backend.domain.user.domain.User;
+import com.real.backend.domain.notice.domain.Notice;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,5 +1,6 @@
 package com.real.backend.domain.news.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +28,7 @@ public class NewsCommentController {
 
     private final NewsCommentService newsCommentService;
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("v1/news/{newsId}/comments")
     public DataResponse<?> getNewsCommentListByCursor(@PathVariable Long newsId,
         @RequestParam(value = "cursorId", required = false) Long cursorId,
@@ -41,6 +43,7 @@ public class NewsCommentController {
         return DataResponse.of(newsCommentList);
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @DeleteMapping("v1/news/{newsId}/comments/{commentId}")
     public StatusResponse deleteNewsComment(@PathVariable Long newsId, @PathVariable Long commentId, @CurrentSession Session session) {
 
@@ -49,6 +52,7 @@ public class NewsCommentController {
         return StatusResponse.of(204, "댓글이 정상적으로 삭제됐습니다.");
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PostMapping("v1/news/{newsId}/comments")
     public StatusResponse createNewsComment(@PathVariable Long newsId,
         @CurrentSession Session session,

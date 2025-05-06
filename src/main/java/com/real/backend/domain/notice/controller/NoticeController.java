@@ -1,5 +1,6 @@
 package com.real.backend.domain.notice.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class NoticeController {
     private final NoticeService noticeService;
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("/v1/notices")
     public DataResponse<SliceDTO<NoticeListResponseDTO>> getNoticeListByCursor(
         @RequestParam(value = "cursorId", required = false) Long cursorId,
@@ -39,6 +41,7 @@ public class NoticeController {
     }
 
     // TODO 파일 받는 로직
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PostMapping("/v1/notices")
     public StatusResponse createNotice(
         @CurrentSession Session session,
@@ -48,6 +51,7 @@ public class NoticeController {
         return StatusResponse.of(201, "공지가 성공적으로 생성되었습니다.");
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("/v1/notices/{noticeId}")
     public DataResponse<NoticeInfoResponseDTO> getNoticeById(
         @PathVariable Long noticeId,

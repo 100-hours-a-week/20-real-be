@@ -2,6 +2,7 @@ package com.real.backend.domain.user.service;
 
 import com.real.backend.util.S3Utils;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ public class UserSignupService {
     private final UserRepository userRepository;
     private final InvitedUserRepository invitedUserRepository;
     private final S3Utils s3Utils;
+    private final List<String> staff = List.of("seaho4588@naver.com");
 
     @Transactional
     public User setKtbUser(String email, User user) {
@@ -31,7 +33,7 @@ public class UserSignupService {
         if (invitedUser != null) {
             user.updateNickname(invitedUser.getName());
             user.updateRole(Role.TRAINEE);
-            if (invitedUser.getEmail().equals("seaho4588@naver.com")) {
+            if (staff.contains(email)) {
                 user.updateRole(Role.STAFF);
             }
         }

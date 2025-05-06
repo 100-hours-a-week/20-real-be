@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.domain.news.component.NewsFinder;
 import com.real.backend.exception.BadRequestException;
-import com.real.backend.exception.NotFoundException;
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsListResponseDTO;
 import com.real.backend.domain.news.dto.NewsResponseDTO;
@@ -95,4 +94,6 @@ public class NewsService {
         news.increaseTotalViewCount();
         newsRepository.save(news);
     }
+
+    // TODO 매 00시에 today_view_count 0으로 만드는 배치 기능
 }
