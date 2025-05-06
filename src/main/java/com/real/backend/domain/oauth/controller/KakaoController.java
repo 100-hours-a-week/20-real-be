@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.domain.oauth.service.AuthService;
 import com.real.backend.domain.user.domain.User;
-import com.real.backend.domain.user.dto.LoginResponseDTO;
-import com.real.backend.response.DataResponse;
+
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

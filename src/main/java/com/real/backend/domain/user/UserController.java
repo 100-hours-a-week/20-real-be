@@ -1,5 +1,6 @@
 package com.real.backend.domain.user;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,7 @@ public class UserController {
         return DataResponse.of(loginResponseDTO);
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("v1/users/notices/unread")
     public DataResponse<?> getUnreadNotices(
         @RequestParam(value = "cursorId", required = false) Long cursorId,
@@ -43,6 +45,7 @@ public class UserController {
         return DataResponse.of(userUnreadNoticeResponseDTOList);
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PostMapping("v1/users/notices/read")
     public StatusResponse readNotices(@CurrentSession Session session) {
         userService.readNotices(session.getId());

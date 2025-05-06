@@ -1,5 +1,6 @@
 package com.real.backend.domain.notice.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class NoticeCommentController {
     private final NoticeCommentService noticeCommentService;
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("v1/notices/{noticeId}/comments")
     public DataResponse<?> getNoticeCommentListByCursor(@PathVariable Long noticeId,
         @RequestParam(value = "cursorId", required = false) Long cursorId,
@@ -40,6 +42,7 @@ public class NoticeCommentController {
         return DataResponse.of(noticeCommentList);
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @DeleteMapping("v1/notices/{noticeId}/comments/{commentId}")
     public StatusResponse deleteNoticeComment(@PathVariable Long noticeId, @PathVariable Long commentId, @CurrentSession Session session) {
 
@@ -48,6 +51,7 @@ public class NoticeCommentController {
         return StatusResponse.of(204, "댓글이 정상적으로 삭제됐습니다.");
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PostMapping("v1/notices/{noticeId}/comments")
     public StatusResponse createNoticeComment(@PathVariable Long noticeId,
         @CurrentSession Session session,

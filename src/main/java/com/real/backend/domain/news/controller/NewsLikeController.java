@@ -1,5 +1,6 @@
 package com.real.backend.domain.news.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,7 @@ public class NewsLikeController {
 
     private final NewsLikeService newsLikeService;
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PutMapping("/v1/news/{newsId}/likes")
     public DataResponse<NewsLikeResponseDTO> editNewsLike(@PathVariable Long newsId, @CurrentSession Session session) {
         Long userId = session.getId();
