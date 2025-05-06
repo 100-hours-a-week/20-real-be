@@ -82,6 +82,10 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoticeComment> noticeComments;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserNoticeRead> userNoticeReads;
+
+
     public void updateNickname(String nickname) {this.nickname = nickname;}
     public void updateRole(Role role) {this.role = role;}
 }

@@ -30,4 +30,50 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Slice<Notice> fetchLatest(@Param("cAt") LocalDateTime cAt,
         @Param("id") Long id,
         Pageable pg);
+
+    /**
+     * 첫 페이지: userId가 읽지 않은(=UserNoticeRead 레코드가 없는) 최신 Notice(limit+1개)
+     */
+    @Query("""
+        SELECT n
+          FROM Notice n
+         WHERE n.deletedAt IS NULL
+           AND NOT EXISTS (
+               SELECT 1
+                 FROM UserNoticeRead unr
+                WHERE unr.notice = n
+                  AND unr.user.id = :userId
+           )
+         ORDER BY n.createdAt DESC, n.id DESC
+        """)
+    Slice<Notice> fetchUnreadLatestFirst(
+        @Param("userId") Long userId,
+        Pageable pageable
+    );
+
+    /**
+     * 다음 페이지: cursor 이후 userId가 읽지 않은(=UserNoticeRead 레코드가 없는) Notice(limit+1개)
+     */
+    @Query("""
+        SELECT n
+          FROM Notice n
+         WHERE n.deletedAt IS NULL
+           AND NOT EXISTS (
+               SELECT 1
+                 FROM UserNoticeRead unr
+                WHERE unr.notice = n
+                  AND unr.user.id = :userId
+           )
+           AND (
+               n.createdAt < :cAt
+            OR (n.createdAt = :cAt AND n.id < :id)
+           )
+         ORDER BY n.createdAt DESC, n.id DESC
+        """)
+    Slice<Notice> fetchUnreadLatest(
+        @Param("cAt")       LocalDateTime cAt,
+        @Param("id")        Long cursorId,
+        @Param("userId")    Long userId,
+        Pageable pageable
+    );
 }

@@ -11,13 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.component.NoticeFinder;
-import com.real.backend.domain.notice.domain.UserNoticeRead;
+import com.real.backend.domain.user.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeFileGroups;
 import com.real.backend.domain.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeListResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeRepository;
-import com.real.backend.domain.notice.repository.UserNoticeReadRepository;
+import com.real.backend.domain.user.repository.UserNoticeReadRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.exception.ForbiddenException;
