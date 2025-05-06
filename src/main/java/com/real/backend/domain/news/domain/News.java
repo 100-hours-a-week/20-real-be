@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.real.backend.post.Post;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -21,13 +22,15 @@ public class News extends Post {
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")
     private Long todayViewCount;
 
-    @Column(nullable = false, columnDefinition = "INT UNSIGNED")
-    private Long commentCount;
-
     private String imageUrl;
 
-    @OneToMany
+    // TODO cascade 전략 수정하기
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NewsComment> newsComments;
 
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NewsLike> newsLikes;
+
     public void increaseTodayViewCount() {this.todayViewCount++;}
+
 }

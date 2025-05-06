@@ -9,15 +9,15 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.domain.news.component.NewsFinder;
 import com.real.backend.exception.BadRequestException;
 import com.real.backend.exception.NotFoundException;
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsListResponseDTO;
 import com.real.backend.domain.news.dto.NewsResponseDTO;
-import com.real.backend.domain.news.dto.NewsSliceDTO;
 import com.real.backend.domain.news.repository.NewsRepository;
+import com.real.backend.util.dto.SliceDTO;
 
-import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,8 +26,9 @@ public class NewsService {
 
     private final NewsRepository newsRepository;
     private final NewsLikeService newsLikeService;
+    private final NewsFinder newsFinder;
 
-    public NewsSliceDTO getNewsListByCursor(Long cursorId, int limit, String sort, String cursorStandard) {
+    public SliceDTO<NewsListResponseDTO> getNewsListByCursor(Long cursorId, int limit, String sort, String cursorStandard) {
 
         String order = (sort == null || sort.isBlank()) ? "latest" : sort.toLowerCase();
 
@@ -77,23 +78,18 @@ public class NewsService {
             .map(NewsListResponseDTO::of)
             .toList();
 
-        return new NewsSliceDTO(dtoList, nextCursor, nextCursorId, hasNext);
-    }
-
-    @Transactional(readOnly = true)
-    public News getNews(Long newsId) {
-        return newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+        return new SliceDTO<>(dtoList, nextCursor, nextCursorId, hasNext);
     }
 
     @Transactional(readOnly = true)
     public NewsResponseDTO getNewsWithUserLiked(Long newsId, Long userId) {
-        News news = getNews(newsId);
+        News news = newsFinder.getNews(newsId);
         return NewsResponseDTO.from(news, newsLikeService.userIsLiked(newsId, userId));
     }
 
     @Transactional
     public void increaseViewCounts(Long newsId) {
-        News news = newsRepository.findById(newsId).orElseThrow(() -> new NotFoundException("해당 id를 가진 뉴스가 존재하지 않습니다."));
+        News news = newsFinder.getNews(newsId);
 
         news.increaseTodayViewCount();
         news.increaseTotalViewCount();

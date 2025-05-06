@@ -9,10 +9,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @MappedSuperclass
 @Getter
+@SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 public abstract class BaseEntity {
     @CreatedDate
     @Column(updatable = false)

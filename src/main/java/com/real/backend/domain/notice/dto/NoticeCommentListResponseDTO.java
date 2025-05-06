@@ -1,9 +1,9 @@
-package com.real.backend.domain.news.dto;
+package com.real.backend.domain.notice.dto;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import com.real.backend.domain.news.domain.NewsComment;
+import com.real.backend.domain.notice.domain.NoticeComment;
 import com.real.backend.domain.user.domain.User;
 
 import lombok.Builder;
@@ -11,7 +11,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class NewsCommentListResponseDTO {
+public class NoticeCommentListResponseDTO {
     private Long id;
     private Boolean isAuthor;
     private String nickname;
@@ -19,13 +19,13 @@ public class NewsCommentListResponseDTO {
     private LocalDateTime createdAt;
     private String profileUrl;
 
-    public static NewsCommentListResponseDTO from(NewsComment newsComment, User author, User currentUser) {
-        return NewsCommentListResponseDTO.builder()
-            .id(newsComment.getId())
+    public static NoticeCommentListResponseDTO from(NoticeComment noticeComment, User author, User currentUser) {
+        return NoticeCommentListResponseDTO.builder()
+            .id(noticeComment.getId())
             .isAuthor(Objects.equals(author.getId(), currentUser.getId()))
             .nickname(author.getNickname())
-            .content(newsComment.getContent())
-            .createdAt(newsComment.getCreatedAt())
+            .content(noticeComment.getContent())
+            .createdAt(noticeComment.getCreatedAt())
             .profileUrl(author.getProfileUrl())
             .build();
     }

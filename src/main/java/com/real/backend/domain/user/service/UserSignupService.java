@@ -31,12 +31,15 @@ public class UserSignupService {
         if (invitedUser != null) {
             user.updateNickname(invitedUser.getName());
             user.updateRole(Role.TRAINEE);
+            if (invitedUser.getEmail().equals("seaho4588@naver.com")) {
+                user.updateRole(Role.STAFF);
+            }
         }
+
         return user;
     }
 
     // TODO 프로필 사진 s3 버킷 연결
-    // TODO Role 설정
     @Transactional
     public User createOAuthUser(KakaoProfileDTO kakaoProfile) {
         String imageUrl = s3Utils.getRandomDefaultProfileUrl();
@@ -44,7 +47,7 @@ public class UserSignupService {
         User user = setKtbUser(kakaoProfile.getKakao_account().getEmail(), User.builder()
             .email(kakaoProfile.getKakao_account().getEmail())
             .nickname(kakaoProfile.getProperties().getNickname())
-            .profileUrl("imageUrl")
+            .profileUrl(imageUrl)
             .loginType(LoginType.OAUTH)
             .role(Role.OUTSIDER)
             .status(Status.NORMAL)
@@ -62,7 +65,7 @@ public class UserSignupService {
         User user = User.builder()
             .email(email)
             .nickname(nickname)
-            // .profileUrl("")
+            // .profileUrl(imageUrl)
             .loginType(LoginType.NORMAL)
             .role(Role.OUTSIDER)
             .status(Status.NORMAL)
