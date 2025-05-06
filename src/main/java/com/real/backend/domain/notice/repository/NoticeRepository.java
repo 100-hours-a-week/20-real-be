@@ -1,6 +1,7 @@
 package com.real.backend.domain.notice.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -76,4 +77,17 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
         @Param("userId")    Long userId,
         Pageable pageable
     );
+
+    @Query("""
+        SELECT n
+          FROM Notice n
+         WHERE n.deletedAt IS NULL
+           AND NOT EXISTS (
+               SELECT 1
+                 FROM UserNoticeRead unr
+                WHERE unr.notice = n
+                  AND unr.user.id = :userId
+           )
+        """)
+    List<Notice> findAllUnreadNotices(@Param("userId") Long userId);
 }
