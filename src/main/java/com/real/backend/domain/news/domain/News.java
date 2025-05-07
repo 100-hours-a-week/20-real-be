@@ -8,15 +8,13 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
 public class News extends Post {
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")

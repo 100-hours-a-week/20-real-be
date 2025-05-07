@@ -13,25 +13,21 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.real.backend.infra.ai.dto.ChatbotRequestDTO;
-import com.real.backend.infra.ai.dto.ChatbotResponseDataDTO;
-
-import lombok.RequiredArgsConstructor;
+import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
 
 @Service
-@RequiredArgsConstructor
-public class ChatbotService {
+public class NoticeAiService {
     @Value("${spring.ai_url}")
     private String aiUrl;
 
-    public ChatbotResponseDataDTO makeQuestion(ChatbotRequestDTO chatbotRequestDTO) throws JsonProcessingException {
+    public String makeSummary(NoticeSummaryRequestDTO noticeSummaryRequestDTO) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // 요청
-        HttpEntity<ChatbotRequestDTO> requestEntity = new HttpEntity<>(chatbotRequestDTO, headers);
-        ResponseEntity<String> response = restTemplate.exchange(aiUrl+"/api/v1/chatbots", HttpMethod.POST, requestEntity, String.class);
+        HttpEntity<NoticeSummaryRequestDTO> requestEntity = new HttpEntity<>(noticeSummaryRequestDTO, headers);
+        ResponseEntity<String> response = restTemplate.exchange(aiUrl+"/api/v1/notices/summarization", HttpMethod.POST, requestEntity, String.class);
 
         if (! response.getStatusCode().is2xxSuccessful()) {
 
@@ -45,8 +41,9 @@ public class ChatbotService {
 
         JsonNode dataNode = body.path("data");
 
-        ChatbotResponseDataDTO data = objectMapper.treeToValue(dataNode, ChatbotResponseDataDTO.class);
+        return dataNode.path("summary").asText();
 
-        return new ChatbotResponseDataDTO(data.answer());
+
+
     }
 }

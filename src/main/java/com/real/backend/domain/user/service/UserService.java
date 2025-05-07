@@ -22,7 +22,9 @@ import com.real.backend.util.CursorUtils;
 import com.real.backend.util.dto.SliceDTO;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -33,6 +35,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public LoginResponseDTO getUserInfo(Long userId) {
         User user = userFinder.getUser(userId);
+        log.info(user.getProfileUrl());
         return LoginResponseDTO.from(user);
     }
 

@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.real.backend.domain.chatbot.dto.ChatbotRequestDTO;
-import com.real.backend.domain.chatbot.dto.ChatbotResponseDataDTO;
+import com.real.backend.infra.ai.dto.ChatbotRequestDTO;
+import com.real.backend.infra.ai.dto.ChatbotResponseDataDTO;
 import com.real.backend.infra.ai.service.ChatbotService;
 import com.real.backend.response.DataResponse;
 

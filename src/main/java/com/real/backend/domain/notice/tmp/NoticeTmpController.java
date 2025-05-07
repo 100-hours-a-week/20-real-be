@@ -8,9 +8,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.response.StatusResponse;
-import com.real.backend.security.CurrentSession;
-import com.real.backend.security.Session;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +25,7 @@ public class NoticeTmpController {
         @RequestPart("notice") NoticeCreateRequestTmpDTO noticeCreateRequestDTO,
         @RequestPart(value = "images", required = false) List<MultipartFile> images,
         @RequestPart(value = "files", required = false) List<MultipartFile> files
-    ) {
+    ) throws JsonProcessingException {
         noticeTmpService.createNoticeTmp(noticeCreateRequestDTO, images, files);
         return StatusResponse.of(201, "공지가 성공적으로 생성되었습니다.");
     }
