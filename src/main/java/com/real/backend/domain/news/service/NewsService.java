@@ -108,13 +108,16 @@ public class NewsService {
     public void createNews(NewsCreateRequestDTO newsCreateRequestDTO, MultipartFile image) throws
         JsonProcessingException {
 
-        String url = s3Utils.upload(image, "static/news/images");
+        String url = "";
+        if (image != null) { url = s3Utils.upload(image, "static/news/images");}
         NewsAiResponseDTO newsAiResponseDTO = newsAiService.makeTitleAndSummary(
             new NewsAiRequestDTO(newsCreateRequestDTO.content(), newsCreateRequestDTO.title())
         );
+
         newsRepository.save(News.builder()
             .title(newsAiResponseDTO.headline())
             .content(newsCreateRequestDTO.content())
+            .tag("뉴스")
             .todayViewCount(0L)
             .totalViewCount(0L)
             .imageUrl(url)

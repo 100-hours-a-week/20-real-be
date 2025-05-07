@@ -52,7 +52,7 @@ public class NewsController {
     @PostMapping("/v1/news")
     public StatusResponse createNews(
         @RequestPart("news") NewsCreateRequestDTO newsCreateRequestDTO,
-        @RequestPart("image") MultipartFile image) throws JsonProcessingException {
+        @RequestPart(value = "image", required = false) MultipartFile image) throws JsonProcessingException {
 
         newsService.createNews(newsCreateRequestDTO, image);
         return StatusResponse.of(201, "뉴스가 성공적으로 생성되었습니다.");
