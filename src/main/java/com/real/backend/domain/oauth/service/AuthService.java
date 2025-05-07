@@ -41,9 +41,10 @@ public class AuthService {
             CONSTANT.REFRESH_TOKEN_EXPIRED);
 
 
-        ResponseCookie accessCookie = cookieUtils.createResponseCookie("ACCESS_TOKEN", accessToken, true, true, "/",
+        //TODO secure 설정 관리
+        ResponseCookie accessCookie = cookieUtils.createResponseCookie("ACCESS_TOKEN", accessToken, true, false, "/",
             "Lax");
-        ResponseCookie refreshCookie = cookieUtils.createResponseCookie("REFRESH_TOKEN", refreshToken, true, true,
+        ResponseCookie refreshCookie = cookieUtils.createResponseCookie("REFRESH_TOKEN", refreshToken, true, false,
             "/auth/refresh", "None");
 
 
