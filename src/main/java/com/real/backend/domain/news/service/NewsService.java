@@ -37,6 +37,7 @@ public class NewsService {
     private final S3Utils s3Utils;
     private final NewsAiService newsAiService;
 
+    @Transactional(readOnly = true)
     public SliceDTO<NewsListResponseDTO> getNewsListByCursor(Long cursorId, int limit, String sort, String cursorStandard) {
 
         String order = (sort == null || sort.isBlank()) ? "latest" : sort.toLowerCase();
