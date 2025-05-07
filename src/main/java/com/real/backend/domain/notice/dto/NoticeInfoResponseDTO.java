@@ -3,6 +3,7 @@ package com.real.backend.domain.notice.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.real.backend.domain.notice.domain.Notice;
 
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class NoticeInfoResponseDTO {
     private Long commentCount;
     private String originalUrl;
     private Boolean userLike;
+    @JsonFormat(pattern = "yyyy.MM.dd HH:mm:ss")
     private LocalDateTime createdAt;
     private List<NoticeFilesResponseDTO> files;
     private List<NoticeFilesResponseDTO> images;
