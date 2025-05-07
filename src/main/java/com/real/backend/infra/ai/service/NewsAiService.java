@@ -21,7 +21,7 @@ public class NewsAiService {
     @Value("${spring.ai_url}")
     private String aiUrl;
 
-    public void makeTitleAndSummary(NewsAiRequestDTO newsAiRequestDTO) throws JsonProcessingException {
+    public NewsAiResponseDTO makeTitleAndSummary(NewsAiRequestDTO newsAiRequestDTO) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -43,6 +43,6 @@ public class NewsAiService {
         JsonNode dataNode = body.path("data");
 
         NewsAiResponseDTO data = objectMapper.treeToValue(dataNode, NewsAiResponseDTO.class);
-
+        return data;
     }
 }
