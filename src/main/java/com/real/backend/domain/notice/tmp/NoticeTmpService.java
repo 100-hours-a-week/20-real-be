@@ -1,5 +1,6 @@
 package com.real.backend.domain.notice.tmp;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -46,8 +47,10 @@ public class NoticeTmpService {
             .build());
 
         int i = 0;
+        if (images == null) images = new ArrayList<>();
+        if (files == null) files = new ArrayList<>();
         for (MultipartFile file:files){
-            String url = s3Utils.upload(file, "_static/notice/files");
+            String url = s3Utils.upload(file, "static/notice/files");
             String name = file.getOriginalFilename();
             String type = "";
             if (name != null && name.contains(".")) {
@@ -65,7 +68,7 @@ public class NoticeTmpService {
         }
         i = 0;
         for (MultipartFile file:images){
-            String url =s3Utils.upload(file, "_static/notice/images");
+            String url =s3Utils.upload(file, "static/notice/images");
             String name = file.getOriginalFilename();
             String type = "";
             if (name != null && name.contains(".")) {
