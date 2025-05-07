@@ -10,4 +10,6 @@ import com.real.backend.domain.user.domain.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+
+	User findByNickname(String nickname);
 }

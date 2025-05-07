@@ -57,7 +57,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/auth/**").permitAll() // 필터 거치지 않고 통과
-                        .requestMatchers("/api/v1/oauth/**", "/api/v1/news").permitAll()
+                        .requestMatchers("/api/v1/oauth/**", "/api/v1/news", "/api/v1/notices/tmp").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/healthz").permitAll()    //서버 헬스 체크용 API, Security Filter 우회
                         .anyRequest().authenticated()  // 나머지는 필터 통과
