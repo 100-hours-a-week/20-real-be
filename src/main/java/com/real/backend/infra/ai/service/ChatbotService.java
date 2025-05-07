@@ -13,8 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.real.backend.domain.chatbot.dto.ChatbotRequestDTO;
-import com.real.backend.domain.chatbot.dto.ChatbotResponseDataDTO;
+import com.real.backend.infra.ai.dto.ChatbotRequestDTO;
+import com.real.backend.infra.ai.dto.ChatbotResponseDataDTO;
 
 import lombok.RequiredArgsConstructor;
 

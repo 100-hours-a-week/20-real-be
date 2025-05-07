@@ -1,4 +1,4 @@
-package com.real.backend;
+package com.real.backend.infra.ai.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -13,26 +13,22 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.real.backend.domain.chatbot.dto.ChatbotRequestDTO;
-import com.real.backend.domain.chatbot.dto.ChatbotResponseDTO;
-import com.real.backend.domain.chatbot.dto.ChatbotResponseDataDTO;
-
-import lombok.RequiredArgsConstructor;
+import com.real.backend.infra.ai.dto.NewsAiRequestDTO;
+import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
 
 @Service
-@RequiredArgsConstructor
-public class FastAPIService {
+public class NewsAiService {
     @Value("${spring.ai_url}")
     private String aiUrl;
 
-    public ChatbotResponseDataDTO makeQuestion(ChatbotRequestDTO chatbotRequestDTO) throws JsonProcessingException {
+    public void makeTitleAndSummary(NewsAiRequestDTO newsAiRequestDTO) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // 요청
-        HttpEntity<ChatbotRequestDTO> requestEntity = new HttpEntity<>(chatbotRequestDTO, headers);
-        ResponseEntity<String> response = restTemplate.exchange(aiUrl+"/api/v1/chatbots", HttpMethod.POST, requestEntity, String.class);
+        HttpEntity<NewsAiRequestDTO> requestEntity = new HttpEntity<>(newsAiRequestDTO, headers);
+        ResponseEntity<String> response = restTemplate.exchange(aiUrl+"/api/v1/news", HttpMethod.POST, requestEntity, String.class);
 
         if (! response.getStatusCode().is2xxSuccessful()) {
 
@@ -46,8 +42,7 @@ public class FastAPIService {
 
         JsonNode dataNode = body.path("data");
 
-        ChatbotResponseDataDTO data = objectMapper.treeToValue(dataNode, ChatbotResponseDataDTO.class);
+        NewsAiResponseDTO data = objectMapper.treeToValue(dataNode, NewsAiResponseDTO.class);
 
-        return new ChatbotResponseDataDTO(data.answer());
     }
 }
