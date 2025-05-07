@@ -7,12 +7,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.NoticeFile;
 import com.real.backend.domain.notice.repository.NoticeFileRepository;
 import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.repository.UserRepository;
+import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
+import com.real.backend.infra.ai.service.NoticeAiService;
 import com.real.backend.util.S3Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -25,19 +28,25 @@ public class NoticeTmpService {
     private final UserRepository userRepository;
     private final S3Utils s3Utils;
     private final NoticeFileRepository noticeFileRepository;
+    private final NoticeAiService noticeAiService;
 
     @Transactional
     public void createNoticeTmp(NoticeCreateRequestTmpDTO noticeCreateRequestDTO, List<MultipartFile> images,
-        List<MultipartFile> files) {
+        List<MultipartFile> files) throws JsonProcessingException {
 
         String userName = noticeCreateRequestDTO.userName();
         User user = userRepository.findByNickname(userName);
+
+        // ai에 summary 요청 로직
+        NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.content(),
+            noticeCreateRequestDTO.title());
+        String summary = noticeAiService.makeSummary(noticeSummaryRequestDTO);
 
         Notice notice = noticeRepository.save(Notice.builder()
             .user(user)
             .title(noticeCreateRequestDTO.title())
             .content(noticeCreateRequestDTO.content())
-            //.summary()
+            .summary(summary)
             .platform(noticeCreateRequestDTO.platform())
             .tag(noticeCreateRequestDTO.tag())
             .originalUrl(noticeCreateRequestDTO.originalUrl())
