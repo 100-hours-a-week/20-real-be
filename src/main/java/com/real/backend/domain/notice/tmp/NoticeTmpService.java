@@ -47,10 +47,13 @@ public class NoticeTmpService {
 
         int i = 0;
         for (MultipartFile file:files){
-            String url = s3Utils.upload(file, "notice/files");
+            String url = s3Utils.upload(file, "_static/notice/files");
             String name = file.getOriginalFilename();
-            assert name != null;
-            String type = name.substring(name.lastIndexOf(".") + 1);
+            String type = "";
+            if (name != null && name.contains(".")) {
+                type = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
+            }
+            i++;
             Integer fileSeqNo = i;
             noticeFileRepository.save(NoticeFile.builder()
                 .notice(notice)
@@ -58,23 +61,25 @@ public class NoticeTmpService {
                 .fileUrl(url)
                 .type(type)
                 .build());
-            i++;
+
         }
         i = 0;
         for (MultipartFile file:images){
-            String url =s3Utils.upload(file, "notice/images");
+            String url =s3Utils.upload(file, "_static/notice/images");
             String name = file.getOriginalFilename();
-            assert name != null;
-            String type = name.substring(name.lastIndexOf(".") + 1);
+            String type = "";
+            if (name != null && name.contains(".")) {
+                type = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
+            }
             Integer fileSeqNo = i;
-
+            i++;
             noticeFileRepository.save(NoticeFile.builder()
                 .notice(notice)
                 .fileSeqNo(fileSeqNo)
                 .fileUrl(url)
                 .type(type)
                 .build());
-            i++;
+
         }
     }
 }

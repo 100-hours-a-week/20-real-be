@@ -48,7 +48,7 @@ public class S3Utils {
      * @return CloudFront URL 형식의 랜덤 프로필 이미지 경로
      */
     public String getRandomDefaultProfileUrl() {
-        List<String> keys = listS3Keys("images/default_profiles/");
+        List<String> keys = listS3Keys("_static/images/default_profiles/");
         validateNonEmpty(keys);
         String randomKey = pickRandomKey(keys);
         return buildCloudFrontUrl(randomKey);
