@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -49,4 +50,8 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     Slice<News> fetchPopular(@Param("views") Long views,
         @Param("id")    Long id,
         Pageable pg);
+
+    @Modifying
+    @Query("UPDATE News n SET n.todayViewCount = 0")
+    void resetTodayViewCount();
 }

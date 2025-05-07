@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -127,5 +128,9 @@ public class NewsService {
             .build());
     }
 
-    // TODO 매 00시에 today_view_count 0으로 만드는 배치 기능
+    @Transactional
+    @Scheduled(cron = "0 0 0 * * *")
+    protected void resetTodayViewCount() {
+        newsRepository.resetTodayViewCount();
+    }
 }

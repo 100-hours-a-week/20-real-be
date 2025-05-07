@@ -41,7 +41,6 @@ public class UserSignupService {
         return user;
     }
 
-    // TODO 프로필 사진 s3 버킷 연결
     @Transactional
     public User createOAuthUser(KakaoProfileDTO kakaoProfile) {
         String imageUrl = s3Utils.getRandomDefaultProfileUrl();
