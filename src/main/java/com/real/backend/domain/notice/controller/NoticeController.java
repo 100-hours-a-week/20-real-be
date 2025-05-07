@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeListResponseDTO;
@@ -46,7 +47,7 @@ public class NoticeController {
     public StatusResponse createNotice(
         @CurrentSession Session session,
         @RequestBody NoticeCreateRequestDTO noticeCreateRequestDTO
-    ) {
+    ) throws JsonProcessingException {
         noticeService.createNotice(session.getId(), noticeCreateRequestDTO);
         return StatusResponse.of(201, "공지가 성공적으로 생성되었습니다.");
     }
