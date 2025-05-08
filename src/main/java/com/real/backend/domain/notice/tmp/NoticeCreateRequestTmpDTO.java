@@ -6,6 +6,7 @@ public record NoticeCreateRequestTmpDTO(
     String tag,
     String originalUrl,
     String userName,
-    String platform
+    String platform,
+    String createdAt
 ) {
 }
