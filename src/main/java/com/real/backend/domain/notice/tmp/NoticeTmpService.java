@@ -1,5 +1,7 @@
 package com.real.backend.domain.notice.tmp;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,29 +42,32 @@ public class NoticeTmpService {
         User user = userRepository.findByNickname(userName);
 
         // ai에 summary 요청 로직
-        NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.content(),
-            noticeCreateRequestDTO.title());
-        NoticeSummaryResponseDTO noticeSummaryResponseDTO = null;
-        for (int i = 0; i < 3; i++) {
-            noticeSummaryResponseDTO = noticeAiService.makeSummary(noticeSummaryRequestDTO);
-            if (noticeSummaryResponseDTO.isCompleted())
-                break;
-        }
-        if (!noticeSummaryResponseDTO.isCompleted()){
-            throw new ServerException("ai가 응답을 주지 못했습니다.");
-        }
+        // NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.content(),
+        //     noticeCreateRequestDTO.title());
+        // NoticeSummaryResponseDTO noticeSummaryResponseDTO = null;
+        // for (int i = 0; i < 3; i++) {
+        //     noticeSummaryResponseDTO = noticeAiService.makeSummary(noticeSummaryRequestDTO);
+        //     if (noticeSummaryResponseDTO.isCompleted())
+        //         break;
+        // }
+        // if (!noticeSummaryResponseDTO.isCompleted()){
+        //     throw new ServerException("ai가 응답을 주지 못했습니다.");
+        // }
+
+        LocalDateTime createTime = LocalDateTime.parse(noticeCreateRequestDTO.createdAt());
 
         Notice notice = noticeRepository.save(Notice.builder()
             .user(user)
             .title(noticeCreateRequestDTO.title())
             .content(noticeCreateRequestDTO.content())
-            .summary(noticeSummaryResponseDTO.summary())
+            // .summary(noticeSummaryResponseDTO.summary())
             .platform(noticeCreateRequestDTO.platform())
             .tag(noticeCreateRequestDTO.tag())
             .originalUrl(noticeCreateRequestDTO.originalUrl())
             .totalViewCount(0L)
             .commentCount(0L)
             .likeCount(0L)
+            .createdAt(createTime)
             .build());
 
         int i = 0;

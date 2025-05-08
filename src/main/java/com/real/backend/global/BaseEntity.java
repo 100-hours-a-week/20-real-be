@@ -18,8 +18,8 @@ import lombok.experimental.SuperBuilder;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 public abstract class BaseEntity {
-    @CreatedDate
-    @Column(updatable = false)
+    // @CreatedDate
+    // @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
