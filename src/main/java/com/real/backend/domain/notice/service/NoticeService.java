@@ -22,6 +22,7 @@ import com.real.backend.domain.user.repository.UserNoticeReadRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
+import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 import com.real.backend.infra.ai.service.NoticeAiService;
 import com.real.backend.util.CursorUtils;
 import com.real.backend.util.dto.SliceDTO;
@@ -82,13 +83,13 @@ public class NoticeService {
 
         NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.content(),
             noticeCreateRequestDTO.title());
-        String summary = noticeAiService.makeSummary(noticeSummaryRequestDTO);
+        NoticeSummaryResponseDTO noticeSummaryResponseDTO = noticeAiService.makeSummary(noticeSummaryRequestDTO);
 
         noticeRepository.save(Notice.builder()
             .user(user)
             .title(noticeCreateRequestDTO.title())
             .content(noticeCreateRequestDTO.content())
-            .summary(summary)
+            .summary(noticeSummaryResponseDTO.summary())
             .tag(noticeCreateRequestDTO.tag())
             .originalUrl(noticeCreateRequestDTO.originalUrl())
             .totalViewCount(0L)

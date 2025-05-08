@@ -13,14 +13,16 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
 import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
+import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 
 @Service
 public class NoticeAiService {
     @Value("${spring.ai_url}")
     private String aiUrl;
 
-    public String makeSummary(NoticeSummaryRequestDTO noticeSummaryRequestDTO) throws JsonProcessingException {
+    public NoticeSummaryResponseDTO makeSummary(NoticeSummaryRequestDTO noticeSummaryRequestDTO) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -40,8 +42,9 @@ public class NoticeAiService {
         JsonNode body = objectMapper.readTree(response.getBody());
 
         JsonNode dataNode = body.path("data");
+        NoticeSummaryResponseDTO data = objectMapper.treeToValue(dataNode, NoticeSummaryResponseDTO.class);
 
-        return dataNode.path("summary").asText();
+        return data;
 
 
 

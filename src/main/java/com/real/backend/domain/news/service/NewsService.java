@@ -19,8 +19,10 @@ import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsListResponseDTO;
 import com.real.backend.domain.news.dto.NewsResponseDTO;
 import com.real.backend.domain.news.repository.NewsRepository;
+import com.real.backend.exception.ServerException;
 import com.real.backend.infra.ai.dto.NewsAiRequestDTO;
 import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
+import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 import com.real.backend.infra.ai.service.NewsAiService;
 import com.real.backend.util.S3Utils;
 import com.real.backend.util.dto.SliceDTO;
@@ -112,9 +114,17 @@ public class NewsService {
 
         String url = "";
         if (image != null) { url = s3Utils.upload(image, "static/news/images");}
-        NewsAiResponseDTO newsAiResponseDTO = newsAiService.makeTitleAndSummary(
-            new NewsAiRequestDTO(newsCreateRequestDTO.content(), newsCreateRequestDTO.title())
-        );
+
+        NewsAiResponseDTO newsAiResponseDTO = null;
+        for (int i = 0; i < 3; i++) {
+            newsAiResponseDTO = newsAiService.makeTitleAndSummary(
+                new NewsAiRequestDTO(newsCreateRequestDTO.content(), newsCreateRequestDTO.title()));
+            if (newsAiResponseDTO.isCompleted())
+                break;
+        }
+        if (!newsAiResponseDTO.isCompleted()){
+            throw new ServerException("ai가 응답을 주지 못했습니다.");
+        }
 
         newsRepository.save(News.builder()
             .title(newsAiResponseDTO.headline())
