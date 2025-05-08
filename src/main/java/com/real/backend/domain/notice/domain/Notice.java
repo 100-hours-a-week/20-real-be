@@ -2,6 +2,7 @@ package com.real.backend.domain.notice.domain;
 
 import java.util.List;
 
+import com.real.backend.domain.notice.tmp.NoticeCreateRequestTmpDTO;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.post.Post;
 
@@ -21,7 +22,6 @@ import lombok.experimental.SuperBuilder;
 public class Notice extends Post {
     private String originalUrl;
     private String platform;
-    private String tag;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
@@ -35,4 +35,15 @@ public class Notice extends Post {
 
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoticeFile> noticeFiles;
+
+    public void updateNotice(NoticeCreateRequestTmpDTO noticeCreateRequestTmpDTO, User user) {
+        this.originalUrl = noticeCreateRequestTmpDTO.originalUrl();
+        this.platform = noticeCreateRequestTmpDTO.platform();
+        this.user = user;
+        this.updatePost(
+            noticeCreateRequestTmpDTO.title(),
+            noticeCreateRequestTmpDTO.content(),
+            noticeCreateRequestTmpDTO.tag()
+            );
+    }
 }

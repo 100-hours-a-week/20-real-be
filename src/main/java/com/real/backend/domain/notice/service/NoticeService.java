@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.component.NoticeFinder;
+import com.real.backend.domain.notice.tmp.NoticeCreateRequestTmpDTO;
 import com.real.backend.domain.user.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeFileGroups;
@@ -21,6 +22,8 @@ import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.repository.UserNoticeReadRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
+import com.real.backend.domain.user.repository.UserRepository;
+import com.real.backend.exception.NotFoundException;
 import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
 import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 import com.real.backend.infra.ai.service.NoticeAiService;
@@ -39,6 +42,7 @@ public class NoticeService {
     private final UserNoticeReadRepository userNoticeReadRepository;
     private final NoticeFinder noticeFinder;
     private final UserFinder userFinder;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public SliceDTO<NoticeListResponseDTO> getNoticeListByCursor(Long cursorId, int limit, String cursorStandard, Long userId) {
@@ -124,8 +128,17 @@ public class NoticeService {
     }
 
     @Transactional
-    public void deleteNotice(Long noticeId, Long userId) {
+    public void deleteNotice(Long noticeId) {
         Notice notice = noticeFinder.getNotice(noticeId);
         noticeRepository.delete(notice);
+    }
+
+    @Transactional
+    public void editNotice(Long noticeId, NoticeCreateRequestTmpDTO noticeCreateRequestTmpDTO) {
+        Notice notice = noticeFinder.getNotice(noticeId);
+        User user = userRepository.findById(notice.getUser().getId()).orElseThrow(() -> new NotFoundException("User not found"));
+
+        notice.updateNotice(noticeCreateRequestTmpDTO, user);
+        noticeRepository.save(notice);
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +16,7 @@ import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeListResponseDTO;
 import com.real.backend.domain.notice.service.NoticeService;
+import com.real.backend.domain.notice.tmp.NoticeCreateRequestTmpDTO;
 import com.real.backend.response.DataResponse;
 import com.real.backend.response.StatusResponse;
 import com.real.backend.security.CurrentSession;
@@ -72,7 +74,18 @@ public class NoticeController {
         @PathVariable Long noticeId,
         @CurrentSession Session session
     ) {
-        noticeService.deleteNotice(noticeId, session.getId());
+        noticeService.deleteNotice(noticeId);
         return StatusResponse.of(204, "공지가 성공적으로 삭제되었습니다.");
+    }
+
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
+    @PutMapping("/v1/notices/{noticeId}")
+    public StatusResponse editNotice(
+        @PathVariable Long noticeId,
+        @RequestBody NoticeCreateRequestTmpDTO noticeCreateRequestTmpDTO,
+        @CurrentSession Session session
+    ) {
+        noticeService.editNotice(noticeId, noticeCreateRequestTmpDTO);
+        return StatusResponse.of(200, "공지가 성공적으로 수정되었습니다.");
     }
 }

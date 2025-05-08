@@ -46,4 +46,9 @@ public abstract class Post extends BaseEntity {
     public void increaseCommentCount() {this.commentCount++;}
     public void decreaseCommentCount() {this.commentCount--;}
 
+    public void updatePost(String title, String content, String tag) {
+        this.title = title;
+        this.content = content;
+        this.tag = tag;
+    }
 }
