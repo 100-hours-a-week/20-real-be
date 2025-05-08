@@ -1,6 +1,7 @@
 package com.real.backend.domain.notice.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,5 +64,15 @@ public class NoticeController {
         NoticeInfoResponseDTO noticeInfoResponseDTO = noticeService.getNoticeById(noticeId, session.getId());
 
         return DataResponse.of(noticeInfoResponseDTO);
+    }
+
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
+    @DeleteMapping("/v1/notices/{noticeId}")
+    public StatusResponse deleteNotice(
+        @PathVariable Long noticeId,
+        @CurrentSession Session session
+    ) {
+        noticeService.deleteNotice(noticeId, session.getId());
+        return StatusResponse.of(204, "공지가 성공적으로 삭제되었습니다.");
     }
 }

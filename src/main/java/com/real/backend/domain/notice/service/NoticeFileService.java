@@ -21,7 +21,7 @@ public class NoticeFileService {
     private final NoticeFileRepository noticeFileRepository;
 
     private static final Set<String> IMAGE_EXTENSIONS = Set.of(
-        "jpg","jpeg","png","gif","bmp"
+        "jpg","jpeg","png","gif","bmp","webp","svg"
     );
 
     public NoticeFileGroups getNoticeFileGroups(Notice notice) {

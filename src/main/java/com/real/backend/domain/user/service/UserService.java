@@ -35,7 +35,6 @@ public class UserService {
     @Transactional(readOnly = true)
     public LoginResponseDTO getUserInfo(Long userId) {
         User user = userFinder.getUser(userId);
-        log.info(user.getProfileUrl());
         return LoginResponseDTO.from(user);
     }
 

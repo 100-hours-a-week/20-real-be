@@ -122,4 +122,10 @@ public class NoticeService {
             userNoticeReadRepository.save(UserNoticeRead.builder().user(user).notice(notice).build());
         }
     }
+
+    @Transactional
+    public void deleteNotice(Long noticeId, Long userId) {
+        Notice notice = noticeFinder.getNotice(noticeId);
+        noticeRepository.delete(notice);
+    }
 }
