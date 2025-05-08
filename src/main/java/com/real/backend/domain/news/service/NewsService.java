@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,8 +19,10 @@ import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsListResponseDTO;
 import com.real.backend.domain.news.dto.NewsResponseDTO;
 import com.real.backend.domain.news.repository.NewsRepository;
+import com.real.backend.exception.ServerException;
 import com.real.backend.infra.ai.dto.NewsAiRequestDTO;
 import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
+import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 import com.real.backend.infra.ai.service.NewsAiService;
 import com.real.backend.util.S3Utils;
 import com.real.backend.util.dto.SliceDTO;
@@ -36,6 +39,7 @@ public class NewsService {
     private final S3Utils s3Utils;
     private final NewsAiService newsAiService;
 
+    @Transactional(readOnly = true)
     public SliceDTO<NewsListResponseDTO> getNewsListByCursor(Long cursorId, int limit, String sort, String cursorStandard) {
 
         String order = (sort == null || sort.isBlank()) ? "latest" : sort.toLowerCase();
@@ -110,9 +114,17 @@ public class NewsService {
 
         String url = "";
         if (image != null) { url = s3Utils.upload(image, "static/news/images");}
-        NewsAiResponseDTO newsAiResponseDTO = newsAiService.makeTitleAndSummary(
-            new NewsAiRequestDTO(newsCreateRequestDTO.content(), newsCreateRequestDTO.title())
-        );
+
+        NewsAiResponseDTO newsAiResponseDTO = null;
+        for (int i = 0; i < 3; i++) {
+            newsAiResponseDTO = newsAiService.makeTitleAndSummary(
+                new NewsAiRequestDTO(newsCreateRequestDTO.content(), newsCreateRequestDTO.title()));
+            if (newsAiResponseDTO.isCompleted())
+                break;
+        }
+        if (!newsAiResponseDTO.isCompleted()){
+            throw new ServerException("ai가 응답을 주지 못했습니다.");
+        }
 
         newsRepository.save(News.builder()
             .title(newsAiResponseDTO.headline())
@@ -127,5 +139,9 @@ public class NewsService {
             .build());
     }
 
-    // TODO 매 00시에 today_view_count 0으로 만드는 배치 기능
+    @Transactional
+    @Scheduled(cron = "0 0 0 * * *")
+    protected void resetTodayViewCount() {
+        newsRepository.resetTodayViewCount();
+    }
 }

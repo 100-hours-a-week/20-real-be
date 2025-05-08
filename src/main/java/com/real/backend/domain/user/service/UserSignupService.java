@@ -25,7 +25,6 @@ public class UserSignupService {
     private final UserRepository userRepository;
     private final InvitedUserRepository invitedUserRepository;
     private final S3Utils s3Utils;
-    private final List<String> staff = List.of("seaho4588@naver.com");
 
     @Transactional
     public User setKtbUser(String email, User user) {
@@ -33,15 +32,11 @@ public class UserSignupService {
         if (invitedUser != null) {
             user.updateNickname(invitedUser.getName());
             user.updateRole(Role.TRAINEE);
-            if (staff.contains(email)) {
-                user.updateRole(Role.STAFF);
-            }
         }
 
         return user;
     }
 
-    // TODO 프로필 사진 s3 버킷 연결
     @Transactional
     public User createOAuthUser(KakaoProfileDTO kakaoProfile) {
         String imageUrl = s3Utils.getRandomDefaultProfileUrl();
