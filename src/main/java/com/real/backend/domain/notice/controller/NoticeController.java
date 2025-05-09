@@ -93,6 +93,7 @@ public class NoticeController {
         return StatusResponse.of(200, "공지가 성공적으로 수정되었습니다.");
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PostMapping("/v1/notices/tmp")
     public StatusResponse pasteNoticeTmp(
         @RequestPart("notice") NoticePasteRequestTmpDTO noticePasteRequestDTO,
