@@ -1,5 +1,6 @@
 package com.real.backend.domain.notice.domain;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.real.backend.domain.notice.tmp.NoticeCreateRequestTmpDTO;
@@ -26,6 +27,8 @@ public class Notice extends Post {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+
+    private LocalDateTime createdAt;
 
     // TODO cascade 전략 수정하기
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
