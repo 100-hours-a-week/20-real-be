@@ -47,6 +47,7 @@ public class Notice extends Post {
         this.originalUrl = noticePasteRequestDTO.originalUrl();
         this.platform = noticePasteRequestDTO.platform();
         this.user = user;
+        this.createdAt = LocalDateTime.parse(noticePasteRequestDTO.createdAt());
         this.updatePost(
             noticePasteRequestDTO.title(),
             noticePasteRequestDTO.content(),

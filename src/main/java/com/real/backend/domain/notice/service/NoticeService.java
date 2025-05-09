@@ -3,7 +3,6 @@ package com.real.backend.domain.notice.service;
 import static com.real.backend.util.CursorUtils.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -15,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.component.NoticeFinder;
-import com.real.backend.domain.notice.domain.NoticeFile;
 import com.real.backend.domain.notice.dto.NoticePasteRequestDTO;
 import com.real.backend.domain.notice.repository.NoticeFileRepository;
 import com.real.backend.domain.user.domain.UserNoticeRead;
