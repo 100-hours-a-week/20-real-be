@@ -20,7 +20,7 @@ import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeListResponseDTO;
 import com.real.backend.domain.notice.service.NoticeService;
-import com.real.backend.domain.notice.dto.NoticePasteRequestTmpDTO;
+import com.real.backend.domain.notice.dto.NoticePasteRequestDTO;
 import com.real.backend.response.DataResponse;
 import com.real.backend.response.StatusResponse;
 import com.real.backend.security.CurrentSession;
@@ -86,16 +86,17 @@ public class NoticeController {
     @PutMapping("/v1/notices/{noticeId}")
     public StatusResponse editNotice(
         @PathVariable Long noticeId,
-        @RequestBody NoticePasteRequestTmpDTO noticePasteRequestTmpDTO,
+        @RequestBody NoticePasteRequestDTO noticePasteRequestDTO,
         @CurrentSession Session session
     ) {
-        noticeService.editNotice(noticeId, noticePasteRequestTmpDTO);
+        noticeService.editNotice(noticeId, noticePasteRequestDTO);
         return StatusResponse.of(200, "공지가 성공적으로 수정되었습니다.");
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PostMapping("/v1/notices/tmp")
     public StatusResponse pasteNoticeTmp(
-        @RequestPart("notice") NoticePasteRequestTmpDTO noticePasteRequestDTO,
+        @RequestPart("notice") NoticePasteRequestDTO noticePasteRequestDTO,
         @RequestPart(value = "images", required = false) List<MultipartFile> images,
         @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) throws JsonProcessingException {
