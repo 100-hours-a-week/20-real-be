@@ -3,7 +3,7 @@ package com.real.backend.domain.notice.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.real.backend.domain.notice.dto.NoticePasteRequestTmpDTO;
+import com.real.backend.domain.notice.dto.NoticePasteRequestDTO;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.domain.UserNoticeRead;
 import com.real.backend.post.Post;
@@ -43,14 +43,14 @@ public class Notice extends Post {
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserNoticeRead> userNoticeReads;
 
-    public void updateNotice(NoticePasteRequestTmpDTO noticePasteRequestTmpDTO, User user) {
-        this.originalUrl = noticePasteRequestTmpDTO.originalUrl();
-        this.platform = noticePasteRequestTmpDTO.platform();
+    public void updateNotice(NoticePasteRequestDTO noticePasteRequestDTO, User user) {
+        this.originalUrl = noticePasteRequestDTO.originalUrl();
+        this.platform = noticePasteRequestDTO.platform();
         this.user = user;
         this.updatePost(
-            noticePasteRequestTmpDTO.title(),
-            noticePasteRequestTmpDTO.content(),
-            noticePasteRequestTmpDTO.tag()
+            noticePasteRequestDTO.title(),
+            noticePasteRequestDTO.content(),
+            noticePasteRequestDTO.tag()
             );
     }
 }

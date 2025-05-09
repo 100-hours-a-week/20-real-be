@@ -16,7 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.domain.NoticeFile;
-import com.real.backend.domain.notice.dto.NoticePasteRequestTmpDTO;
+import com.real.backend.domain.notice.dto.NoticePasteRequestDTO;
 import com.real.backend.domain.notice.repository.NoticeFileRepository;
 import com.real.backend.domain.user.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
@@ -142,16 +142,16 @@ public class NoticeService {
     }
 
     @Transactional
-    public void editNotice(Long noticeId, NoticePasteRequestTmpDTO noticePasteRequestTmpDTO) {
+    public void editNotice(Long noticeId, NoticePasteRequestDTO noticePasteRequestDTO) {
         Notice notice = noticeFinder.getNotice(noticeId);
         User user = userRepository.findById(notice.getUser().getId()).orElseThrow(() -> new NotFoundException("User not found"));
 
-        notice.updateNotice(noticePasteRequestTmpDTO, user);
+        notice.updateNotice(noticePasteRequestDTO, user);
         noticeRepository.save(notice);
     }
 
     @Transactional
-    public void pasteNoticeTmp(NoticePasteRequestTmpDTO noticeCreateRequestDTO, List<MultipartFile> images,
+    public void pasteNoticeTmp(NoticePasteRequestDTO noticeCreateRequestDTO, List<MultipartFile> images,
         List<MultipartFile> files) throws JsonProcessingException {
 
         String userName = noticeCreateRequestDTO.userName();
