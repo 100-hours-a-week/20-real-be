@@ -1,6 +1,6 @@
-package com.real.backend.domain.notice.tmp;
+package com.real.backend.domain.notice.dto;
 
-public record NoticeCreateRequestTmpDTO(
+public record NoticePasteRequestTmpDTO(
     String title,
     String content,
     String tag,
