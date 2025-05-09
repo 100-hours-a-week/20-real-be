@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.real.backend.domain.notice.tmp.NoticeCreateRequestTmpDTO;
 import com.real.backend.domain.user.domain.User;
+import com.real.backend.domain.user.domain.UserNoticeRead;
 import com.real.backend.post.Post;
 
 import jakarta.persistence.CascadeType;
@@ -35,6 +36,9 @@ public class Notice extends Post {
 
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoticeFile> noticeFiles;
+
+    @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserNoticeRead> userNoticeReads;
 
     public void updateNotice(NoticeCreateRequestTmpDTO noticeCreateRequestTmpDTO, User user) {
         this.originalUrl = noticeCreateRequestTmpDTO.originalUrl();

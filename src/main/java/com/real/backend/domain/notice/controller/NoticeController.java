@@ -68,7 +68,7 @@ public class NoticeController {
         return DataResponse.of(noticeInfoResponseDTO);
     }
 
-    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
+    // @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @DeleteMapping("/v1/notices/{noticeId}")
     public StatusResponse deleteNotice(
         @PathVariable Long noticeId,
@@ -78,7 +78,7 @@ public class NoticeController {
         return StatusResponse.of(204, "공지가 성공적으로 삭제되었습니다.");
     }
 
-    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
+    // @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PutMapping("/v1/notices/{noticeId}")
     public StatusResponse editNotice(
         @PathVariable Long noticeId,
