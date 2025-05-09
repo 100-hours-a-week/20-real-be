@@ -13,6 +13,10 @@ java {
 	}
 }
 
+tasks.withType(JavaExec) {
+    jvmArgs = ["-Duser.timezone=Asia/Seoul"]
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
