@@ -21,6 +21,7 @@ import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 import com.real.backend.util.dto.SliceDTO;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -51,7 +52,7 @@ public class NewsController {
 
     @PostMapping("/v1/news")
     public StatusResponse createNews(
-        @RequestPart("news") NewsCreateRequestDTO newsCreateRequestDTO,
+        @Valid @RequestPart("news") NewsCreateRequestDTO newsCreateRequestDTO,
         @RequestPart(value = "image", required = false) MultipartFile image) throws JsonProcessingException {
 
         newsService.createNews(newsCreateRequestDTO, image);

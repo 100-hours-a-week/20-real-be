@@ -12,6 +12,7 @@ import com.real.backend.infra.ai.dto.ChatbotResponseDataDTO;
 import com.real.backend.infra.ai.service.ChatbotService;
 import com.real.backend.response.DataResponse;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -23,7 +24,7 @@ public class ChatbotController {
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PostMapping("/v1/chatbots")
-    public DataResponse<ChatbotResponseDataDTO> makeQuestion(@RequestBody ChatbotRequestDTO chatbotRequestDTO) throws
+    public DataResponse<ChatbotResponseDataDTO> makeQuestion(@Valid @RequestBody ChatbotRequestDTO chatbotRequestDTO) throws
         JsonProcessingException {
         ChatbotResponseDataDTO chatbotResponsedataDTO = chatbotService.makeQuestion(chatbotRequestDTO);
 

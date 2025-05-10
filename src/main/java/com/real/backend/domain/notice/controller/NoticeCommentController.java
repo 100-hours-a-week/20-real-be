@@ -19,6 +19,7 @@ import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 import com.real.backend.util.dto.SliceDTO;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -55,7 +56,7 @@ public class NoticeCommentController {
     @PostMapping("v1/notices/{noticeId}/comments")
     public StatusResponse createNoticeComment(@PathVariable Long noticeId,
         @CurrentSession Session session,
-        @RequestBody NoticeCommentRequestDTO noticeCommentRequestDTO) {
+        @Valid @RequestBody NoticeCommentRequestDTO noticeCommentRequestDTO) {
         Long userId = session.getId();
         noticeCommentService.createNoticeComment(noticeId, userId, noticeCommentRequestDTO);
 
