@@ -27,6 +27,7 @@ import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 import com.real.backend.util.dto.SliceDTO;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -53,7 +54,7 @@ public class NoticeController {
     @PostMapping("/v1/notices")
     public StatusResponse createNotice(
         @CurrentSession Session session,
-        @RequestBody NoticeCreateRequestDTO noticeCreateRequestDTO
+        @Valid @RequestBody NoticeCreateRequestDTO noticeCreateRequestDTO
     ) throws JsonProcessingException {
         noticeService.createNotice(session.getId(), noticeCreateRequestDTO);
         return StatusResponse.of(201, "공지가 성공적으로 생성되었습니다.");
@@ -86,7 +87,7 @@ public class NoticeController {
     @PutMapping("/v1/notices/{noticeId}")
     public StatusResponse editNotice(
         @PathVariable Long noticeId,
-        @RequestBody NoticePasteRequestDTO noticePasteRequestDTO,
+        @Valid @RequestBody NoticePasteRequestDTO noticePasteRequestDTO,
         @CurrentSession Session session
     ) {
         noticeService.editNotice(noticeId, noticePasteRequestDTO);
@@ -96,7 +97,7 @@ public class NoticeController {
     @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PostMapping("/v1/notices/tmp")
     public StatusResponse pasteNoticeTmp(
-        @RequestPart("notice") NoticePasteRequestDTO noticePasteRequestDTO,
+        @Valid @RequestPart("notice") NoticePasteRequestDTO noticePasteRequestDTO,
         @RequestPart(value = "images", required = false) List<MultipartFile> images,
         @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) throws JsonProcessingException {

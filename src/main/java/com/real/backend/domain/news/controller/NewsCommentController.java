@@ -19,6 +19,7 @@ import com.real.backend.response.DataResponse;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -56,7 +57,7 @@ public class NewsCommentController {
     @PostMapping("v1/news/{newsId}/comments")
     public StatusResponse createNewsComment(@PathVariable Long newsId,
         @CurrentSession Session session,
-        @RequestBody NewsCommentRequestDTO newsCommentRequestDTO) {
+        @Valid @RequestBody NewsCommentRequestDTO newsCommentRequestDTO) {
         Long userId = session.getId();
         newsCommentService.createNewsComment(newsId, userId, newsCommentRequestDTO);
 
