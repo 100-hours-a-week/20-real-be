@@ -80,7 +80,7 @@ public class NewsCommentService {
         news.increaseCommentCount();
 
         newsCommentRepository.save(NewsComment.builder()
-            .content(newsCommentRequestDTO.content())
+            .content(newsCommentRequestDTO.getContent())
             .user(user)
             .news(news)
             .build());

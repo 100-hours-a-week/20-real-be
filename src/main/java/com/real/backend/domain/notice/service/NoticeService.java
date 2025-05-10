@@ -46,10 +46,8 @@ public class NoticeService {
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
     private final UserNoticeReadRepository userNoticeReadRepository;
-    private final NoticeFileRepository noticeFileRepository;
     private final NoticeFinder noticeFinder;
     private final UserFinder userFinder;
-    private final S3Utils s3Utils;
 
     @Transactional(readOnly = true)
     public SliceDTO<NoticeListResponseDTO> getNoticeListByCursor(Long cursorId, int limit, String cursorStandard, Long userId) {
@@ -92,17 +90,17 @@ public class NoticeService {
         JsonProcessingException {
         User user = userFinder.getUser(userId);
 
-        NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.content(),
-            noticeCreateRequestDTO.title());
+        NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.getContent(),
+            noticeCreateRequestDTO.getTitle());
         NoticeSummaryResponseDTO noticeSummaryResponseDTO = noticeAiService.makeSummary(noticeSummaryRequestDTO);
 
         noticeRepository.save(Notice.builder()
             .user(user)
-            .title(noticeCreateRequestDTO.title())
-            .content(noticeCreateRequestDTO.content())
+            .title(noticeCreateRequestDTO.getTitle())
+            .content(noticeCreateRequestDTO.getContent())
             .summary(noticeSummaryResponseDTO.summary())
-            .tag(noticeCreateRequestDTO.tag())
-            .originalUrl(noticeCreateRequestDTO.originalUrl())
+            .tag(noticeCreateRequestDTO.getTag())
+            .originalUrl(noticeCreateRequestDTO.getOriginalUrl())
             .totalViewCount(0L)
             .commentCount(0L)
             .likeCount(0L)
@@ -153,12 +151,13 @@ public class NoticeService {
     public void pasteNoticeTmp(NoticePasteRequestDTO noticeCreateRequestDTO, List<MultipartFile> images,
         List<MultipartFile> files) throws JsonProcessingException {
 
-        String userName = noticeCreateRequestDTO.userName();
+
+        String userName = noticeCreateRequestDTO.getUserName();
         User user = userRepository.findByNickname(userName);
 
         // ai에 summary 요청 로직
-        NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.content(),
-            noticeCreateRequestDTO.title());
+        NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.getContent(),
+            noticeCreateRequestDTO.getTitle());
         NoticeSummaryResponseDTO noticeSummaryResponseDTO = null;
         for (int i = 0; i < 3; i++) {
             noticeSummaryResponseDTO = noticeAiService.makeSummary(noticeSummaryRequestDTO);
@@ -169,16 +168,16 @@ public class NoticeService {
             throw new ServerException("ai가 응답을 주지 못했습니다.");
         }
 
-        LocalDateTime createTime = LocalDateTime.parse(noticeCreateRequestDTO.createdAt());
+        LocalDateTime createTime = LocalDateTime.parse(noticeCreateRequestDTO.getCreatedAt());
 
         Notice notice = noticeRepository.save(Notice.builder()
             .user(user)
-            .title(noticeCreateRequestDTO.title())
-            .content(noticeCreateRequestDTO.content())
+            .title(noticeCreateRequestDTO.getTitle())
+            .content(noticeCreateRequestDTO.getContent())
             .summary(noticeSummaryResponseDTO.summary())
-            .platform(noticeCreateRequestDTO.platform())
-            .tag(noticeCreateRequestDTO.tag())
-            .originalUrl(noticeCreateRequestDTO.originalUrl())
+            .platform(noticeCreateRequestDTO.getPlatform())
+            .tag(noticeCreateRequestDTO.getTag())
+            .originalUrl(noticeCreateRequestDTO.getOriginalUrl())
             .totalViewCount(0L)
             .commentCount(0L)
             .likeCount(0L)

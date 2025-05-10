@@ -44,14 +44,14 @@ public class Notice extends Post {
     private List<UserNoticeRead> userNoticeReads;
 
     public void updateNotice(NoticePasteRequestDTO noticePasteRequestDTO, User user) {
-        this.originalUrl = noticePasteRequestDTO.originalUrl();
-        this.platform = noticePasteRequestDTO.platform();
+        this.originalUrl = noticePasteRequestDTO.getOriginalUrl();
+        this.platform = noticePasteRequestDTO.getPlatform();
         this.user = user;
-        this.createdAt = LocalDateTime.parse(noticePasteRequestDTO.createdAt());
+        this.createdAt = LocalDateTime.parse(noticePasteRequestDTO.getCreatedAt());
         this.updatePost(
-            noticePasteRequestDTO.title(),
-            noticePasteRequestDTO.content(),
-            noticePasteRequestDTO.tag()
+            noticePasteRequestDTO.getTitle(),
+            noticePasteRequestDTO.getContent(),
+            noticePasteRequestDTO.getTag()
             );
     }
 }

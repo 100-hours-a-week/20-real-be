@@ -1,15 +1,20 @@
 package com.real.backend.domain.news.dto;
 
+import com.real.backend.global.aop.Sanitizer;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 
-public record NewsCreateRequestDTO (
+@Data
+public class NewsCreateRequestDTO {
     @NotBlank
+    @Sanitizer
     @Size(min = 1, max = 26)
-    String title,
+    private String title;
 
     @NotBlank
+    @Sanitizer
     @Size(min = 1, max = 1024)
-    String content
-){
+    private String content;
 }
