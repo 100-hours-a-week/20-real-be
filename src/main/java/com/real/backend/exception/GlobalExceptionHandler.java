@@ -1,14 +1,20 @@
 package com.real.backend.exception;
 
+import org.springframework.security.access.AccessDeniedException;
 import com.real.backend.response.StatusResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.HandlerMapping;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -67,6 +73,38 @@ public class GlobalExceptionHandler {
     public ResponseEntity<StatusResponse> handleRuntime(RuntimeException e) {
         StatusResponse response = StatusResponse.of(500, e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<StatusResponse> handleAccessDenied(
+        AccessDeniedException e,
+        HttpServletRequest request
+    ) {
+        String message = "권한이 없습니다.";
+
+        Object attr = request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE);
+        if (attr instanceof HandlerMethod handlerMethod) {
+            // 2) 메서드 레벨 @PreAuthorize 읽기
+            PreAuthorize PreAuthorize = handlerMethod.getMethodAnnotation(PreAuthorize.class);
+
+            if (PreAuthorize == null) {
+                PreAuthorize = handlerMethod.getBeanType().getAnnotation(PreAuthorize.class);
+            }
+
+            if (PreAuthorize != null) {
+                String expr = PreAuthorize.value();                  // 절대로 pa가 null일 때 여기 안 옴
+                String norm = expr.replaceAll("\\s+", ""); // 공백 제거
+
+                if (norm.contains("hasAnyAuthority('OUTSIDER','TRAINEE')")) {
+                    message = "운영진만 접근할 수 있습니다.";
+                } else if (norm.contains("hasAnyAuthority('OUTSIDER')")) {
+                    message = "외부인은 접근할 수 없습니다.";
+                }
+            }
+        }
+
+        StatusResponse response = StatusResponse.of(403, message);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
 }
