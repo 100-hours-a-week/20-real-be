@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.real.backend.domain.notice.domain.Notice;
@@ -50,6 +51,7 @@ public class NoticeFileService {
         );
     }
 
+    @Transactional
     public void uploadFilesToS3(List<MultipartFile> files, Notice notice, boolean isImage) {
         List<MultipartFile> safeFiles = Optional.ofNullable(files).orElseGet(ArrayList::new);
         String dirName = "static/notice/" + (isImage ? "images" : "files");
@@ -63,11 +65,11 @@ public class NoticeFileService {
             if (name != null && name.contains(".")) {
                 type = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
             }
-            Integer fileSeqNo = i+1;
-            i++;
+
             noticeFileRepository.save(NoticeFile.builder()
                 .notice(notice)
-                .fileSeqNo(fileSeqNo)
+                .name(name)
+                .fileSeqNo(i+1)
                 .fileUrl(url)
                 .type(type)
                 .build());
