@@ -118,7 +118,7 @@ public class NewsService {
         NewsAiResponseDTO newsAiResponseDTO = null;
         for (int i = 0; i < 3; i++) {
             newsAiResponseDTO = newsAiService.makeTitleAndSummary(
-                new NewsAiRequestDTO(newsCreateRequestDTO.content(), newsCreateRequestDTO.title()));
+                new NewsAiRequestDTO(newsCreateRequestDTO.getContent(), newsCreateRequestDTO.getTitle()));
             if (newsAiResponseDTO.isCompleted())
                 break;
         }
@@ -128,7 +128,7 @@ public class NewsService {
 
         newsRepository.save(News.builder()
             .title(newsAiResponseDTO.headline())
-            .content(newsCreateRequestDTO.content())
+            .content(newsCreateRequestDTO.getContent())
             .tag("뉴스")
             .todayViewCount(0L)
             .totalViewCount(0L)
