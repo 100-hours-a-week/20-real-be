@@ -46,10 +46,8 @@ public class NoticeService {
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
     private final UserNoticeReadRepository userNoticeReadRepository;
-    private final NoticeFileRepository noticeFileRepository;
     private final NoticeFinder noticeFinder;
     private final UserFinder userFinder;
-    private final S3Utils s3Utils;
 
     @Transactional(readOnly = true)
     public SliceDTO<NoticeListResponseDTO> getNoticeListByCursor(Long cursorId, int limit, String cursorStandard, Long userId) {

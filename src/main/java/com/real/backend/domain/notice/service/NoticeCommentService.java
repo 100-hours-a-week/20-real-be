@@ -18,7 +18,6 @@ import com.real.backend.domain.notice.repository.NoticeCommentRepository;
 import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
-import com.real.backend.exception.BadRequestException;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.exception.NotFoundException;
 import com.real.backend.util.dto.SliceDTO;
@@ -70,7 +69,6 @@ public class NoticeCommentService {
         noticeRepository.save(notice);
     }
 
-    // TODO XSS 필터링
     @Transactional
     public void createNoticeComment(Long noticeId, Long userId, NoticeCommentRequestDTO noticeCommentRequestDTO) {
         User user = userFinder.getUser(userId);
