@@ -45,8 +45,11 @@ public class NoticeCommentController {
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @DeleteMapping("v1/notices/{noticeId}/comments/{commentId}")
-    public StatusResponse deleteNoticeComment(@PathVariable Long noticeId, @PathVariable Long commentId, @CurrentSession Session session) {
-
+    public StatusResponse deleteNoticeComment(
+        @PathVariable Long noticeId,
+        @PathVariable Long commentId,
+        @CurrentSession Session session
+    ) {
         Long userId = session.getId();
         noticeCommentService.deleteNoticeComment(noticeId, commentId, userId);
         return StatusResponse.of(204, "댓글이 정상적으로 삭제됐습니다.");
@@ -54,9 +57,11 @@ public class NoticeCommentController {
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PostMapping("v1/notices/{noticeId}/comments")
-    public StatusResponse createNoticeComment(@PathVariable Long noticeId,
+    public StatusResponse createNoticeComment(
+        @PathVariable Long noticeId,
         @CurrentSession Session session,
-        @Valid @RequestBody NoticeCommentRequestDTO noticeCommentRequestDTO) {
+        @Valid @RequestBody NoticeCommentRequestDTO noticeCommentRequestDTO
+    ) {
         Long userId = session.getId();
         noticeCommentService.createNoticeComment(noticeId, userId, noticeCommentRequestDTO);
 

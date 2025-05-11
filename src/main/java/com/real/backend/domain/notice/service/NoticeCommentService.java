@@ -18,7 +18,6 @@ import com.real.backend.domain.notice.repository.NoticeCommentRepository;
 import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
-import com.real.backend.exception.BadRequestException;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.exception.NotFoundException;
 import com.real.backend.util.dto.SliceDTO;
@@ -33,7 +32,7 @@ public class NoticeCommentService {
     private final UserFinder userFinder;
     private final NoticeFinder noticeFinder;
 
-
+    @Transactional(readOnly = true)
     public SliceDTO<NoticeCommentListResponseDTO> getNoticeCommentListByCursor(Long noticeId, Long cursorId, String cursorStandard, int limit, Long currentUserId) {
 
         User currentUser = userFinder.getUser(currentUserId);
@@ -59,10 +58,6 @@ public class NoticeCommentService {
 
     @Transactional
     public void deleteNoticeComment(Long noticeId, Long commentId, Long userId) {
-        if (commentId == null) {
-            throw new BadRequestException("필수 파라미터인 commentId를 받지 못했습니다.");
-        }
-
         Notice notice = noticeFinder.getNotice(noticeId);
         NoticeComment noticeComment = noticeCommentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("해당 id를 가진 댓글이 존재하지 않습니다."));
 
@@ -81,7 +76,7 @@ public class NoticeCommentService {
         notice.increaseCommentCount();
 
         noticeCommentRepository.save(NoticeComment.builder()
-            .content(noticeCommentRequestDTO.content())
+            .content(noticeCommentRequestDTO.getContent())
             .user(user)
             .notice(notice)
             .build());

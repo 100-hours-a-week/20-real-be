@@ -1,20 +1,26 @@
 package com.real.backend.domain.notice.dto;
 
+import com.real.backend.global.aop.Sanitizer;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 
-public record NoticeCreateRequestDTO(
+@Data
+public class NoticeCreateRequestDTO {
 	@NotBlank
-    @Size(min = 1, max = 26)
-	String title,
+	@Sanitizer
+	@Size(min = 1, max = 26)
+	private String title;
 
 	@NotBlank
+	@Sanitizer
 	@Size(min = 1, max = 20000)
-    String content,
+	private String content;
 
 	@NotBlank
-    String tag,
+	private String tag;
 
-    String originalUrl
-) {
+	@Sanitizer
+	private String originalUrl;
 }
