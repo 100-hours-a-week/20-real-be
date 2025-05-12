@@ -58,7 +58,7 @@ public class AuthService {
         ResponseCookie accessCookie = cookieUtils.createResponseCookie("ACCESS_TOKEN", accessToken, isHttpOnly, isSecure, "/",
             "Lax");
         ResponseCookie refreshCookie = cookieUtils.createResponseCookie("REFRESH_TOKEN", refreshToken, isHttpOnly, isSecure,
-            "/api/v1/auth/refresh", "None");
+            "/api/v1/auth", "None");
 
         refreshTokenRepository.deleteByUser(user);
         refreshTokenRepository.save(RefreshToken.builder()
@@ -85,7 +85,7 @@ public class AuthService {
         ResponseCookie deleteAccessCookie = cookieUtils.deleteResponseCookie("ACCESS_TOKEN",  isHttpOnly, isSecure, "/",
             "Lax");
         ResponseCookie deleteRefreshCookie = cookieUtils.deleteResponseCookie("REFRESH_TOKEN",  isHttpOnly, isSecure,
-            "/api/v1/auth/refresh", "None");
+            "/api/v1/auth", "None");
 
         response.addHeader(HttpHeaders.SET_COOKIE, deleteAccessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, deleteRefreshCookie.toString());
