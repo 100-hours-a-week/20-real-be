@@ -61,7 +61,7 @@ public class AuthService {
         ResponseCookie accessCookie = cookieUtils.createResponseCookie("ACCESS_TOKEN", accessToken, isHttpOnly, isSecure, "/",
             "Lax");
         ResponseCookie refreshCookie = cookieUtils.createResponseCookie("REFRESH_TOKEN", refreshToken, isHttpOnly, isSecure,
-            "/api/v1/auth", "None");
+            "/", "None");
 
         refreshTokenRepository.deleteByUser(user);
         refreshTokenRepository.save(RefreshToken.builder()
@@ -88,13 +88,14 @@ public class AuthService {
         ResponseCookie deleteAccessCookie = cookieUtils.deleteResponseCookie("ACCESS_TOKEN",  isHttpOnly, isSecure, "/",
             "Lax");
         ResponseCookie deleteRefreshCookie = cookieUtils.deleteResponseCookie("REFRESH_TOKEN",  isHttpOnly, isSecure,
-            "/api/v1/auth", "None");
+            "/", "None");
 
         response.addHeader(HttpHeaders.SET_COOKIE, deleteAccessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, deleteRefreshCookie.toString());
 
     }
 
+    @Transactional
     public void refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN");
         String accessToken = cookieUtils.resolveTokenFromCookie(request, "ACCESS_TOKEN");
@@ -121,7 +122,7 @@ public class AuthService {
         ResponseCookie accessCookie = cookieUtils.createResponseCookie("ACCESS_TOKEN", newAccessToken, isHttpOnly, isSecure, "/",
             "Lax");
         ResponseCookie refreshCookie = cookieUtils.createResponseCookie("REFRESH_TOKEN", newRefreshToken, isHttpOnly, isSecure,
-            "/api/v1/auth", "None");
+            "/", "None");
 
         refreshTokenRepository.deleteByUser(user);
         refreshTokenRepository.save(RefreshToken.builder()
