@@ -10,6 +10,7 @@ import com.real.backend.domain.news.domain.NewsComment;
 import com.real.backend.domain.news.domain.NewsLike;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.NoticeComment;
+import com.real.backend.domain.oauth.domain.RefreshToken;
 import com.real.backend.global.BaseEntity;
 
 import jakarta.persistence.CascadeType;
@@ -84,6 +85,9 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserNoticeRead> userNoticeReads;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RefreshToken> refreshTokens;
 
 
     public void updateNickname(String nickname) {this.nickname = nickname;}
