@@ -35,6 +35,9 @@ public class AuthService {
     private final CookieUtils cookieUtils;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    private final boolean isSecure = true;
+    private final boolean isHttpOnly = true;
+
     @Transactional
     public User oAuthLogin(String accessCode, HttpServletResponse response) {
         KakaoTokenDTO oauthToken = kakaoUtil.getAccessToken(accessCode);
@@ -51,10 +54,9 @@ public class AuthService {
             CONSTANT.REFRESH_TOKEN_EXPIRED);
 
 
-        //TODO secure 설정 관리
-        ResponseCookie accessCookie = cookieUtils.createResponseCookie("ACCESS_TOKEN", accessToken, true, false, "/",
+        ResponseCookie accessCookie = cookieUtils.createResponseCookie("ACCESS_TOKEN", accessToken, isHttpOnly, isSecure, "/",
             "Lax");
-        ResponseCookie refreshCookie = cookieUtils.createResponseCookie("REFRESH_TOKEN", refreshToken, true, false,
+        ResponseCookie refreshCookie = cookieUtils.createResponseCookie("REFRESH_TOKEN", refreshToken, isHttpOnly, isSecure,
             "/api/v1/auth/refresh", "None");
 
         refreshTokenRepository.deleteByUser(user);
