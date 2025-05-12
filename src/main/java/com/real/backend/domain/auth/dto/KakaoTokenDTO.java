@@ -1,4 +1,4 @@
-package com.real.backend.domain.oauth.dto;
+package com.real.backend.domain.auth.dto;
 
 import lombok.Getter;
 

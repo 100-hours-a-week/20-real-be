@@ -1,4 +1,4 @@
-package com.real.backend.domain.oauth.service;
+package com.real.backend.domain.auth.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -8,11 +8,11 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.real.backend.domain.oauth.domain.RefreshToken;
-import com.real.backend.domain.oauth.dto.KakaoProfileDTO;
-import com.real.backend.domain.oauth.dto.KakaoTokenDTO;
-import com.real.backend.domain.oauth.kakao.KakaoUtil;
-import com.real.backend.domain.oauth.repository.RefreshTokenRepository;
+import com.real.backend.domain.auth.domain.RefreshToken;
+import com.real.backend.domain.auth.dto.KakaoProfileDTO;
+import com.real.backend.domain.auth.dto.KakaoTokenDTO;
+import com.real.backend.domain.auth.kakao.KakaoUtil;
+import com.real.backend.domain.auth.repository.RefreshTokenRepository;
 import com.real.backend.security.JwtUtil;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.repository.UserRepository;

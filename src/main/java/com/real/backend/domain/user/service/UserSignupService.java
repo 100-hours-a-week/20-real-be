@@ -2,12 +2,11 @@ package com.real.backend.domain.user.service;
 
 import com.real.backend.util.S3Utils;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.real.backend.domain.oauth.dto.KakaoProfileDTO;
+import com.real.backend.domain.auth.dto.KakaoProfileDTO;
 import com.real.backend.domain.user.domain.InvitedUser;
 import com.real.backend.domain.user.domain.LoginType;
 import com.real.backend.domain.user.domain.Role;

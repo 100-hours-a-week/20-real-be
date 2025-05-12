@@ -1,9 +1,9 @@
-package com.real.backend.domain.oauth.repository;
+package com.real.backend.domain.auth.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.real.backend.domain.oauth.domain.RefreshToken;
+import com.real.backend.domain.auth.domain.RefreshToken;
 import com.real.backend.domain.user.domain.User;
 
 @Repository
