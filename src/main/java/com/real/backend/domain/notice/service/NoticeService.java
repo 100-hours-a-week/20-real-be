@@ -144,6 +144,7 @@ public class NoticeService {
         User user = userRepository.findById(notice.getUser().getId()).orElseThrow(() -> new NotFoundException("User not found"));
 
         notice.updateNotice(noticePasteRequestDTO, user);
+        notice.updateCreatedAt(noticePasteRequestDTO.getCreatedAt());
         noticeRepository.save(notice);
     }
 

@@ -19,7 +19,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public abstract class BaseEntity {
     @CreatedDate
-    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
@@ -29,5 +28,8 @@ public abstract class BaseEntity {
 
     public void delete() {
         this.deletedAt = LocalDateTime.now();
+    }
+    public void updateCreatedAt(String createdAt) {
+        this.createdAt = LocalDateTime.parse(createdAt);
     }
 }

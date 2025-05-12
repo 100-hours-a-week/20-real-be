@@ -20,6 +20,7 @@ import com.real.backend.domain.user.service.UserSignupService;
 import com.real.backend.util.CONSTANT;
 import com.real.backend.util.CookieUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,4 +74,21 @@ public class AuthService {
 
     }
 
+    @Transactional
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN");
+
+        if (refreshToken != null) {
+            refreshTokenRepository.deleteByToken(refreshToken);
+        }
+
+        ResponseCookie deleteAccessCookie = cookieUtils.deleteResponseCookie("ACCESS_TOKEN",  isHttpOnly, isSecure, "/",
+            "Lax");
+        ResponseCookie deleteRefreshCookie = cookieUtils.deleteResponseCookie("REFRESH_TOKEN",  isHttpOnly, isSecure,
+            "/api/v1/auth/refresh", "None");
+
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteAccessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteRefreshCookie.toString());
+
+    }
 }
