@@ -36,4 +36,11 @@ public class AuthController {
         authService.logout(request, response);
         return StatusResponse.of(204, "성공적으로 로그아웃 됐습니다.");
     }
+
+    @PostMapping("v1/auth/refresh")
+    public StatusResponse refresh(HttpServletRequest request, HttpServletResponse response) {
+        authService.refreshAccessToken(request, response);
+
+        return StatusResponse.of(200, "OK");
+    }
 }

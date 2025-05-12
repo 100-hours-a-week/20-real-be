@@ -13,6 +13,8 @@ import com.real.backend.domain.auth.dto.KakaoProfileDTO;
 import com.real.backend.domain.auth.dto.KakaoTokenDTO;
 import com.real.backend.domain.auth.kakao.KakaoUtil;
 import com.real.backend.domain.auth.repository.RefreshTokenRepository;
+import com.real.backend.domain.user.component.UserFinder;
+import com.real.backend.exception.UnauthorizedException;
 import com.real.backend.security.JwtUtil;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.repository.UserRepository;
@@ -38,6 +40,7 @@ public class AuthService {
 
     private final boolean isSecure = true;
     private final boolean isHttpOnly = true;
+    private final UserFinder userFinder;
 
     @Transactional
     public User oAuthLogin(String accessCode, HttpServletResponse response) {
@@ -90,5 +93,44 @@ public class AuthService {
         response.addHeader(HttpHeaders.SET_COOKIE, deleteAccessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, deleteRefreshCookie.toString());
 
+    }
+
+    public void refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN");
+        String accessToken = cookieUtils.resolveTokenFromCookie(request, "ACCESS_TOKEN");
+
+        if (refreshToken == null) {
+            throw new UnauthorizedException("refresh token is null");
+        }
+        User user = userFinder.getUser(jwtUtil.getId(accessToken));
+        RefreshToken saved = refreshTokenRepository.findByUser(user).orElseThrow(() -> new UnauthorizedException("refresh token not found"));
+
+        if (!saved.getToken().equals(refreshToken)) {
+            throw new UnauthorizedException("refresh token does not match");
+        }
+
+        String newAccessToken = jwtUtil.generateToken("access", user.getId(), user.getNickname(), user.getRole().toString(),
+            CONSTANT.ACCESS_TOKEN_EXPIRED);
+
+        // RTR
+        LocalDateTime expiryTime = LocalDateTime.now().plus(Duration.ofSeconds(CONSTANT.REFRESH_TOKEN_EXPIRED));
+        String newRefreshToken = jwtUtil.generateToken("refresh", user.getId(), user.getNickname(), user.getRole().toString(),
+            CONSTANT.REFRESH_TOKEN_EXPIRED);
+
+
+        ResponseCookie accessCookie = cookieUtils.createResponseCookie("ACCESS_TOKEN", newAccessToken, isHttpOnly, isSecure, "/",
+            "Lax");
+        ResponseCookie refreshCookie = cookieUtils.createResponseCookie("REFRESH_TOKEN", newRefreshToken, isHttpOnly, isSecure,
+            "/api/v1/auth", "None");
+
+        refreshTokenRepository.deleteByUser(user);
+        refreshTokenRepository.save(RefreshToken.builder()
+            .token(refreshToken)
+            .user(user)
+            .expiryTime(expiryTime)
+            .build());
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }
 }
