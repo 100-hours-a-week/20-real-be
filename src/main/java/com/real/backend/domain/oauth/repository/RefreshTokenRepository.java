@@ -10,4 +10,6 @@ import com.real.backend.domain.user.domain.User;
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 
     void deleteByUser(User user);
+
+    void deleteByToken(String token);
 }

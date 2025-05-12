@@ -28,8 +28,6 @@ public class Notice extends Post {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    private LocalDateTime createdAt;
-
     // TODO cascade 전략 수정하기
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoticeComment> noticeComments;
@@ -47,7 +45,6 @@ public class Notice extends Post {
         this.originalUrl = noticePasteRequestDTO.getOriginalUrl();
         this.platform = noticePasteRequestDTO.getPlatform();
         this.user = user;
-        this.createdAt = LocalDateTime.parse(noticePasteRequestDTO.getCreatedAt());
         this.updatePost(
             noticePasteRequestDTO.getTitle(),
             noticePasteRequestDTO.getContent(),

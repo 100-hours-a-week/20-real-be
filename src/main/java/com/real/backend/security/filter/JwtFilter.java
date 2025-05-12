@@ -39,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = cookieUtils.resolveTokenFromCookie(request);
+        String token = cookieUtils.resolveTokenFromCookie(request, "ACCESS_TOKEN");
 
         // token 검증
         if (token == null) {
