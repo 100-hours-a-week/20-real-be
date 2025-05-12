@@ -27,7 +27,7 @@ public class NewsResponseDTO {
     private boolean userLike;
     private String imageUrl;
 
-    @JsonFormat(pattern = "yyyy.MM.dd HH:mm")
+    @JsonFormat(pattern = "yyyy.MM.dd HH:mm:ss")
     private LocalDateTime createdAt;
 
     public static NewsResponseDTO from(News news, boolean userLike) {
