@@ -1,4 +1,4 @@
-package com.real.backend.domain.oauth.kakao;
+package com.real.backend.domain.auth.kakao;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,10 +13,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.real.backend.domain.oauth.dto.KakaoProfileDTO;
-import com.real.backend.domain.oauth.dto.KakaoTokenDTO;
-
-import jakarta.servlet.http.HttpServletResponse;
+import com.real.backend.domain.auth.dto.KakaoProfileDTO;
+import com.real.backend.domain.auth.dto.KakaoTokenDTO;
 
 @Component
 public class KakaoUtil {
