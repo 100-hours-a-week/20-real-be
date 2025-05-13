@@ -43,13 +43,7 @@ public class AuthService {
     private final UserFinder userFinder;
 
     @Transactional
-    public User oAuthLogin(String accessCode, HttpServletResponse response) {
-        KakaoTokenDTO oauthToken = kakaoUtil.getAccessToken(accessCode);
-        KakaoProfileDTO kakaoProfile = kakaoUtil.getKakaoProfile(oauthToken);
-
-        String email = kakaoProfile.getKakao_account().getEmail();
-
-        User user = userRepository.findByEmail(email).orElseGet(() -> userSignupService.createOAuthUser(kakaoProfile));
+    protected void generateToken(HttpServletResponse response, User user) {
         String accessToken = jwtUtil.generateToken("access", user.getId(), user.getNickname(), user.getRole().toString(),
             CONSTANT.ACCESS_TOKEN_EXPIRED);
 
@@ -57,11 +51,10 @@ public class AuthService {
         String refreshToken = jwtUtil.generateToken("refresh", user.getId(), user.getNickname(), user.getRole().toString(),
             CONSTANT.REFRESH_TOKEN_EXPIRED);
 
-
         ResponseCookie accessCookie = cookieUtils.createResponseCookie("ACCESS_TOKEN", accessToken, isHttpOnly, isSecure, "/",
             "Lax");
         ResponseCookie refreshCookie = cookieUtils.createResponseCookie("REFRESH_TOKEN", refreshToken, isHttpOnly, isSecure,
-            "/", "None");
+            "/api/v1/auth", "None");
 
         refreshTokenRepository.deleteByUser(user);
         refreshTokenRepository.save(RefreshToken.builder()
@@ -72,6 +65,17 @@ public class AuthService {
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+    }
+
+    @Transactional
+    public User oAuthLogin(String accessCode, HttpServletResponse response) {
+        KakaoTokenDTO oauthToken = kakaoUtil.getAccessToken(accessCode);
+        KakaoProfileDTO kakaoProfile = kakaoUtil.getKakaoProfile(oauthToken);
+
+        String email = kakaoProfile.getKakao_account().getEmail();
+
+        User user = userRepository.findByEmail(email).orElseGet(() -> userSignupService.createOAuthUser(kakaoProfile));
+        generateToken(response, user);
 
         return user;
 
@@ -88,7 +92,7 @@ public class AuthService {
         ResponseCookie deleteAccessCookie = cookieUtils.deleteResponseCookie("ACCESS_TOKEN",  isHttpOnly, isSecure, "/",
             "Lax");
         ResponseCookie deleteRefreshCookie = cookieUtils.deleteResponseCookie("REFRESH_TOKEN",  isHttpOnly, isSecure,
-            "/", "None");
+            "/api/v1/auth", "None");
 
         response.addHeader(HttpHeaders.SET_COOKIE, deleteAccessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, deleteRefreshCookie.toString());
@@ -98,40 +102,17 @@ public class AuthService {
     @Transactional
     public void refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN");
-        String accessToken = cookieUtils.resolveTokenFromCookie(request, "ACCESS_TOKEN");
 
         if (refreshToken == null) {
             throw new UnauthorizedException("refresh token is null");
         }
-        User user = userFinder.getUser(jwtUtil.getId(accessToken));
+        User user = userFinder.getUser(jwtUtil.getId(refreshToken));
         RefreshToken saved = refreshTokenRepository.findByUser(user).orElseThrow(() -> new UnauthorizedException("refresh token not found"));
 
         if (!saved.getToken().equals(refreshToken)) {
             throw new UnauthorizedException("refresh token does not match");
         }
 
-        String newAccessToken = jwtUtil.generateToken("access", user.getId(), user.getNickname(), user.getRole().toString(),
-            CONSTANT.ACCESS_TOKEN_EXPIRED);
-
-        // RTR
-        LocalDateTime expiryTime = LocalDateTime.now().plus(Duration.ofSeconds(CONSTANT.REFRESH_TOKEN_EXPIRED));
-        String newRefreshToken = jwtUtil.generateToken("refresh", user.getId(), user.getNickname(), user.getRole().toString(),
-            CONSTANT.REFRESH_TOKEN_EXPIRED);
-
-
-        ResponseCookie accessCookie = cookieUtils.createResponseCookie("ACCESS_TOKEN", newAccessToken, isHttpOnly, isSecure, "/",
-            "Lax");
-        ResponseCookie refreshCookie = cookieUtils.createResponseCookie("REFRESH_TOKEN", newRefreshToken, isHttpOnly, isSecure,
-            "/", "None");
-
-        refreshTokenRepository.deleteByUser(user);
-        refreshTokenRepository.save(RefreshToken.builder()
-            .token(refreshToken)
-            .user(user)
-            .expiryTime(expiryTime)
-            .build());
-
-        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        generateToken(response, user);
     }
 }
