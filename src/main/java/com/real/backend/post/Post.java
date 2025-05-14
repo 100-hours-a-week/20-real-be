@@ -40,7 +40,6 @@ public abstract class Post extends BaseEntity {
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")
     private Long commentCount;
 
-    public void increaseTotalViewCount() {this.totalViewCount++;}
     public void increaseLikesCount() {this.likeCount++;}
     public void decreaseLikesCount() {this.likeCount--;}
     public void increaseCommentCount() {this.commentCount++;}

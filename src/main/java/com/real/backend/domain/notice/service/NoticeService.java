@@ -124,14 +124,6 @@ public class NoticeService {
     }
 
     @Transactional
-    public void increaseViewCounts(Long noticeId) {
-        Notice notice = noticeFinder.getNotice(noticeId);
-
-        notice.increaseTotalViewCount();
-        noticeRepository.save(notice);
-    }
-
-    @Transactional
     public void userReadNotice(Long noticeId, Long userId) {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
