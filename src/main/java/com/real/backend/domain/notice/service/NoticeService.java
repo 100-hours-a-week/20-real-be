@@ -149,6 +149,7 @@ public class NoticeService {
         noticeRepository.save(notice);
     }
 
+    // TODO 생성 날짜 지정 관련 버그 수정
     @Transactional
     public void pasteNoticeTmp(NoticePasteRequestDTO noticeCreateRequestDTO, List<MultipartFile> images,
         List<MultipartFile> files) throws JsonProcessingException {

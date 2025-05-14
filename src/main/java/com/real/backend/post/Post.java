@@ -42,7 +42,6 @@ public abstract class Post extends BaseEntity {
 
     public void increaseLikesCount() {this.likeCount++;}
     public void decreaseLikesCount() {this.likeCount--;}
-    public void increaseCommentCount() {this.commentCount++;}
     public void decreaseCommentCount() {this.commentCount--;}
 
     public void updatePost(String title, String content, String tag) {

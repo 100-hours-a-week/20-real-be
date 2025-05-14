@@ -30,6 +30,10 @@ public class PostRedisService {
         return redisTemplate.opsForValue().increment(buildKey(domain, type, id));
     }
 
+    public Long decrement(String domain, String type, Long id) {
+        return redisTemplate.opsForValue().decrement(buildKey(domain, type, id));
+    }
+
     public Long getCount(String domain, String type, Long id) {
         Object val = redisTemplate.opsForValue().get(buildKey(domain, type, id));
         return val == null ? 0L : Long.parseLong(val.toString());
