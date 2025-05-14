@@ -15,7 +15,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.dto.NoticePasteRequestDTO;
-import com.real.backend.domain.notice.repository.NoticeFileRepository;
 import com.real.backend.domain.user.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeFileGroups;
@@ -31,8 +30,8 @@ import com.real.backend.exception.ServerException;
 import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
 import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 import com.real.backend.infra.ai.service.NoticeAiService;
+import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.CursorUtils;
-import com.real.backend.util.S3Utils;
 import com.real.backend.util.dto.SliceDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -43,6 +42,7 @@ public class NoticeService {
     private final NoticeLikeService noticeLikeService;
     private final NoticeFileService noticeFileService;
     private final NoticeAiService noticeAiService;
+    private final PostRedisService postRedisService;
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
     private final UserNoticeReadRepository userNoticeReadRepository;
@@ -110,8 +110,17 @@ public class NoticeService {
     @Transactional(readOnly = true)
     public NoticeInfoResponseDTO getNoticeById(Long noticeId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
+
+        postRedisService.initCount("notice", "totalView", noticeId, notice.getTotalViewCount());
+        postRedisService.initCount("notice", "like", noticeId, notice.getLikeCount());
+        postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
+
+        long totalViewCount = postRedisService.increment("notice", "totalView", noticeId);
+        long likeCount = postRedisService.getCount("notice", "like", noticeId);
+        long commentCount = postRedisService.getCount("notice", "comment", noticeId);
+
         NoticeFileGroups noticeFileGroups = noticeFileService.getNoticeFileGroups(notice);
-        return NoticeInfoResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId), noticeFileGroups.files(), noticeFileGroups.images());
+        return NoticeInfoResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId), likeCount, commentCount, noticeFileGroups.files(), noticeFileGroups.images());
     }
 
     @Transactional
