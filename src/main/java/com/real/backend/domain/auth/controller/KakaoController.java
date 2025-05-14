@@ -1,4 +1,4 @@
-package com.real.backend.domain.oauth.controller;
+package com.real.backend.domain.auth.controller;
 
 import java.io.IOException;
 
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.real.backend.domain.oauth.service.AuthService;
+import com.real.backend.domain.auth.service.AuthService;
 import com.real.backend.domain.user.domain.User;
 
 

@@ -44,18 +44,18 @@ public class JwtFilter extends OncePerRequestFilter {
         // token 검증
         if (token == null) {
             System.out.println("token is null");
-            setBody(response, 401, "Access token is null");
+            setBody(response, 401, "MISSING_TOKEN");
             return;
         }
 
         try {
             if (jwtUtil.isExpired(token)) {
                 System.out.println("token is expired");
-                setBody(response, 401, "Access token is expired");
+                setBody(response, 401, "EXPIRED_TOKEN");
                 return;
             }
         } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException exception) {
-            setBody(response, 401, "token form is incorrect");
+            setBody(response, 401, "INVALID_TOKEN");
             return;
         }
 
@@ -78,12 +78,12 @@ public class JwtFilter extends OncePerRequestFilter {
     private void setBody(HttpServletResponse response, int code, String message) throws IOException {
         response.setStatus(code);
         response.setContentType("application/json");
-        String jsonResponse = "{\"code\": " + code + ", \"message\": " + message + "}";
+        String jsonResponse = String.format("{\"code\": %d, \"message\": \"%s\"}", code, message);
         response.getWriter().write(jsonResponse);
     }
 
     private boolean shouldSkip(HttpServletRequest request) {
-        List<String> skipURI = Arrays.asList("/login", "/auth/.*", "/users/signup", "/api/v1/oauth/.*", "/api/v1/news", "/api/healthz", "/error", "/api/v1/notices/tmp");
+        List<String> skipURI = Arrays.asList("/login", "/auth/.*", "/users/signup", "/api/v1/oauth/.*", "/api/v1/news", "/api/healthz", "/error", "/api/v1/notices/tmp", "/api/v1/auth/refresh");
         return skipURI.stream().anyMatch(uri -> {
             Pattern pattern = Pattern.compile(uri);
             return pattern.matcher(request.getRequestURI()).matches();

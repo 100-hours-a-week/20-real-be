@@ -10,7 +10,7 @@ import com.real.backend.domain.news.domain.NewsComment;
 import com.real.backend.domain.news.domain.NewsLike;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.NoticeComment;
-import com.real.backend.domain.oauth.domain.RefreshToken;
+import com.real.backend.domain.auth.domain.RefreshToken;
 import com.real.backend.global.BaseEntity;
 
 import jakarta.persistence.CascadeType;

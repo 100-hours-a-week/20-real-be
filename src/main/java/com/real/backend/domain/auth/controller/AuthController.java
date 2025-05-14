@@ -1,4 +1,4 @@
-package com.real.backend.domain.oauth.controller;
+package com.real.backend.domain.auth.controller;
 
 import java.io.IOException;
 
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.real.backend.domain.oauth.kakao.KakaoUtil;
-import com.real.backend.domain.oauth.service.AuthService;
+import com.real.backend.domain.auth.kakao.KakaoUtil;
+import com.real.backend.domain.auth.service.AuthService;
 import com.real.backend.response.StatusResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,5 +35,12 @@ public class AuthController {
     public StatusResponse logout(HttpServletRequest request, HttpServletResponse response) {
         authService.logout(request, response);
         return StatusResponse.of(204, "성공적으로 로그아웃 됐습니다.");
+    }
+
+    @PostMapping("v1/auth/refresh")
+    public StatusResponse refresh(HttpServletRequest request, HttpServletResponse response) {
+        authService.refreshAccessToken(request, response);
+
+        return StatusResponse.of(200, "OK");
     }
 }

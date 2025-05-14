@@ -27,7 +27,7 @@ public class CookieUtils {
             .secure(isSecure)
             .path(path) // RT 사용 경로 한정
             .sameSite(sameSite) // 크로스-사이트 재발급용
-            .maxAge(name.equals("REFRESH_TOKEN") ? CONSTANT.REFRESH_TOKEN_EXPIRED : CONSTANT.ACCESS_TOKEN_EXPIRED)
+            .maxAge(CONSTANT.REFRESH_TOKEN_EXPIRED)
             .build();
     }
 

@@ -1,8 +1,6 @@
-package com.real.backend.domain.oauth.domain;
+package com.real.backend.domain.auth.domain;
 
 import java.time.LocalDateTime;
-
-import org.checkerframework.checker.units.qual.C;
 
 import com.real.backend.domain.user.domain.User;
 
