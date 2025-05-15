@@ -20,6 +20,7 @@ import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.exception.NotFoundException;
+import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.dto.SliceDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NoticeCommentService {
+    private final PostRedisService postRedisService;
     private final NoticeCommentRepository noticeCommentRepository;
     private final NoticeRepository noticeRepository;
     private final UserFinder userFinder;
@@ -56,6 +58,7 @@ public class NoticeCommentService {
         );
     }
 
+    //TODO initcount를 먼저 레디스에 값이 있는지 확인을 하고 db에서 꺼내는 방법으로 변경하기
     @Transactional
     public void deleteNoticeComment(Long noticeId, Long commentId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
@@ -65,21 +68,26 @@ public class NoticeCommentService {
             throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
         }
         noticeComment.delete();
-        notice.decreaseCommentCount();
-        noticeRepository.save(notice);
+        // notice.decreaseCommentCount();
+        postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
+        postRedisService.decrement("notice", "comment", noticeId);
+        // noticeRepository.save(notice);
     }
 
     @Transactional
     public void createNoticeComment(Long noticeId, Long userId, NoticeCommentRequestDTO noticeCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
-        notice.increaseCommentCount();
+        // notice.increaseCommentCount();
+        postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
+        Long commentCount = postRedisService.increment("notice", "comment", noticeId);
+
 
         noticeCommentRepository.save(NoticeComment.builder()
             .content(noticeCommentRequestDTO.getContent())
             .user(user)
             .notice(notice)
             .build());
-        noticeRepository.save(notice);
+        // noticeRepository.save(notice);
     }
 }
