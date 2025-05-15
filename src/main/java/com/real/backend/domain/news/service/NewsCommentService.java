@@ -71,10 +71,8 @@ public class NewsCommentService {
             throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
         }
         newsComment.delete();
-        // news.decreaseCommentCount();
         postRedisService.initCount("news", "comment", newsId, news.getCommentCount());
-        Long commentCount = postRedisService.decrement("news", "comment", newsId);
-        // newsRepository.save(news);
+        postRedisService.decrement("news", "comment", newsId);
     }
 
     @Transactional

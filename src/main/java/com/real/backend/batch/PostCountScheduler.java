@@ -22,7 +22,6 @@ public class PostCountScheduler {
 
     @Transactional
     @Scheduled(cron = "* * */3 * * *")
-    // @Scheduled(cron = "*/1 * * * * *")
     public void syncNoticeCountsToDB() {
         List<Long> noticeIds = postRedisService.getIds("notice", "totalView");
 
@@ -37,7 +36,6 @@ public class PostCountScheduler {
 
     @Transactional
     @Scheduled(cron = "* * */3 * * *")
-    // @Scheduled(cron = "*/1 * * * * *")
     public void syncNewsCountsToDB() {
         List<Long> newsIds = postRedisService.getIds("news", "totalView");
 

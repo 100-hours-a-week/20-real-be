@@ -11,6 +11,7 @@ import com.real.backend.domain.notice.repository.NoticeLikeRepository;
 import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
+import com.real.backend.infra.redis.PostRedisService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +22,7 @@ public class NoticeLikeService {
     private final NoticeRepository noticeRepository;
     private final NoticeFinder noticeFinder;
     private final UserFinder userFinder;
+    private final PostRedisService postRedisService;
 
     @Transactional
     public NoticeLikeResponseDTO editNoticeLike(Long noticeId, Long userId) {
@@ -38,8 +40,12 @@ public class NoticeLikeService {
 
         noticeLike.updateIsActivated();
 
-        if (noticeLike.getIsActivated()) notice.increaseLikesCount();
-        else notice.decreaseLikesCount();
+        if (noticeLike.getIsActivated()) {
+            postRedisService.increment("notice", "like", notice.getId());
+        }
+        else {
+            postRedisService.decrement("notice", "like", notice.getId());
+        }
 
         noticeRepository.save(notice);
         return NoticeLikeResponseDTO.from(noticeLikeRepository.save(noticeLike));

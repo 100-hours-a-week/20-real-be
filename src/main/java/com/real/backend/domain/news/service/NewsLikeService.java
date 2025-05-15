@@ -11,8 +11,7 @@ import com.real.backend.domain.news.repository.NewsLikeRepository;
 import com.real.backend.domain.news.repository.NewsRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
-import com.real.backend.domain.user.service.UserService;
-import com.real.backend.exception.NotFoundException;
+import com.real.backend.infra.redis.PostRedisService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +22,7 @@ public class NewsLikeService {
     private final NewsRepository newsRepository;
     private final UserFinder userFinder;
     private final NewsFinder newsFinder;
+    private final PostRedisService postRedisService;
 
     @Transactional
     public NewsLikeResponseDTO editNewsLike(Long newsId, Long userId) {
@@ -40,8 +40,12 @@ public class NewsLikeService {
 
         newsLike.updateIsActivated();
 
-        if (newsLike.getIsActivated()) news.increaseLikesCount();
-        else news.decreaseLikesCount();
+        if (newsLike.getIsActivated()) {
+            postRedisService.increment("news", "like", newsLike.getId());
+        }
+        else {
+            postRedisService.decrement("news", "like", newsLike.getId());
+        }
 
         newsRepository.save(news);
         return NewsLikeResponseDTO.from(newsLikeRepository.save(newsLike));

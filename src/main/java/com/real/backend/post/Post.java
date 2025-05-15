@@ -40,10 +40,6 @@ public abstract class Post extends BaseEntity {
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")
     private Long commentCount;
 
-    public void increaseLikesCount() {this.likeCount++;}
-    public void decreaseLikesCount() {this.likeCount--;}
-    public void decreaseCommentCount() {this.commentCount--;}
-
     public void updatePost(String title, String content, String tag) {
         this.title = title;
         this.content = content;
