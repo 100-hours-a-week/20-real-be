@@ -58,7 +58,6 @@ public class NoticeCommentService {
         );
     }
 
-    //TODO initcount를 먼저 레디스에 값이 있는지 확인을 하고 db에서 꺼내는 방법으로 변경하기
     @Transactional
     public void deleteNoticeComment(Long noticeId, Long commentId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
@@ -68,10 +67,8 @@ public class NoticeCommentService {
             throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
         }
         noticeComment.delete();
-        // notice.decreaseCommentCount();
-        postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
-        postRedisService.decrement("notice", "comment", noticeId);
-        // noticeRepository.save(notice);
+        notice.decreaseCommentCount();
+        noticeRepository.save(notice);
     }
 
     @Transactional
