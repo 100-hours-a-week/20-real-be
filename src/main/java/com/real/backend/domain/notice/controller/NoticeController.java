@@ -49,6 +49,7 @@ public class NoticeController {
         return DataResponse.of(noticeList);
     }
 
+    // TODO 파일 받는 로직
     @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PostMapping("/v1/notices")
     public StatusResponse createNotice(

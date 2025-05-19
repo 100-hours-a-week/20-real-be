@@ -20,7 +20,6 @@ import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.exception.NotFoundException;
-import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.dto.SliceDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NoticeCommentService {
-    private final PostRedisService postRedisService;
     private final NoticeCommentRepository noticeCommentRepository;
     private final NoticeRepository noticeRepository;
     private final UserFinder userFinder;
@@ -75,16 +73,13 @@ public class NoticeCommentService {
     public void createNoticeComment(Long noticeId, Long userId, NoticeCommentRequestDTO noticeCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
-        // notice.increaseCommentCount();
-        postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
-        Long commentCount = postRedisService.increment("notice", "comment", noticeId);
-
+        notice.increaseCommentCount();
 
         noticeCommentRepository.save(NoticeComment.builder()
             .content(noticeCommentRequestDTO.getContent())
             .user(user)
             .notice(notice)
             .build());
-        // noticeRepository.save(notice);
+        noticeRepository.save(notice);
     }
 }
