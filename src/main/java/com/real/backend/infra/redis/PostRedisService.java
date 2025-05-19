@@ -1,9 +1,5 @@
 package com.real.backend.infra.redis;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostRedisService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<Object, Object> redisTemplate;
 
     private String buildKey(String domain, String type, Long id) {
         return domain + ":" + type + ":" + id;  // ex) news:view:12
@@ -39,13 +35,4 @@ public class PostRedisService {
         redisTemplate.delete(buildKey(domain, type, id));
     }
 
-    public List<Long> getIds(String domain, String type) {
-        String str = domain + ":" + type + ":*";
-
-        Set<String> keys = redisTemplate.keys(str);
-        return keys.stream()
-            .map(k -> (k.substring((domain+":"+type+":").length())))
-            .map(Long::parseLong)
-            .collect(Collectors.toList());
-    }
 }

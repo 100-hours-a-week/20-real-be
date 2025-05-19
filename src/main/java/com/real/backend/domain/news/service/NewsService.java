@@ -23,7 +23,6 @@ import com.real.backend.exception.ServerException;
 import com.real.backend.infra.ai.dto.NewsAiRequestDTO;
 import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
 import com.real.backend.infra.ai.service.NewsAiService;
-import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.S3Utils;
 import com.real.backend.util.dto.SliceDTO;
 
@@ -35,7 +34,6 @@ public class NewsService {
 
     private final NewsRepository newsRepository;
     private final NewsLikeService newsLikeService;
-    private final PostRedisService postRedisService;
     private final NewsFinder newsFinder;
     private final S3Utils s3Utils;
     private final NewsAiService newsAiService;
@@ -97,18 +95,7 @@ public class NewsService {
     @Transactional(readOnly = true)
     public NewsResponseDTO getNewsWithUserLiked(Long newsId, Long userId) {
         News news = newsFinder.getNews(newsId);
-
-        postRedisService.initCount("news", "totalView", newsId, news.getTotalViewCount());
-        postRedisService.initCount("news", "todayView", newsId, news.getTodayViewCount());
-        postRedisService.initCount("news", "like", newsId, news.getLikeCount());
-        postRedisService.initCount("news", "comment", newsId, news.getCommentCount());
-
-        long totalViewCount = postRedisService.increment("news", "totalView", newsId);
-        long todayViewCount = postRedisService.increment("news", "todayView", newsId);
-        long likeCount = postRedisService.getCount("news", "like", newsId);
-        long commentCount = postRedisService.getCount("news", "comment", newsId);
-
-        return NewsResponseDTO.from(news, newsLikeService.userIsLiked(newsId, userId), totalViewCount, likeCount, commentCount);
+        return NewsResponseDTO.from(news, newsLikeService.userIsLiked(newsId, userId));
     }
 
     @Transactional
@@ -149,5 +136,11 @@ public class NewsService {
             .likeCount(0L)
             .commentCount(0L)
             .build());
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 0 0 * * *")
+    protected void resetTodayViewCount() {
+        newsRepository.resetTodayViewCount();
     }
 }

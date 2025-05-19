@@ -54,8 +54,4 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     @Modifying
     @Query("UPDATE News n SET n.todayViewCount = 0")
     void resetTodayViewCount();
-
-    @Modifying
-    @Query("UPDATE News n SET n.totalViewCount = :totalView, n.todayViewCount = :todayViewCount, n.likeCount = :likeCount, n.commentCount = :commentCount WHERE n.id = :id")
-    void updateCounts(Long id, Long totalView, Long todayViewCount, Long likeCount, Long commentCount);
 }
