@@ -28,4 +28,7 @@ public class News extends Post {
 
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NewsLike> newsLikes;
+
+    public void increaseTodayViewCount() {this.todayViewCount++;}
+
 }

@@ -66,6 +66,7 @@ public class NoticeController {
         @PathVariable Long noticeId,
         @CurrentSession Session session
     ) {
+        noticeService.increaseViewCounts(noticeId);
         noticeService.userReadNotice(noticeId, session.getId());
         NoticeInfoResponseDTO noticeInfoResponseDTO = noticeService.getNoticeById(noticeId, session.getId());
 

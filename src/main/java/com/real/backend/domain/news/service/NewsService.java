@@ -111,6 +111,14 @@ public class NewsService {
         return NewsResponseDTO.from(news, newsLikeService.userIsLiked(newsId, userId), totalViewCount, likeCount, commentCount);
     }
 
+    @Transactional
+    public void increaseViewCounts(Long newsId) {
+        News news = newsFinder.getNews(newsId);
+
+        news.increaseTodayViewCount();
+        news.increaseTotalViewCount();
+        newsRepository.save(news);
+    }
 
     @Transactional
     public void createNews(NewsCreateRequestDTO newsCreateRequestDTO, MultipartFile image) throws
