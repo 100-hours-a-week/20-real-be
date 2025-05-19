@@ -17,7 +17,6 @@ import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.exception.BadRequestException;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.exception.NotFoundException;
-import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.dto.SliceDTO;
 import com.real.backend.domain.news.domain.NewsComment;
 import com.real.backend.domain.news.dto.NewsCommentListResponseDTO;
@@ -34,7 +33,6 @@ public class NewsCommentService {
     private final NewsRepository newsRepository;
     private final UserFinder userFinder;
     private final NewsFinder newsFinder;
-    private final PostRedisService postRedisService;
 
     public SliceDTO<NewsCommentListResponseDTO> getNewsCommentListByCursor(Long newsId, Long cursorId, String cursorStandard, int limit, Long currentUserId) {
 
@@ -71,23 +69,21 @@ public class NewsCommentService {
             throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
         }
         newsComment.delete();
-        // news.decreaseCommentCount();
-        postRedisService.initCount("news", "comment", newsId, news.getCommentCount());
-        Long commentCount = postRedisService.decrement("news", "comment", newsId);
-        // newsRepository.save(news);
+        news.decreaseCommentCount();
+        newsRepository.save(news);
     }
 
     @Transactional
     public void createNewsComment(Long newsId, Long userId, NewsCommentRequestDTO newsCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         News news = newsFinder.getNews(newsId);
-        postRedisService.initCount("news", "comment", newsId, news.getCommentCount());
-        Long commentCount = postRedisService.increment("news", "comment", newsId);
+        news.increaseCommentCount();
 
         newsCommentRepository.save(NewsComment.builder()
             .content(newsCommentRequestDTO.getContent())
             .user(user)
             .news(news)
             .build());
+        newsRepository.save(news);
     }
 }

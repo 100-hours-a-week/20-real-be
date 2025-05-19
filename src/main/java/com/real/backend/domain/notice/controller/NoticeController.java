@@ -49,6 +49,7 @@ public class NoticeController {
         return DataResponse.of(noticeList);
     }
 
+    // TODO 파일 받는 로직
     @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PostMapping("/v1/notices")
     public StatusResponse createNotice(
@@ -65,6 +66,7 @@ public class NoticeController {
         @PathVariable Long noticeId,
         @CurrentSession Session session
     ) {
+        noticeService.increaseViewCounts(noticeId);
         noticeService.userReadNotice(noticeId, session.getId());
         NoticeInfoResponseDTO noticeInfoResponseDTO = noticeService.getNoticeById(noticeId, session.getId());
 
