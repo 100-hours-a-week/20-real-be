@@ -97,4 +97,16 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Transactional
     @Query("UPDATE Notice n SET n.totalViewCount = n.totalViewCount + 1 WHERE n.id = :noticeId")
     void increaseViewCount(@Param("noticeId") Long noticeId);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+    UPDATE notice
+    SET like_count = like_count + IF(NOT :isActivated, -1, 1)
+    WHERE id = :noticeId
+    """, nativeQuery = true)
+    void updateLikeCount(
+        @Param("noticeId") Long noticeId,
+        @Param("isActivated") Boolean isActivated
+    );
 }

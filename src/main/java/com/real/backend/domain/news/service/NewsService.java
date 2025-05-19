@@ -135,6 +135,11 @@ public class NewsService {
     }
 
     @Transactional
+    public void updateLikeCount(Long noticeId, Boolean isActivated) {
+        newsRepository.updateLikeCount(noticeId, isActivated);
+    }
+
+    @Transactional
     @Scheduled(cron = "0 0 0 * * *")
     protected void resetTodayViewCount() {
         newsRepository.resetTodayViewCount();

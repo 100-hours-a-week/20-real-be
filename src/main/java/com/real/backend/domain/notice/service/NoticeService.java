@@ -182,4 +182,9 @@ public class NoticeService {
         noticeFileService.uploadFilesToS3(images, notice, true);
         noticeFileService.uploadFilesToS3(files, notice, false);
     }
+
+    @Transactional
+    public void updateLikeCount(Long noticeId, Boolean isActivated) {
+        noticeRepository.updateLikeCount(noticeId, isActivated);
+    }
 }

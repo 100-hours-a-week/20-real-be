@@ -60,4 +60,16 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     @Transactional
     @Query("UPDATE News n SET n.totalViewCount = n.totalViewCount + 1, n.todayViewCount = n.todayViewCount + 1 WHERE n.id = :newsId")
     void increaseViewCount(@Param("newsId") Long newsId);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+    UPDATE news
+    SET like_count = like_count + IF(NOT :isActivated, -1, 1)
+    WHERE id = :newsId
+    """, nativeQuery = true)
+    void updateLikeCount(
+        @Param("newsId") Long newsId,
+        @Param("isActivated") Boolean isActivated
+    );
 }
