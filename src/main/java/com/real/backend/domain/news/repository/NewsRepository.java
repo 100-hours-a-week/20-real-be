@@ -72,4 +72,9 @@ public interface NewsRepository extends JpaRepository<News, Long> {
         @Param("newsId") Long newsId,
         @Param("isActivated") Boolean isActivated
     );
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE News n SET n.commentCount = n.commentCount + 1 WHERE n.id = :newsId")
+    void increaseCommentCount(@Param("newsId") Long newsId);
 }

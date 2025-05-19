@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.real.backend.domain.notice.dto.NoticeCommentRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeCommentListResponseDTO;
 import com.real.backend.domain.notice.service.NoticeCommentService;
+import com.real.backend.domain.notice.service.NoticeService;
 import com.real.backend.response.DataResponse;
 import com.real.backend.response.StatusResponse;
 import com.real.backend.security.CurrentSession;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api")
 public class NoticeCommentController {
     private final NoticeCommentService noticeCommentService;
+    private final NoticeService noticeService;
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("v1/notices/{noticeId}/comments")
@@ -64,6 +66,7 @@ public class NoticeCommentController {
     ) {
         Long userId = session.getId();
         noticeCommentService.createNoticeComment(noticeId, userId, noticeCommentRequestDTO);
+        noticeService.increaseCommentCount(noticeId);
 
         return StatusResponse.of(200, "댓글이 성공적으로 생성되었습니다.");
     }

@@ -187,4 +187,9 @@ public class NoticeService {
     public void updateLikeCount(Long noticeId, Boolean isActivated) {
         noticeRepository.updateLikeCount(noticeId, isActivated);
     }
+
+    @Transactional
+    public void increaseCommentCount(Long noticeId) {
+        noticeRepository.increaseCommentCount(noticeId);
+    }
 }

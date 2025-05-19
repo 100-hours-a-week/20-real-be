@@ -73,13 +73,11 @@ public class NoticeCommentService {
     public void createNoticeComment(Long noticeId, Long userId, NoticeCommentRequestDTO noticeCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
-        notice.increaseCommentCount();
 
         noticeCommentRepository.save(NoticeComment.builder()
             .content(noticeCommentRequestDTO.getContent())
             .user(user)
             .notice(notice)
             .build());
-        noticeRepository.save(notice);
     }
 }

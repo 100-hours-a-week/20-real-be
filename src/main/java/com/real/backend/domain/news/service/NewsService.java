@@ -144,4 +144,9 @@ public class NewsService {
     protected void resetTodayViewCount() {
         newsRepository.resetTodayViewCount();
     }
+
+    @Transactional
+    public void increaseCommentCount(Long noticeId) {
+        newsRepository.increaseCommentCount(noticeId);
+    }
 }

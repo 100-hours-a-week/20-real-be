@@ -109,4 +109,9 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
         @Param("noticeId") Long noticeId,
         @Param("isActivated") Boolean isActivated
     );
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Notice n SET n.commentCount = n.commentCount + 1 WHERE n.id = :noticeId")
+    void increaseCommentCount(@Param("noticeId") Long noticeId);
 }
