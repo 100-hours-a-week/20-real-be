@@ -15,7 +15,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.dto.NoticePasteRequestDTO;
-import com.real.backend.domain.notice.repository.NoticeFileRepository;
 import com.real.backend.domain.user.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeFileGroups;
@@ -32,7 +31,6 @@ import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
 import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 import com.real.backend.infra.ai.service.NoticeAiService;
 import com.real.backend.util.CursorUtils;
-import com.real.backend.util.S3Utils;
 import com.real.backend.util.dto.SliceDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -127,9 +125,7 @@ public class NoticeService {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
 
-        if (!userNoticeReadRepository.findByUserAndNotice(user, notice).isPresent()) {
-            userNoticeReadRepository.save(UserNoticeRead.builder().user(user).notice(notice).build());
-        }
+        userNoticeReadRepository.insertIgnore(user.getId(), notice.getId());
     }
 
     @Transactional
