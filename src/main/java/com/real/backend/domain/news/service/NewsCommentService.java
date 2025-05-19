@@ -77,13 +77,11 @@ public class NewsCommentService {
     public void createNewsComment(Long newsId, Long userId, NewsCommentRequestDTO newsCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         News news = newsFinder.getNews(newsId);
-        news.increaseCommentCount();
 
         newsCommentRepository.save(NewsComment.builder()
             .content(newsCommentRequestDTO.getContent())
             .user(user)
             .news(news)
             .build());
-        newsRepository.save(news);
     }
 }

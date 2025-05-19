@@ -6,9 +6,11 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.domain.notice.domain.Notice;
 
@@ -90,4 +92,26 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
            )
         """)
     List<Notice> findAllUnreadNotices(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Notice n SET n.totalViewCount = n.totalViewCount + 1 WHERE n.id = :noticeId")
+    void increaseViewCount(@Param("noticeId") Long noticeId);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+    UPDATE notice
+    SET like_count = like_count + IF(NOT :isActivated, -1, 1)
+    WHERE id = :noticeId
+    """, nativeQuery = true)
+    void updateLikeCount(
+        @Param("noticeId") Long noticeId,
+        @Param("isActivated") Boolean isActivated
+    );
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Notice n SET n.commentCount = n.commentCount + 1 WHERE n.id = :noticeId")
+    void increaseCommentCount(@Param("noticeId") Long noticeId);
 }

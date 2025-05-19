@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.domain.news.dto.NewsCommentRequestDTO;
+import com.real.backend.domain.news.service.NewsService;
 import com.real.backend.response.StatusResponse;
 import com.real.backend.util.dto.SliceDTO;
 import com.real.backend.domain.news.dto.NewsCommentListResponseDTO;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class NewsCommentController {
 
     private final NewsCommentService newsCommentService;
+    private final NewsService newsService;
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("v1/news/{newsId}/comments")
@@ -57,9 +59,11 @@ public class NewsCommentController {
     @PostMapping("v1/news/{newsId}/comments")
     public StatusResponse createNewsComment(@PathVariable Long newsId,
         @CurrentSession Session session,
-        @Valid @RequestBody NewsCommentRequestDTO newsCommentRequestDTO) {
+        @Valid @RequestBody NewsCommentRequestDTO newsCommentRequestDTO
+    ) {
         Long userId = session.getId();
         newsCommentService.createNewsComment(newsId, userId, newsCommentRequestDTO);
+        newsService.increaseCommentCount(newsId);
 
         return StatusResponse.of(200, "댓글이 성공적으로 생성되었습니다.");
     }

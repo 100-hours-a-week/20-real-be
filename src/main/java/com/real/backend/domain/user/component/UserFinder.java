@@ -1,6 +1,7 @@
 package com.real.backend.domain.user.component;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.repository.UserRepository;
@@ -14,6 +15,7 @@ public class UserFinder {
 
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public User getUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("해당 id를 가진 사용자가 없습니다."));
         if (user.getWithdrawAt() != null) {
