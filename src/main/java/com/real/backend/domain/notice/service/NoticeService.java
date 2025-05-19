@@ -171,7 +171,7 @@ public class NoticeService {
 
         LocalDateTime createTime = LocalDateTime.parse(noticeCreateRequestDTO.getCreatedAt());
 
-        Notice notice = Notice.builder()
+        Notice notice = noticeRepository.save(Notice.builder()
             .user(user)
             .title(noticeCreateRequestDTO.getTitle())
             .content(noticeCreateRequestDTO.getContent())
@@ -183,10 +183,7 @@ public class NoticeService {
             .commentCount(0L)
             .likeCount(0L)
             .createdAt(createTime)
-            .build();
-
-        notice.updateCreatedAt(noticeCreateRequestDTO.getCreatedAt());
-        noticeRepository.save(notice);
+            .build());
 
         noticeFileService.uploadFilesToS3(images, notice, true);
         noticeFileService.uploadFilesToS3(files, notice, false);
