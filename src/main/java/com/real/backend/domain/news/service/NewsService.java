@@ -100,11 +100,7 @@ public class NewsService {
 
     @Transactional
     public void increaseViewCounts(Long newsId) {
-        News news = newsFinder.getNews(newsId);
-
-        news.increaseTodayViewCount();
-        news.increaseTotalViewCount();
-        newsRepository.save(news);
+        newsRepository.increaseViewCount(newsId);
     }
 
     @Transactional
