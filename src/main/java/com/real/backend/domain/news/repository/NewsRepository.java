@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.domain.news.domain.News;
 
@@ -56,6 +57,24 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     void resetTodayViewCount();
 
     @Modifying
-    @Query("UPDATE News n SET n.totalViewCount = :totalView, n.todayViewCount = :todayViewCount, n.likeCount = :likeCount, n.commentCount = :commentCount WHERE n.id = :id")
-    void updateCounts(Long id, Long totalView, Long todayViewCount, Long likeCount, Long commentCount);
+    @Transactional
+    @Query("UPDATE News n SET n.totalViewCount = n.totalViewCount + 1, n.todayViewCount = n.todayViewCount + 1 WHERE n.id = :newsId")
+    void increaseViewCount(@Param("newsId") Long newsId);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+    UPDATE news
+    SET like_count = like_count + IF(NOT :isActivated, -1, 1)
+    WHERE id = :newsId
+    """, nativeQuery = true)
+    void updateLikeCount(
+        @Param("newsId") Long newsId,
+        @Param("isActivated") Boolean isActivated
+    );
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE News n SET n.commentCount = n.commentCount + 1 WHERE n.id = :newsId")
+    void increaseCommentCount(@Param("newsId") Long newsId);
 }

@@ -49,7 +49,6 @@ public class NoticeLikeService {
 
         noticeRepository.save(notice);
         return NoticeLikeResponseDTO.from(noticeLikeRepository.save(noticeLike));
-
     }
 
     @Transactional(readOnly = true)

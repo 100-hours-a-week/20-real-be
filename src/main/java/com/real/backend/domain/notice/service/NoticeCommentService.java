@@ -15,7 +15,6 @@ import com.real.backend.domain.notice.dto.NoticeCommentRequestDTO;
 import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.dto.NoticeCommentListResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeCommentRepository;
-import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.exception.ForbiddenException;
@@ -57,6 +56,7 @@ public class NoticeCommentService {
         );
     }
 
+    //TODO initcount를 먼저 레디스에 값이 있는지 확인을 하고 db에서 꺼내는 방법으로 변경하기
     @Transactional
     public void deleteNoticeComment(Long noticeId, Long commentId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);

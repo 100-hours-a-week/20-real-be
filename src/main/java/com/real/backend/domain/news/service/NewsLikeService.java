@@ -49,7 +49,6 @@ public class NewsLikeService {
 
         newsRepository.save(news);
         return NewsLikeResponseDTO.from(newsLikeRepository.save(newsLike));
-
     }
 
     @Transactional(readOnly = true)
