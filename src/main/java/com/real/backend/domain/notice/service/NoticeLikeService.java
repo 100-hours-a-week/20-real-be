@@ -8,9 +8,9 @@ import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.domain.NoticeLike;
 import com.real.backend.domain.notice.dto.NoticeLikeResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeLikeRepository;
-import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
+import com.real.backend.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NoticeLikeService {
     private final NoticeLikeRepository noticeLikeRepository;
-    private final NoticeRepository noticeRepository;
     private final NoticeFinder noticeFinder;
     private final UserFinder userFinder;
 
@@ -26,23 +25,11 @@ public class NoticeLikeService {
     public NoticeLikeResponseDTO editNoticeLike(Long noticeId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
         User user = userFinder.getUser(userId);
-        NoticeLike noticeLike = noticeLikeRepository.findByNoticeAndUser(notice, user).orElse(null);
 
-        if (noticeLike == null) {
-            noticeLike = NoticeLike.builder()
-                .isActivated(false)
-                .user(user)
-                .notice(notice)
-                .build();
-        }
+        noticeLikeRepository.insertOrToggle(userId, noticeId);
+        NoticeLike noticeLike = noticeLikeRepository.findByNoticeAndUser(notice, user).orElseThrow(() -> new NotFoundException("not found"));
 
-        noticeLike.updateIsActivated();
-
-        if (noticeLike.getIsActivated()) notice.increaseLikesCount();
-        else notice.decreaseLikesCount();
-
-        noticeRepository.save(notice);
-        return NoticeLikeResponseDTO.from(noticeLikeRepository.save(noticeLike));
+        return NoticeLikeResponseDTO.from(noticeLike);
 
     }
 

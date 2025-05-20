@@ -30,7 +30,6 @@ import com.real.backend.exception.ServerException;
 import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
 import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 import com.real.backend.infra.ai.service.NoticeAiService;
-import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.CursorUtils;
 import com.real.backend.util.dto.SliceDTO;
 
@@ -42,7 +41,6 @@ public class NoticeService {
     private final NoticeLikeService noticeLikeService;
     private final NoticeFileService noticeFileService;
     private final NoticeAiService noticeAiService;
-    private final PostRedisService postRedisService;
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
     private final UserNoticeReadRepository userNoticeReadRepository;
@@ -110,17 +108,13 @@ public class NoticeService {
     @Transactional(readOnly = true)
     public NoticeInfoResponseDTO getNoticeById(Long noticeId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
-
-        postRedisService.initCount("notice", "totalView", noticeId, notice.getTotalViewCount());
-        postRedisService.initCount("notice", "like", noticeId, notice.getLikeCount());
-        postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
-
-        long totalViewCount = postRedisService.increment("notice", "totalView", noticeId);
-        long likeCount = postRedisService.getCount("notice", "like", noticeId);
-        long commentCount = postRedisService.getCount("notice", "comment", noticeId);
-
         NoticeFileGroups noticeFileGroups = noticeFileService.getNoticeFileGroups(notice);
-        return NoticeInfoResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId), likeCount, commentCount, noticeFileGroups.files(), noticeFileGroups.images());
+        return NoticeInfoResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId), noticeFileGroups.files(), noticeFileGroups.images());
+    }
+
+    @Transactional
+    public void increaseViewCounts(Long noticeId) {
+        noticeRepository.increaseViewCount(noticeId);
     }
 
     @Transactional
@@ -128,9 +122,7 @@ public class NoticeService {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
 
-        if (!userNoticeReadRepository.findByUserAndNotice(user, notice).isPresent()) {
-            userNoticeReadRepository.save(UserNoticeRead.builder().user(user).notice(notice).build());
-        }
+        userNoticeReadRepository.insertIgnore(user.getId(), notice.getId());
     }
 
     @Transactional
@@ -149,7 +141,6 @@ public class NoticeService {
         noticeRepository.save(notice);
     }
 
-    // TODO 생성 날짜 지정 관련 버그 수정
     @Transactional
     public void pasteNoticeTmp(NoticePasteRequestDTO noticeCreateRequestDTO, List<MultipartFile> images,
         List<MultipartFile> files) throws JsonProcessingException {
@@ -171,6 +162,7 @@ public class NoticeService {
             throw new ServerException("ai가 응답을 주지 못했습니다.");
         }
 
+
         Notice notice = Notice.builder()
             .user(user)
             .title(noticeCreateRequestDTO.getTitle())
@@ -190,5 +182,15 @@ public class NoticeService {
 
         noticeFileService.uploadFilesToS3(images, notice, true);
         noticeFileService.uploadFilesToS3(files, notice, false);
+    }
+
+    @Transactional
+    public void updateLikeCount(Long noticeId, Boolean isActivated) {
+        noticeRepository.updateLikeCount(noticeId, isActivated);
+    }
+
+    @Transactional
+    public void increaseCommentCount(Long noticeId) {
+        noticeRepository.increaseCommentCount(noticeId);
     }
 }
