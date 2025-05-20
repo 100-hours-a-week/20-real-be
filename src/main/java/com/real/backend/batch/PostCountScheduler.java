@@ -60,4 +60,6 @@ public class PostCountScheduler {
         }
         newsRepository.resetTodayViewCount();
     }
+
+    // TODO 좋아요 상태 DB에 업데이트
 }

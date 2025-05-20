@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -108,7 +107,8 @@ public class NewsService {
         long likeCount = postRedisService.getCount("news", "like", newsId);
         long commentCount = postRedisService.getCount("news", "comment", newsId);
 
-        return NewsResponseDTO.from(news, newsLikeService.userIsLiked(newsId, userId), totalViewCount, likeCount, commentCount);
+        boolean liked = postRedisService.userLiked("news", userId, newsId);
+        return NewsResponseDTO.from(news, liked, totalViewCount, likeCount, commentCount);
     }
 
 

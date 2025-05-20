@@ -120,7 +120,8 @@ public class NoticeService {
         long commentCount = postRedisService.getCount("notice", "comment", noticeId);
 
         NoticeFileGroups noticeFileGroups = noticeFileService.getNoticeFileGroups(notice);
-        return NoticeInfoResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId), likeCount, commentCount, noticeFileGroups.files(), noticeFileGroups.images());
+        boolean liked = postRedisService.userLiked("notice", userId, noticeId);
+        return NoticeInfoResponseDTO.from(notice, liked, likeCount, commentCount, noticeFileGroups.files(), noticeFileGroups.images());
     }
 
     @Transactional

@@ -1,7 +1,5 @@
 package com.real.backend.domain.news.dto;
 
-import com.real.backend.domain.news.domain.NewsLike;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,10 +13,10 @@ public class NewsLikeResponseDTO {
     private Long id;
     private Boolean isActivated;
 
-    public static NewsLikeResponseDTO from(NewsLike newsLike) {
+    public static NewsLikeResponseDTO of(Long newsId, Boolean isActivated) {
         return NewsLikeResponseDTO.builder()
-            .id(newsLike.getId())
-            .isActivated(newsLike.getIsActivated())
+            .id(newsId)
+            .isActivated(isActivated)
             .build();
     }
 }

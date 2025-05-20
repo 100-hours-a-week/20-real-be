@@ -28,27 +28,11 @@ public class NewsLikeService {
     public NewsLikeResponseDTO editNewsLike(Long newsId, Long userId) {
         News news = newsFinder.getNews(newsId);
         User user = userFinder.getUser(userId);
-        NewsLike newsLike = newsLikeRepository.findByNewsAndUser(news, user).orElse(null);
 
-        if (newsLike == null) {
-            newsLike = NewsLike.builder()
-                .isActivated(false)
-                .user(user)
-                .news(news)
-                .build();
-        }
+        boolean liked = postRedisService.userLiked("news", userId, newsId);
+        postRedisService.createUserLike("news", userId, newsId, liked);
 
-        newsLike.updateIsActivated();
-
-        if (newsLike.getIsActivated()) {
-            postRedisService.increment("news", "like", newsLike.getId());
-        }
-        else {
-            postRedisService.decrement("news", "like", newsLike.getId());
-        }
-
-        newsRepository.save(news);
-        return NewsLikeResponseDTO.from(newsLikeRepository.save(newsLike));
+        return NewsLikeResponseDTO.of(newsId, !liked);
     }
 
     @Transactional(readOnly = true)
