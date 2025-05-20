@@ -38,7 +38,7 @@ public class NoticeLikeService {
                 .build();
         }
 
-        noticeLike.updateIsActivated();
+        // noticeLike.updateIsActivated();
 
         if (noticeLike.getIsActivated()) {
             postRedisService.increment("notice", "like", notice.getId());

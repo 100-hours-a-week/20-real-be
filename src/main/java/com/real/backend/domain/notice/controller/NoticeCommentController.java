@@ -66,7 +66,6 @@ public class NoticeCommentController {
     ) {
         Long userId = session.getId();
         noticeCommentService.createNoticeComment(noticeId, userId, noticeCommentRequestDTO);
-        noticeService.increaseCommentCount(noticeId);
 
         return StatusResponse.of(200, "댓글이 성공적으로 생성되었습니다.");
     }

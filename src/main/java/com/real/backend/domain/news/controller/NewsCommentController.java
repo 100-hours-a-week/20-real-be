@@ -63,7 +63,6 @@ public class NewsCommentController {
     ) {
         Long userId = session.getId();
         newsCommentService.createNewsComment(newsId, userId, newsCommentRequestDTO);
-        newsService.increaseCommentCount(newsId);
 
         return StatusResponse.of(200, "댓글이 성공적으로 생성되었습니다.");
     }

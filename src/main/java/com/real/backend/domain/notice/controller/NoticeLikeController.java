@@ -29,7 +29,6 @@ public class NoticeLikeController {
         Long userId = session.getId();
 
         NoticeLikeResponseDTO noticeLikeResponseDTO = noticeLikeService.editNoticeLike(noticeId, userId);
-        noticeService.updateLikeCount(noticeId, noticeLikeResponseDTO.getIsActivated());
         return DataResponse.of(noticeLikeResponseDTO);
     }
 }
