@@ -128,9 +128,7 @@ public class NoticeService {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
 
-        if (!userNoticeReadRepository.findByUserAndNotice(user, notice).isPresent()) {
-            userNoticeReadRepository.save(UserNoticeRead.builder().user(user).notice(notice).build());
-        }
+        userNoticeReadRepository.insertIgnore(user.getId(), notice.getId());
     }
 
     @Transactional
@@ -149,7 +147,6 @@ public class NoticeService {
         noticeRepository.save(notice);
     }
 
-    // TODO 생성 날짜 지정 관련 버그 수정
     @Transactional
     public void pasteNoticeTmp(NoticePasteRequestDTO noticeCreateRequestDTO, List<MultipartFile> images,
         List<MultipartFile> files) throws JsonProcessingException {
