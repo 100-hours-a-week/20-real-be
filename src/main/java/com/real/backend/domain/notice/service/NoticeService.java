@@ -162,9 +162,8 @@ public class NoticeService {
             throw new ServerException("ai가 응답을 주지 못했습니다.");
         }
 
-        LocalDateTime createTime = LocalDateTime.parse(noticeCreateRequestDTO.getCreatedAt());
 
-        Notice notice = noticeRepository.save(Notice.builder()
+        Notice notice = Notice.builder()
             .user(user)
             .title(noticeCreateRequestDTO.getTitle())
             .content(noticeCreateRequestDTO.getContent())
@@ -175,8 +174,11 @@ public class NoticeService {
             .totalViewCount(0L)
             .commentCount(0L)
             .likeCount(0L)
-            .createdAt(createTime)
-            .build());
+            .build();
+
+        noticeRepository.save(notice);
+        notice.updateCreatedAt(noticeCreateRequestDTO.getCreatedAt());
+        noticeRepository.save(notice);
 
         noticeFileService.uploadFilesToS3(images, notice, true);
         noticeFileService.uploadFilesToS3(files, notice, false);
