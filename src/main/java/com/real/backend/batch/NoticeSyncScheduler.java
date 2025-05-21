@@ -41,7 +41,7 @@ public class NoticeSyncScheduler {
     // TODO 좋아요 상태 DB에 업데이트
     @Transactional
     @Scheduled(cron = "* * */3 * * *")
-    // @Scheduled(cron = "*/1 * * * * *")
+    // @Scheduled(cron = "* 14 15 * * *")
     public void SyncNoticeLikeToDB(){
         LocalDateTime threshold = LocalDateTime.now().minusMinutes(181); // 최근 3시간 1분 로그인한 유저
         List<Long> activeUserIds = userRepository.findRecentlyActiveUserIds(threshold);

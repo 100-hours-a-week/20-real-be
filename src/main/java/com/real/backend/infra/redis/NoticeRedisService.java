@@ -21,6 +21,13 @@ public class NoticeRedisService {
     private final UserFinder userFinder;
     private final NoticeFinder noticeFinder;
 
+    public void createUserNoticeRead(Long userId, Long noticeId) {
+        String key = "notice:read:user"+userId;
+        if (!redisTemplate.hasKey(key)) {
+            redisTemplate.opsForSet().add(key, noticeId.toString());
+        }
+    }
+
     public void syncLike(List<Long> userIds) {
 
         for (Long userId : userIds) {

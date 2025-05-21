@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.domain.notice.dto.NoticeLikeResponseDTO;
 import com.real.backend.domain.notice.service.NoticeLikeService;
-import com.real.backend.domain.notice.service.NoticeService;
 import com.real.backend.response.DataResponse;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
@@ -21,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 public class NoticeLikeController {
 
     private final NoticeLikeService noticeLikeService;
-    private final NoticeService noticeService;
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PutMapping("/v1/notices/{noticeId}/likes")

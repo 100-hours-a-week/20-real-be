@@ -5,10 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.domain.news.component.NewsFinder;
 import com.real.backend.domain.news.domain.News;
-import com.real.backend.domain.news.domain.NewsLike;
 import com.real.backend.domain.news.dto.NewsLikeResponseDTO;
-import com.real.backend.domain.news.repository.NewsLikeRepository;
-import com.real.backend.domain.news.repository.NewsRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.infra.redis.PostRedisService;
@@ -27,8 +24,7 @@ public class NewsLikeService {
         News news = newsFinder.getNews(newsId);
         User user = userFinder.getUser(userId);
 
-        boolean liked = postRedisService.userLiked("news", userId, newsId);
-        postRedisService.createUserLike("news", userId, newsId, liked);
+        boolean liked = postRedisService.toggleLikeInRedis("news", userId, newsId);
 
         return NewsLikeResponseDTO.of(newsId, !liked);
     }

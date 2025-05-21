@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
-
-import com.real.backend.domain.notice.repository.NoticeLikeRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +18,21 @@ import lombok.RequiredArgsConstructor;
 public class PostRedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final NoticeLikeRepository noticeLikeRepository;
+    private static final String TOGGLE_LIKE_LUA = """
+        local likeKey = KEYS[1]
+        local countKey = KEYS[2]
+        local noticeId = ARGV[1]
+
+        if redis.call("SISMEMBER", likeKey, noticeId) == 1 then
+            redis.call("SREM", likeKey, noticeId)
+            redis.call("DECR", countKey)
+            return 0
+        else
+            redis.call("SADD", likeKey, noticeId)
+            redis.call("INCR", countKey)
+            return 1
+        end
+    """;
 
     private String buildKey(String domain, String type, Long id) {
         return domain + ":" + type + ":" + id;  // ex) news:view:12
@@ -24,13 +40,13 @@ public class PostRedisService {
 
     public void initCount(String domain, String type, Long id, Long value) {
         String key = buildKey(domain, type, id);
-        if (!redisTemplate.hasKey(key)) {
-            redisTemplate.opsForValue().set(key, value);
-        }
+        redisTemplate.opsForValue().setIfAbsent(key, value);
     }
 
     public Long increment(String domain, String type, Long id) {
-        return redisTemplate.opsForValue().increment(buildKey(domain, type, id));
+        String key = buildKey(domain, type, id);
+        redisTemplate.opsForValue().setIfAbsent(key, 0L);  // 누락 방지
+        return redisTemplate.opsForValue().increment(key);
     }
 
     public void decrement(String domain, String type, Long id) {
@@ -56,31 +72,24 @@ public class PostRedisService {
             .collect(Collectors.toList());
     }
 
-    public void createUserNoticeRead(Long userId, Long noticeId) {
-        String key = "notice:read:user"+userId;
-        if (!redisTemplate.hasKey(key)) {
-            redisTemplate.opsForSet().add(key, noticeId.toString());
-        }
-    }
-
     public boolean userLiked(String domain, Long userId, Long noticeId) {
         String key = domain+":like:"+"user:"+userId;
 
         return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(key, noticeId.toString()));
     }
 
-    public void createUserLike(String domain, Long userId, Long noticeId, boolean liked) {
-        String likeKey = domain+":like:user:"+userId;
-        String cancelLikeKey = domain+":like:cancel:user:"+userId;
+    public boolean toggleLikeInRedis(String domain, Long userId, Long noticeId) {
+        String likeKey = domain + ":like:user:" + userId;
+        String countKey = domain + ":like:count:" + noticeId;
 
-        if (liked) {
-            redisTemplate.opsForSet().remove(likeKey, noticeId.toString());
-            decrement(domain, "like", noticeId);
-            redisTemplate.opsForSet().add(cancelLikeKey, noticeId.toString());
-        } else {
-            redisTemplate.opsForSet().add(likeKey, noticeId.toString());
-            increment(domain, "like", noticeId);
-            redisTemplate.opsForSet().remove(cancelLikeKey, noticeId.toString());
-        }
+        RedisScript<Long> script = RedisScript.of(TOGGLE_LIKE_LUA, Long.class);
+
+        Long result = redisTemplate.execute(
+            script,
+            List.of(likeKey, countKey),
+            noticeId.toString()
+        );
+
+        return result != null && result == 1;
     }
 }

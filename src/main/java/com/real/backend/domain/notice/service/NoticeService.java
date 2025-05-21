@@ -30,6 +30,7 @@ import com.real.backend.exception.ServerException;
 import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
 import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 import com.real.backend.infra.ai.service.NoticeAiService;
+import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.CursorUtils;
 import com.real.backend.util.dto.SliceDTO;
@@ -39,10 +40,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NoticeService {
-    private final NoticeLikeService noticeLikeService;
     private final NoticeFileService noticeFileService;
     private final NoticeAiService noticeAiService;
     private final PostRedisService postRedisService;
+    private final NoticeRedisService noticeRedisService;
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
     private final UserNoticeReadRepository userNoticeReadRepository;
@@ -129,7 +130,7 @@ public class NoticeService {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
 
-        postRedisService.createUserNoticeRead(userId, noticeId);
+        noticeRedisService.createUserNoticeRead(userId, noticeId);
     }
 
     @Transactional

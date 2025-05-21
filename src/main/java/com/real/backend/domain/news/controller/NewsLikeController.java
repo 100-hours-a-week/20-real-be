@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class NewsLikeController {
 
     private final NewsLikeService newsLikeService;
-    private final NewsService newsService;
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PutMapping("/v1/news/{newsId}/likes")
