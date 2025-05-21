@@ -61,20 +61,22 @@ public class PostRedisService {
     }
 
     public boolean userLiked(String domain, Long userId, Long noticeId) {
-        String key = domain+"like:"+"user:"+userId;
+        String key = domain+":like:"+"user:"+userId;
 
         return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(key, noticeId.toString()));
     }
 
     public void createUserLike(String domain, Long userId, Long noticeId, boolean liked) {
-        String key = domain+"like:"+"user:"+userId;
+        String key = domain+":like:"+"user:"+userId;
 
         if (liked) {
             redisTemplate.opsForSet().remove(key, noticeId.toString());
             decrement(domain, "like", noticeId);
-        } else{
+            redisTemplate.opsForSet().add("notice:like:cancel:user"+userId, noticeId.toString());
+        } else {
             redisTemplate.opsForSet().add(key, noticeId.toString());
             increment(domain, "like", noticeId);
+            redisTemplate.opsForSet().remove("notice:like:cancel:user"+userId, noticeId.toString());
         }
     }
 }
