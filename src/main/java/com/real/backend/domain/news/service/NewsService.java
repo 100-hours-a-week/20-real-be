@@ -149,4 +149,9 @@ public class NewsService {
     public void increaseCommentCount(Long noticeId) {
         newsRepository.increaseCommentCount(noticeId);
     }
+
+    @Transactional
+    public void decreaseCommentCount(Long newsId){
+        newsRepository.decreaseCommentCount(newsId);
+    }
 }

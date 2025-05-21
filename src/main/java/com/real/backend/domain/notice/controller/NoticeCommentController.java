@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.domain.notice.dto.NoticeCommentRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeCommentListResponseDTO;
+import com.real.backend.domain.notice.dto.NoticeStressResponseDTO;
 import com.real.backend.domain.notice.service.NoticeCommentService;
 import com.real.backend.domain.notice.service.NoticeService;
 import com.real.backend.response.DataResponse;
-import com.real.backend.response.StatusResponse;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 import com.real.backend.util.dto.SliceDTO;
@@ -47,27 +47,28 @@ public class NoticeCommentController {
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @DeleteMapping("v1/notices/{noticeId}/comments/{commentId}")
-    public StatusResponse deleteNoticeComment(
+    public DataResponse<NoticeStressResponseDTO> deleteNoticeComment(
         @PathVariable Long noticeId,
         @PathVariable Long commentId,
         @CurrentSession Session session
     ) {
         Long userId = session.getId();
-        noticeCommentService.deleteNoticeComment(noticeId, commentId, userId);
-        return StatusResponse.of(204, "댓글이 정상적으로 삭제됐습니다.");
+        NoticeStressResponseDTO noticeStressResponseDTO = noticeCommentService.deleteNoticeComment(noticeId, commentId, userId);
+        noticeService.decreaseCommentCount(noticeId);
+        return DataResponse.of(noticeStressResponseDTO);
     }
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PostMapping("v1/notices/{noticeId}/comments")
-    public StatusResponse createNoticeComment(
+    public DataResponse<NoticeStressResponseDTO> createNoticeComment(
         @PathVariable Long noticeId,
         @CurrentSession Session session,
         @Valid @RequestBody NoticeCommentRequestDTO noticeCommentRequestDTO
     ) {
         Long userId = session.getId();
-        noticeCommentService.createNoticeComment(noticeId, userId, noticeCommentRequestDTO);
+        NoticeStressResponseDTO noticeStressResponseDTO = noticeCommentService.createNoticeComment(noticeId, userId, noticeCommentRequestDTO);
         noticeService.increaseCommentCount(noticeId);
 
-        return StatusResponse.of(200, "댓글이 성공적으로 생성되었습니다.");
+        return DataResponse.of(noticeStressResponseDTO);
     }
 }
