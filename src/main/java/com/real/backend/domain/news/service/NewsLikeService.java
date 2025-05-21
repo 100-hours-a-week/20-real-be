@@ -18,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NewsLikeService {
-    private final NewsLikeRepository newsLikeRepository;
-    private final NewsRepository newsRepository;
     private final UserFinder userFinder;
     private final NewsFinder newsFinder;
     private final PostRedisService postRedisService;
@@ -34,21 +32,4 @@ public class NewsLikeService {
 
         return NewsLikeResponseDTO.of(newsId, !liked);
     }
-
-    @Transactional(readOnly = true)
-    public boolean userIsLiked(Long newsId, Long userId) {
-        NewsLike newsLike = getNewsLike(newsId, userId);
-        if (newsLike == null) return false;
-        return newsLike.getIsActivated();
-
-    }
-
-    @Transactional(readOnly = true)
-    public NewsLike getNewsLike(Long newsId, Long userId) {
-        News news = newsFinder.getNews(newsId);
-        User user = userFinder.getUser(userId);
-
-        return newsLikeRepository.findByNewsAndUser(news, user).orElse(null);
-    }
-
 }

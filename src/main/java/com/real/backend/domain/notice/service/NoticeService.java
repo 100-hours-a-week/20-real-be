@@ -115,7 +115,7 @@ public class NoticeService {
         postRedisService.initCount("notice", "like", noticeId, notice.getLikeCount());
         postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
 
-        long totalViewCount = postRedisService.increment("notice", "totalView", noticeId);
+        postRedisService.increment("notice", "totalView", noticeId);
         long likeCount = postRedisService.getCount("notice", "like", noticeId);
         long commentCount = postRedisService.getCount("notice", "comment", noticeId);
 

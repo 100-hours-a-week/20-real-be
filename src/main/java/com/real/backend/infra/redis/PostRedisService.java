@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.real.backend.domain.notice.repository.NoticeLikeRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class PostRedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
+    private final NoticeLikeRepository noticeLikeRepository;
 
     private String buildKey(String domain, String type, Long id) {
         return domain + ":" + type + ":" + id;  // ex) news:view:12
@@ -30,8 +33,8 @@ public class PostRedisService {
         return redisTemplate.opsForValue().increment(buildKey(domain, type, id));
     }
 
-    public Long decrement(String domain, String type, Long id) {
-        return redisTemplate.opsForValue().decrement(buildKey(domain, type, id));
+    public void decrement(String domain, String type, Long id) {
+        redisTemplate.opsForValue().decrement(buildKey(domain, type, id));
     }
 
     public Long getCount(String domain, String type, Long id) {
@@ -54,7 +57,7 @@ public class PostRedisService {
     }
 
     public void createUserNoticeRead(Long userId, Long noticeId) {
-        String key = "user:"+userId+":read_notice";
+        String key = "notice:read:user"+userId;
         if (!redisTemplate.hasKey(key)) {
             redisTemplate.opsForSet().add(key, noticeId.toString());
         }
@@ -67,16 +70,17 @@ public class PostRedisService {
     }
 
     public void createUserLike(String domain, Long userId, Long noticeId, boolean liked) {
-        String key = domain+":like:"+"user:"+userId;
+        String likeKey = domain+":like:user:"+userId;
+        String cancelLikeKey = domain+":like:cancel:user:"+userId;
 
         if (liked) {
-            redisTemplate.opsForSet().remove(key, noticeId.toString());
+            redisTemplate.opsForSet().remove(likeKey, noticeId.toString());
             decrement(domain, "like", noticeId);
-            redisTemplate.opsForSet().add("notice:like:cancel:user"+userId, noticeId.toString());
+            redisTemplate.opsForSet().add(cancelLikeKey, noticeId.toString());
         } else {
-            redisTemplate.opsForSet().add(key, noticeId.toString());
+            redisTemplate.opsForSet().add(likeKey, noticeId.toString());
             increment(domain, "like", noticeId);
-            redisTemplate.opsForSet().remove("notice:like:cancel:user"+userId, noticeId.toString());
+            redisTemplate.opsForSet().remove(cancelLikeKey, noticeId.toString());
         }
     }
 }
