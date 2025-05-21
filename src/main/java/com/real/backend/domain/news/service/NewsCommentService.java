@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.real.backend.domain.news.component.NewsFinder;
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsCommentRequestDTO;
+import com.real.backend.domain.news.dto.NewsStressResponseDTO;
 import com.real.backend.domain.news.repository.NewsRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.exception.BadRequestException;
@@ -30,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 public class NewsCommentService {
 
     private final NewsCommentRepository newsCommentRepository;
-    private final NewsRepository newsRepository;
     private final UserFinder userFinder;
     private final NewsFinder newsFinder;
 
@@ -56,8 +56,9 @@ public class NewsCommentService {
             SliceDTO<NewsCommentListResponseDTO>::new                                  // 최종 DTO 빌더
         );
     }
+
     @Transactional
-    public void deleteNewsComment(Long newsId, Long commentId, Long userId) {
+    public NewsStressResponseDTO deleteNewsComment(Long newsId, Long commentId, Long userId) {
         if (commentId == null) {
             throw new BadRequestException("필수 파라미터인 commentId를 받지 못했습니다.");
         }
@@ -68,20 +69,19 @@ public class NewsCommentService {
         if (!newsComment.getUser().getId().equals(userId)) {
             throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
         }
-        newsComment.delete();
-        news.decreaseCommentCount();
-        newsRepository.save(news);
+        newsCommentRepository.deleteByNewsId(newsComment.getId(), LocalDateTime.now());
+        return new NewsStressResponseDTO(newsComment.getId());
     }
 
     @Transactional
-    public void createNewsComment(Long newsId, Long userId, NewsCommentRequestDTO newsCommentRequestDTO) {
+    public NewsStressResponseDTO createNewsComment(Long newsId, Long userId, NewsCommentRequestDTO newsCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         News news = newsFinder.getNews(newsId);
 
-        newsCommentRepository.save(NewsComment.builder()
+        return new NewsStressResponseDTO(newsCommentRepository.save(NewsComment.builder()
             .content(newsCommentRequestDTO.getContent())
             .user(user)
             .news(news)
-            .build());
+            .build()).getId());
     }
 }

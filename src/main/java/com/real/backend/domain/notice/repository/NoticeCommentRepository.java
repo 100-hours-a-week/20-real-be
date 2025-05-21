@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -33,4 +34,13 @@ public interface NoticeCommentRepository extends JpaRepository<NoticeComment, Lo
         @Param("id") Long id,
         Pageable pg,
         @Param("noticeId") Long noticeId);
+
+    @Modifying
+    @Query("""
+    UPDATE NoticeComment n
+    SET n.deletedAt = :deletedAt
+    WHERE n.id = :noticeId
+"""
+    )
+    void deleteByNoticeId(Long noticeId, LocalDateTime deletedAt);
 }

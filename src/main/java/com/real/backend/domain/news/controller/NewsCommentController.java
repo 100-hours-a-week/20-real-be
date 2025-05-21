@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.domain.news.dto.NewsCommentRequestDTO;
+import com.real.backend.domain.news.dto.NewsStressResponseDTO;
 import com.real.backend.domain.news.service.NewsService;
-import com.real.backend.response.StatusResponse;
 import com.real.backend.util.dto.SliceDTO;
 import com.real.backend.domain.news.dto.NewsCommentListResponseDTO;
 import com.real.backend.domain.news.service.NewsCommentService;
@@ -48,23 +48,24 @@ public class NewsCommentController {
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @DeleteMapping("v1/news/{newsId}/comments/{commentId}")
-    public StatusResponse deleteNewsComment(@PathVariable Long newsId, @PathVariable Long commentId, @CurrentSession Session session) {
+    public DataResponse<NewsStressResponseDTO> deleteNewsComment(@PathVariable Long newsId, @PathVariable Long commentId, @CurrentSession Session session) {
 
         Long userId = session.getId();
-        newsCommentService.deleteNewsComment(newsId, commentId, userId);
-        return StatusResponse.of(204, "댓글이 정상적으로 삭제됐습니다.");
+        NewsStressResponseDTO newsStressResponseDTO = newsCommentService.deleteNewsComment(newsId, commentId, userId);
+        newsService.decreaseCommentCount(newsId);
+        return DataResponse.of(newsStressResponseDTO);
     }
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PostMapping("v1/news/{newsId}/comments")
-    public StatusResponse createNewsComment(@PathVariable Long newsId,
+    public DataResponse<NewsStressResponseDTO> createNewsComment(@PathVariable Long newsId,
         @CurrentSession Session session,
         @Valid @RequestBody NewsCommentRequestDTO newsCommentRequestDTO
     ) {
         Long userId = session.getId();
-        newsCommentService.createNewsComment(newsId, userId, newsCommentRequestDTO);
+        NewsStressResponseDTO newsStressResponseDTO = newsCommentService.createNewsComment(newsId, userId, newsCommentRequestDTO);
         newsService.increaseCommentCount(newsId);
 
-        return StatusResponse.of(200, "댓글이 성공적으로 생성되었습니다.");
+        return DataResponse.of(newsStressResponseDTO);
     }
 }
