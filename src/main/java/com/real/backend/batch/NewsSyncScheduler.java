@@ -41,7 +41,7 @@ public class NewsSyncScheduler {
 
     @Transactional
     @Scheduled(cron = "0 0 0 * * *")
-    protected void resetNewsTodayViewCount() {
+    public void resetNewsTodayViewCount() {
         List<Long> newsIds = postRedisService.getIds("news", "todayView");
         for (Long newsId : newsIds) {
             postRedisService.delete("news", "todayView", newsId);

@@ -15,7 +15,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.dto.NoticePasteRequestDTO;
-import com.real.backend.domain.user.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeFileGroups;
 import com.real.backend.domain.notice.dto.NoticeInfoResponseDTO;
@@ -46,7 +45,6 @@ public class NoticeService {
     private final NoticeRedisService noticeRedisService;
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
-    private final UserNoticeReadRepository userNoticeReadRepository;
     private final NoticeFinder noticeFinder;
     private final UserFinder userFinder;
 
@@ -81,8 +79,7 @@ public class NoticeService {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
 
-        UserNoticeRead userNoticeRead = userNoticeReadRepository.findByUserAndNotice(user, notice).orElse(null);
-        return userNoticeRead != null;
+        return noticeRedisService.getUserRead(userId, noticeId);
 
     }
 

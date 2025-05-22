@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.domain.news.dto.NewsLikeResponseDTO;
 import com.real.backend.domain.news.service.NewsLikeService;
-import com.real.backend.domain.news.service.NewsService;
 import com.real.backend.response.DataResponse;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;

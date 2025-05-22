@@ -4,10 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +42,6 @@ public class PostRedisService {
 
     public Long increment(String domain, String type, Long id) {
         String key = buildKey(domain, type, id);
-        redisTemplate.opsForValue().setIfAbsent(key, 0L);  // 누락 방지
         return redisTemplate.opsForValue().increment(key);
     }
 

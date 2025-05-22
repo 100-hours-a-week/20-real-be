@@ -22,10 +22,13 @@ public class NoticeRedisService {
     private final NoticeFinder noticeFinder;
 
     public void createUserNoticeRead(Long userId, Long noticeId) {
-        String key = "notice:read:user"+userId;
-        if (!redisTemplate.hasKey(key)) {
-            redisTemplate.opsForSet().add(key, noticeId.toString());
-        }
+        String key = "notice:read:user:"+userId;
+        redisTemplate.opsForSet().add(key, noticeId.toString());
+    }
+
+    public Boolean getUserRead(Long userId, Long noticeId) {
+        String key = "notice:read:user:"+userId;
+        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(key, noticeId.toString()));
     }
 
     public void syncLike(List<Long> userIds) {
