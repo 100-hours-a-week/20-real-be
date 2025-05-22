@@ -49,7 +49,6 @@ public class NewsSyncScheduler {
         newsRepository.resetTodayViewCount();
     }
 
-    // TODO 좋아요 상태 DB에 업데이트
     @Transactional
     @Scheduled(cron = "* * */3 * * *")
     // @Scheduled(cron = "*/1 * * * * *")

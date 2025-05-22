@@ -10,6 +10,8 @@ import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.domain.NoticeLike;
 import com.real.backend.domain.notice.repository.NoticeLikeRepository;
 import com.real.backend.domain.user.component.UserFinder;
+import com.real.backend.domain.user.domain.UserNoticeRead;
+import com.real.backend.domain.user.repository.UserNoticeReadRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +22,7 @@ public class NoticeRedisService {
     private final NoticeLikeRepository noticeLikeRepository;
     private final UserFinder userFinder;
     private final NoticeFinder noticeFinder;
+    private final UserNoticeReadRepository userNoticeReadRepository;
 
     public void createUserNoticeRead(Long userId, Long noticeId) {
         String key = "notice:read:user:"+userId;
@@ -81,6 +84,34 @@ public class NoticeRedisService {
 
                     // 처리 완료되면 Redis에서 삭제
                     redisTemplate.opsForSet().remove(cancelLikeKey, noticeIdObj);
+                }
+            }
+        }
+    }
+
+    public void syncNoticeRead() {
+        String str = "notice:read:user:*";
+
+        Set<String> keys = redisTemplate.keys(str);
+        List<Long> ids = keys.stream()
+            .map(k -> (k.substring(("notice:read:user:").length())))
+            .map(Long::parseLong)
+            .toList();
+
+        for (Long userId : ids) {
+
+            Set<Object> noticeIds = redisTemplate.opsForSet().members("notice:read:user:"+userId);
+
+            if (noticeIds != null) {
+                for (Object noticeIdObj : noticeIds) {
+                    Long noticeId = Long.valueOf((String) noticeIdObj);
+                    if (!userNoticeReadRepository.existsByUserIdAndNoticeId(userId, noticeId)) {
+                        userNoticeReadRepository.save(
+                            UserNoticeRead.builder()
+                                .user(userFinder.getUser(userId))
+                                .notice(noticeFinder.getNotice(noticeId))
+                                .build());
+                    };
                 }
             }
         }

@@ -38,7 +38,6 @@ public class NoticeSyncScheduler {
         }
     }
 
-    // TODO 좋아요 상태 DB에 업데이트
     @Transactional
     @Scheduled(cron = "* * */3 * * *")
     // @Scheduled(cron = "* 14 15 * * *")
@@ -48,4 +47,12 @@ public class NoticeSyncScheduler {
 
         noticeRedisService.syncLike(activeUserIds);
     }
+
+    @Transactional
+    @Scheduled(cron = "* * */3 * * *")
+    // @Scheduled(cron = "* 42 17 * * *")
+    public void syncNoticeReadToDB() {
+        noticeRedisService.syncNoticeRead();
+    }
+
 }
