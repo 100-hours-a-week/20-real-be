@@ -65,7 +65,6 @@ public class NoticeCommentController {
         @Valid @RequestBody NoticeCommentRequestDTO noticeCommentRequestDTO
     ) {
         Long userId = session.getId();
-        noticeCommentService.createNoticeComment(noticeId, userId, noticeCommentRequestDTO);
         NoticeStressResponseDTO noticeStressResponseDTO = noticeCommentService.createNoticeComment(noticeId, userId, noticeCommentRequestDTO);
 
         return DataResponse.of(noticeStressResponseDTO);
