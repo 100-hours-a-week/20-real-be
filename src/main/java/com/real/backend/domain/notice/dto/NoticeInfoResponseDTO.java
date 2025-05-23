@@ -19,7 +19,6 @@ public class NoticeInfoResponseDTO {
     private String content;
     private String summary;
     private String tag;
-    private Long totalViewCount;
     private Long likeCount;
     private Long commentCount;
     private String originalUrl;
@@ -32,6 +31,8 @@ public class NoticeInfoResponseDTO {
     public static NoticeInfoResponseDTO from(
         Notice notice,
         Boolean userLike,
+        Long likeCount,
+        Long commentCount,
         List<NoticeFilesResponseDTO> files,
         List<NoticeFilesResponseDTO> images) {
 
@@ -43,9 +44,8 @@ public class NoticeInfoResponseDTO {
             .content(notice.getContent())
             .summary(notice.getSummary())
             .tag(notice.getTag())
-            .totalViewCount(notice.getTotalViewCount())
-            .likeCount(notice.getLikeCount())
-            .commentCount(notice.getCommentCount())
+            .likeCount(likeCount)
+            .commentCount(commentCount)
             .originalUrl(notice.getOriginalUrl())
             .userLike(userLike)
             .createdAt(notice.getCreatedAt())

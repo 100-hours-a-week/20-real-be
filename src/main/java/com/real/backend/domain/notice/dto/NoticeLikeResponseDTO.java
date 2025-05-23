@@ -1,7 +1,5 @@
 package com.real.backend.domain.notice.dto;
 
-import com.real.backend.domain.notice.domain.NoticeLike;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,10 +13,10 @@ public class NoticeLikeResponseDTO {
     private Long id;
     private Boolean isActivated;
 
-    public static NoticeLikeResponseDTO from(NoticeLike noticeLike) {
+    public static NoticeLikeResponseDTO of(Long noticeId, Boolean isActivated) {
         return NoticeLikeResponseDTO.builder()
-            .id(noticeLike.getId())
-            .isActivated(noticeLike.getIsActivated())
+            .id(noticeId)
+            .isActivated(isActivated)
             .build();
     }
 }

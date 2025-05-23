@@ -52,7 +52,6 @@ public class NewsCommentController {
 
         Long userId = session.getId();
         NewsStressResponseDTO newsStressResponseDTO = newsCommentService.deleteNewsComment(newsId, commentId, userId);
-        newsService.decreaseCommentCount(newsId);
         return DataResponse.of(newsStressResponseDTO);
     }
 
@@ -64,7 +63,6 @@ public class NewsCommentController {
     ) {
         Long userId = session.getId();
         NewsStressResponseDTO newsStressResponseDTO = newsCommentService.createNewsComment(newsId, userId, newsCommentRequestDTO);
-        newsService.increaseCommentCount(newsId);
 
         return DataResponse.of(newsStressResponseDTO);
     }

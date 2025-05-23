@@ -44,7 +44,6 @@ public class NewsController {
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("/v1/news/{newsId}")
     public DataResponse<NewsResponseDTO> getNewsById(@PathVariable("newsId") Long newsId, @CurrentSession Session session) {
-        newsService.increaseViewCounts(newsId);
         NewsResponseDTO newsResponseDTO = newsService.getNewsWithUserLiked(newsId, session.getId());
 
         return DataResponse.of(newsResponseDTO);

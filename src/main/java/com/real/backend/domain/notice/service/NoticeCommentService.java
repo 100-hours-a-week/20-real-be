@@ -16,11 +16,11 @@ import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.dto.NoticeCommentListResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeStressResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeCommentRepository;
-import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.exception.NotFoundException;
+import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.dto.SliceDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -28,8 +28,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NoticeCommentService {
+    private final PostRedisService postRedisService;
     private final NoticeCommentRepository noticeCommentRepository;
-    private final NoticeRepository noticeRepository;
     private final UserFinder userFinder;
     private final NoticeFinder noticeFinder;
 
@@ -65,7 +65,9 @@ public class NoticeCommentService {
         if (!noticeComment.getUser().getId().equals(userId)) {
             throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
         }
-        noticeCommentRepository.deleteByNoticeId(noticeComment.getId(), LocalDateTime.now());
+        noticeComment.delete();
+        postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
+        postRedisService.decrement("notice", "comment", noticeId);
         return new NoticeStressResponseDTO(noticeComment.getId());
     }
 
@@ -73,6 +75,9 @@ public class NoticeCommentService {
     public NoticeStressResponseDTO createNoticeComment(Long noticeId, Long userId, NoticeCommentRequestDTO noticeCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
+        postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
+        postRedisService.increment("notice", "comment", noticeId);
+
 
         return new NoticeStressResponseDTO(noticeCommentRepository.save(NoticeComment.builder()
             .content(noticeCommentRequestDTO.getContent())

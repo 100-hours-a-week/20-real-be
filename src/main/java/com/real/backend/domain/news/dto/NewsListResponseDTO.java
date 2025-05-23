@@ -20,13 +20,13 @@ public class NewsListResponseDTO{
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm:ss")
     private LocalDateTime createdAt;
 
-    public static NewsListResponseDTO of(News news) {
+    public static NewsListResponseDTO of(News news, Long todayViewCount, Long commentCount) {
         return NewsListResponseDTO.builder()
             .id(news.getId())
             .title(news.getTitle())
             .tag(news.getTag())
-            .commentCount(news.getCommentCount())
-            .todayViewCount(news.getTodayViewCount())
+            .commentCount(commentCount)
+            .todayViewCount(todayViewCount)
             .imageUrl(news.getImageUrl())
             .createdAt(news.getCreatedAt())
             .build();

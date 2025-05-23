@@ -1,12 +1,14 @@
 package com.real.backend.domain.news.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +25,7 @@ import com.real.backend.exception.ServerException;
 import com.real.backend.infra.ai.dto.NewsAiRequestDTO;
 import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
 import com.real.backend.infra.ai.service.NewsAiService;
+import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.S3Utils;
 import com.real.backend.util.dto.SliceDTO;
 
@@ -31,12 +34,12 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NewsService {
-
+    private final RedisTemplate<String, Object> redisTemplate;
     private final NewsRepository newsRepository;
-    private final NewsLikeService newsLikeService;
+    private final NewsAiService newsAiService;
+    private final PostRedisService postRedisService;
     private final NewsFinder newsFinder;
     private final S3Utils s3Utils;
-    private final NewsAiService newsAiService;
 
     @Transactional(readOnly = true)
     public SliceDTO<NewsListResponseDTO> getNewsListByCursor(Long cursorId, int limit, String sort, String cursorStandard) {
@@ -74,6 +77,9 @@ public class NewsService {
         boolean hasNext = slice.hasNext();
         List<News> pageItems = content.size() > limit ? content.subList(0, limit) : content;
 
+        Map<Long, Long> todayViewCount = bulkGetCount(content, "news:todayView:");
+        Map<Long, Long> commentCount = bulkGetCount(content, "news:comment:");
+
         // 다음 커서 계산
         String nextCursor = null;
         Long nextCursorId = null;
@@ -86,22 +92,51 @@ public class NewsService {
         }
 
         List<NewsListResponseDTO> dtoList = pageItems.stream()
-            .map(NewsListResponseDTO::of)
+            .map(n -> NewsListResponseDTO.of(
+                n,
+                todayViewCount.getOrDefault(n.getId(), n.getTodayViewCount()),   // fallback
+                commentCount.getOrDefault(n.getId(), n.getCommentCount())
+            ))
             .toList();
 
         return new SliceDTO<>(dtoList, nextCursor, nextCursorId, hasNext);
     }
 
+    private Map<Long, Long> bulkGetCount(List<News> list, String keyPrefix) {
+        List<String> keys = list.stream()
+            .map(n -> keyPrefix + n.getId())
+            .toList();
+
+        List<Object> values = redisTemplate.opsForValue().multiGet(keys);
+
+        Map<Long, Long> result = new HashMap<>();
+        for (int i = 0; i < list.size(); i++) {
+            Object val = values.get(i);
+            if (val != null) {
+                result.put(list.get(i).getId(), Long.parseLong(val.toString()));
+            }
+        }
+        return result;
+    }
+
     @Transactional(readOnly = true)
     public NewsResponseDTO getNewsWithUserLiked(Long newsId, Long userId) {
         News news = newsFinder.getNews(newsId);
-        return NewsResponseDTO.from(news, newsLikeService.userIsLiked(newsId, userId));
+
+        postRedisService.initCount("news", "totalView", newsId, news.getTotalViewCount());
+        postRedisService.initCount("news", "todayView", newsId, news.getTodayViewCount());
+        postRedisService.initCount("news", "like", newsId, news.getLikeCount());
+        postRedisService.initCount("news", "comment", newsId, news.getCommentCount());
+
+        postRedisService.increment("news", "todayView", newsId);
+        long totalViewCount = postRedisService.increment("news", "totalView", newsId);
+        long likeCount = postRedisService.getCount("news", "like", newsId);
+        long commentCount = postRedisService.getCount("news", "comment", newsId);
+
+        boolean liked = postRedisService.userLiked("news", userId, newsId);
+        return NewsResponseDTO.from(news, liked, totalViewCount, likeCount, commentCount);
     }
 
-    @Transactional
-    public void increaseViewCounts(Long newsId) {
-        newsRepository.increaseViewCount(newsId);
-    }
 
     @Transactional
     public void createNews(NewsCreateRequestDTO newsCreateRequestDTO, MultipartFile image) throws
@@ -132,26 +167,5 @@ public class NewsService {
             .likeCount(0L)
             .commentCount(0L)
             .build());
-    }
-
-    @Transactional
-    public void updateLikeCount(Long noticeId, Boolean isActivated) {
-        newsRepository.updateLikeCount(noticeId, isActivated);
-    }
-
-    @Transactional
-    @Scheduled(cron = "0 0 0 * * *")
-    protected void resetTodayViewCount() {
-        newsRepository.resetTodayViewCount();
-    }
-
-    @Transactional
-    public void increaseCommentCount(Long noticeId) {
-        newsRepository.increaseCommentCount(noticeId);
-    }
-
-    @Transactional
-    public void decreaseCommentCount(Long newsId){
-        newsRepository.decreaseCommentCount(newsId);
     }
 }

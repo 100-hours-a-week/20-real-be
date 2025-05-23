@@ -13,11 +13,11 @@ import com.real.backend.domain.news.component.NewsFinder;
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsCommentRequestDTO;
 import com.real.backend.domain.news.dto.NewsStressResponseDTO;
-import com.real.backend.domain.news.repository.NewsRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.exception.BadRequestException;
 import com.real.backend.exception.ForbiddenException;
 import com.real.backend.exception.NotFoundException;
+import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.dto.SliceDTO;
 import com.real.backend.domain.news.domain.NewsComment;
 import com.real.backend.domain.news.dto.NewsCommentListResponseDTO;
@@ -33,6 +33,7 @@ public class NewsCommentService {
     private final NewsCommentRepository newsCommentRepository;
     private final UserFinder userFinder;
     private final NewsFinder newsFinder;
+    private final PostRedisService postRedisService;
 
     public SliceDTO<NewsCommentListResponseDTO> getNewsCommentListByCursor(Long newsId, Long cursorId, String cursorStandard, int limit, Long currentUserId) {
 
@@ -69,7 +70,9 @@ public class NewsCommentService {
         if (!newsComment.getUser().getId().equals(userId)) {
             throw new ForbiddenException("해당 댓글 작성자가 아닙니다.");
         }
-        newsCommentRepository.deleteByNewsId(newsComment.getId(), LocalDateTime.now());
+        newsComment.delete();
+        postRedisService.initCount("news", "comment", newsId, news.getCommentCount());
+        postRedisService.decrement("news", "comment", newsId);
         return new NewsStressResponseDTO(newsComment.getId());
     }
 
@@ -77,6 +80,8 @@ public class NewsCommentService {
     public NewsStressResponseDTO createNewsComment(Long newsId, Long userId, NewsCommentRequestDTO newsCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         News news = newsFinder.getNews(newsId);
+        postRedisService.initCount("news", "comment", newsId, news.getCommentCount());
+        Long commentCount = postRedisService.increment("news", "comment", newsId);
 
         return new NewsStressResponseDTO(newsCommentRepository.save(NewsComment.builder()
             .content(newsCommentRequestDTO.getContent())

@@ -54,7 +54,6 @@ public class NoticeCommentController {
     ) {
         Long userId = session.getId();
         NoticeStressResponseDTO noticeStressResponseDTO = noticeCommentService.deleteNoticeComment(noticeId, commentId, userId);
-        noticeService.decreaseCommentCount(noticeId);
         return DataResponse.of(noticeStressResponseDTO);
     }
 
@@ -67,7 +66,6 @@ public class NoticeCommentController {
     ) {
         Long userId = session.getId();
         NoticeStressResponseDTO noticeStressResponseDTO = noticeCommentService.createNoticeComment(noticeId, userId, noticeCommentRequestDTO);
-        noticeService.increaseCommentCount(noticeId);
 
         return DataResponse.of(noticeStressResponseDTO);
     }
