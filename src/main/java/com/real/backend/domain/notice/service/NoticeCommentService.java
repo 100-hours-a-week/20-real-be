@@ -14,8 +14,8 @@ import com.real.backend.domain.notice.domain.NoticeComment;
 import com.real.backend.domain.notice.dto.NoticeCommentRequestDTO;
 import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.dto.NoticeCommentListResponseDTO;
+import com.real.backend.domain.notice.dto.NoticeStressResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeCommentRepository;
-import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.exception.ForbiddenException;
@@ -58,7 +58,7 @@ public class NoticeCommentService {
     }
 
     @Transactional
-    public void deleteNoticeComment(Long noticeId, Long commentId, Long userId) {
+    public NoticeStressResponseDTO deleteNoticeComment(Long noticeId, Long commentId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
         NoticeComment noticeComment = noticeCommentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("해당 id를 가진 댓글이 존재하지 않습니다."));
 
@@ -68,20 +68,21 @@ public class NoticeCommentService {
         noticeComment.delete();
         postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
         postRedisService.decrement("notice", "comment", noticeId);
+        return new NoticeStressResponseDTO(noticeComment.getId());
     }
 
     @Transactional
-    public void createNoticeComment(Long noticeId, Long userId, NoticeCommentRequestDTO noticeCommentRequestDTO) {
+    public NoticeStressResponseDTO createNoticeComment(Long noticeId, Long userId, NoticeCommentRequestDTO noticeCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
         postRedisService.initCount("notice", "comment", noticeId, notice.getCommentCount());
         postRedisService.increment("notice", "comment", noticeId);
 
 
-        noticeCommentRepository.save(NoticeComment.builder()
+        return new NoticeStressResponseDTO(noticeCommentRepository.save(NoticeComment.builder()
             .content(noticeCommentRequestDTO.getContent())
             .user(user)
             .notice(notice)
-            .build());
+            .build()).getId());
     }
 }
