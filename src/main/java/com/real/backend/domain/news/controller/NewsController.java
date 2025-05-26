@@ -49,6 +49,7 @@ public class NewsController {
         return DataResponse.of(newsResponseDTO);
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PostMapping("/v1/news")
     public StatusResponse createNews(
         @Valid @RequestPart("news") NewsCreateRequestDTO newsCreateRequestDTO,
