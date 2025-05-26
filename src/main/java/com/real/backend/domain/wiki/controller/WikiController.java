@@ -3,16 +3,22 @@ package com.real.backend.domain.wiki.controller;
 import java.io.IOException;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.real.backend.domain.wiki.domain.SearchMethod;
+import com.real.backend.domain.wiki.domain.Wiki;
 import com.real.backend.domain.wiki.dto.WikiCreateRequestDTO;
+import com.real.backend.domain.wiki.dto.WikiResponseDTO;
 import com.real.backend.domain.wiki.service.WikiService;
 import com.real.backend.infra.redis.WikiRedisService;
+import com.real.backend.response.DataResponse;
 import com.real.backend.response.StatusResponse;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
@@ -49,5 +55,17 @@ public class WikiController {
     ) throws IOException {
 
         wikiRedisService.updateWiki(wikiId, request.getInputStream().readAllBytes(), session.getUsername());
+    }
+
+    // 위키 상세
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
+    @GetMapping("/v1/wikis")
+    public DataResponse<WikiResponseDTO> getWiki(
+        @RequestParam(required = false) String title,
+        @RequestParam(defaultValue = "NORMAL") SearchMethod method
+    ) {
+        Wiki wiki = wikiService.getWiki(title, method);
+        WikiResponseDTO wikiResponseDTO = WikiResponseDTO.from(wiki);
+        return DataResponse.of(wikiResponseDTO);
     }
 }
