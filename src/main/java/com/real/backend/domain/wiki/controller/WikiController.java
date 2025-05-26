@@ -13,15 +13,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.domain.wiki.domain.SearchMethod;
+import com.real.backend.domain.wiki.domain.SortBy;
 import com.real.backend.domain.wiki.domain.Wiki;
 import com.real.backend.domain.wiki.dto.WikiCreateRequestDTO;
+import com.real.backend.domain.wiki.dto.WikiListResponseDTO;
 import com.real.backend.domain.wiki.dto.WikiResponseDTO;
 import com.real.backend.domain.wiki.service.WikiService;
 import com.real.backend.infra.redis.WikiRedisService;
 import com.real.backend.response.DataResponse;
-import com.real.backend.response.StatusResponse;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
+import com.real.backend.util.dto.SliceDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -37,12 +39,13 @@ public class WikiController {
     // 새로운 위키 생성
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PostMapping("/v1/wikis")
-    public StatusResponse createWiki(
+    public DataResponse<WikiResponseDTO> createWiki(
         @RequestBody WikiCreateRequestDTO wikiCreateRequestDTO,
         @CurrentSession Session session
     ) {
-        wikiService.createWiki(wikiCreateRequestDTO, session.getUsername());
-        return StatusResponse.of(201, "위키가 성공적으로 생성되었습니다.");
+        Wiki wiki = wikiService.createWiki(wikiCreateRequestDTO, session.getUsername());
+        WikiResponseDTO wikiResponseDTO = WikiResponseDTO.from(wiki);
+        return DataResponse.of(wikiResponseDTO);
     }
 
     // 위키 편집
@@ -67,5 +70,18 @@ public class WikiController {
         Wiki wiki = wikiService.getWiki(title, method);
         WikiResponseDTO wikiResponseDTO = WikiResponseDTO.from(wiki);
         return DataResponse.of(wikiResponseDTO);
+    }
+
+    // 위키 목록
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
+    @GetMapping("/v1/wikis/list")
+    public DataResponse<SliceDTO<WikiListResponseDTO>> getWikisList(
+        @RequestParam(value = "cursorId", required = false) Long cursorId,
+        @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
+        @RequestParam(value = "sort", required = false) SortBy sort,
+        @RequestParam String keyword
+    ) {
+        SliceDTO<WikiListResponseDTO> wikiList = wikiService.getWikiListByCursor(cursorId, limit, sort, keyword);
+        return DataResponse.of(wikiList);
     }
 }
