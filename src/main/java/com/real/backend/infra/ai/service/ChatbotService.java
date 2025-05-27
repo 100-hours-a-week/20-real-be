@@ -29,6 +29,8 @@ public class ChatbotService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
+        System.out.println(chatbotRequestDTO.getUserId());
+
         // 요청
         HttpEntity<ChatbotRequestDTO> requestEntity = new HttpEntity<>(chatbotRequestDTO, headers);
         ResponseEntity<String> response = restTemplate.exchange(aiUrl+"/api/v1/chatbots", HttpMethod.POST, requestEntity, String.class);
