@@ -24,7 +24,7 @@ public class NewsSyncScheduler {
     private final UserRepository userRepository;
 
     @Transactional
-    @Scheduled(cron = "* * */3 * * *")
+    @Scheduled(cron = "0 0 */3 * * *")
     // @Scheduled(cron = "*/1 * * * * *")
     public void syncNewsCountsToDB() {
         List<Long> newsIds = postRedisService.getIds("news", "totalView");
@@ -50,7 +50,7 @@ public class NewsSyncScheduler {
     }
 
     @Transactional
-    @Scheduled(cron = "* * */3 * * *")
+    @Scheduled(cron = "0 0 */3 * * *")
     // @Scheduled(cron = "*/1 * * * * *")
     public void SyncNewsLikeToDB(){
         LocalDateTime threshold = LocalDateTime.now().minusMinutes(181); // 최근 3시간 1분 로그인한 유저

@@ -13,7 +13,7 @@ import lombok.Getter;
 public class Session implements UserDetails {
 
     private final Long id;
-    private final String username; // 유저의 이메일
+    private final String username;
     private final String role;
 
     @Builder
