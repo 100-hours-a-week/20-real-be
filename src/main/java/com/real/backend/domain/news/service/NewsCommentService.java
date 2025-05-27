@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.real.backend.domain.news.component.NewsFinder;
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsCommentRequestDTO;
+import com.real.backend.domain.news.dto.NewsStressResponseDTO;
 import com.real.backend.domain.news.repository.NewsRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.exception.BadRequestException;
@@ -74,14 +75,14 @@ public class NewsCommentService {
     }
 
     @Transactional
-    public void createNewsComment(Long newsId, Long userId, NewsCommentRequestDTO newsCommentRequestDTO) {
+    public NewsStressResponseDTO createNewsComment(Long newsId, Long userId, NewsCommentRequestDTO newsCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         News news = newsFinder.getNews(newsId);
 
-        newsCommentRepository.save(NewsComment.builder()
+        return new NewsStressResponseDTO(newsCommentRepository.save(NewsComment.builder()
             .content(newsCommentRequestDTO.getContent())
             .user(user)
             .news(news)
-            .build());
+            .build()).getId());
     }
 }

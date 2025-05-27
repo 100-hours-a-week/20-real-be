@@ -14,6 +14,7 @@ import com.real.backend.domain.notice.domain.NoticeComment;
 import com.real.backend.domain.notice.dto.NoticeCommentRequestDTO;
 import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.dto.NoticeCommentListResponseDTO;
+import com.real.backend.domain.notice.dto.NoticeStressResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeCommentRepository;
 import com.real.backend.domain.notice.repository.NoticeRepository;
 import com.real.backend.domain.user.component.UserFinder;
@@ -70,14 +71,14 @@ public class NoticeCommentService {
     }
 
     @Transactional
-    public void createNoticeComment(Long noticeId, Long userId, NoticeCommentRequestDTO noticeCommentRequestDTO) {
+    public NoticeStressResponseDTO createNoticeComment(Long noticeId, Long userId, NoticeCommentRequestDTO noticeCommentRequestDTO) {
         User user = userFinder.getUser(userId);
         Notice notice = noticeFinder.getNotice(noticeId);
 
-        noticeCommentRepository.save(NoticeComment.builder()
+        return new NoticeStressResponseDTO(noticeCommentRepository.save(NoticeComment.builder()
             .content(noticeCommentRequestDTO.getContent())
             .user(user)
             .notice(notice)
-            .build());
+            .build()).getId());
     }
 }
