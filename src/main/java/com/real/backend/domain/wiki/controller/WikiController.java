@@ -21,6 +21,7 @@ import com.real.backend.domain.wiki.dto.WikiResponseDTO;
 import com.real.backend.domain.wiki.service.WikiService;
 import com.real.backend.infra.redis.WikiRedisService;
 import com.real.backend.response.DataResponse;
+import com.real.backend.response.StatusResponse;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 import com.real.backend.util.dto.SliceDTO;
@@ -51,13 +52,14 @@ public class WikiController {
     // 위키 편집
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PutMapping("/v1/wikis/{wikiId}")
-    public void updateWiki(
+    public StatusResponse updateWiki(
         @PathVariable Long wikiId,
         @CurrentSession Session session,
         HttpServletRequest request
     ) throws IOException {
 
         wikiRedisService.updateWiki(wikiId, request.getInputStream().readAllBytes(), session.getUsername());
+        return StatusResponse.of(200, "문서가 redis에 정상적으로 저장되었습니다.");
     }
 
     // 위키 상세
