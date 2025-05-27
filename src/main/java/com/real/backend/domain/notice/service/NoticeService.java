@@ -27,7 +27,6 @@ import com.real.backend.exception.NotFoundException;
 import com.real.backend.exception.ServerException;
 import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
 import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
-import com.real.backend.infra.ai.service.NoticeAiService;
 import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.util.CursorUtils;

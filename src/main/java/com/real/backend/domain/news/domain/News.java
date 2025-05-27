@@ -44,7 +44,7 @@ public class News extends Post {
             .build();
     }
 
-    public static News of(NewsAiResponseDTO newsAiResponseDTO,String url) {
+    public static News of(NewsAiResponseDTO newsAiResponseDTO, String url) {
         return News.builder()
             .title(newsAiResponseDTO.headline())
             .content(newsAiResponseDTO.content())

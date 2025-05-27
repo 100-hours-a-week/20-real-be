@@ -13,40 +13,42 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
-import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
-import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
-public class NoticeAiService {
+@RequiredArgsConstructor
+public class AiResponseService {
     @Value("${spring.ai_url}")
     private String aiUrl;
 
-    public NoticeSummaryResponseDTO makeSummary(NoticeSummaryRequestDTO noticeSummaryRequestDTO) throws JsonProcessingException {
-        RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    public <T, R> R postForAiResponse(String path, T requestDto, Class<R> responseType) throws
+        JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<T> requestEntity = new HttpEntity<>(requestDto, headers);
 
-        // 요청
-        HttpEntity<NoticeSummaryRequestDTO> requestEntity = new HttpEntity<>(noticeSummaryRequestDTO, headers);
-        ResponseEntity<String> response = restTemplate.exchange(aiUrl+"/api/v1/notices/summarization", HttpMethod.POST, requestEntity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(
+            aiUrl + path,
+            HttpMethod.POST,
+            requestEntity,
+            String.class
+        );
 
-        if (! response.getStatusCode().is2xxSuccessful()) {
-
+        if (!response.getStatusCode().is2xxSuccessful()) {
             throw new ResponseStatusException(
                 response.getStatusCode(),
                 "FastAPI 호출 실패: status=" + response.getStatusCode() + ", body=" + response.getBody()
             );
         }
-        ObjectMapper objectMapper = new ObjectMapper();
+
         JsonNode body = objectMapper.readTree(response.getBody());
-
         JsonNode dataNode = body.path("data");
-        NoticeSummaryResponseDTO data = objectMapper.treeToValue(dataNode, NoticeSummaryResponseDTO.class);
-
-        return data;
 
 
-
+        return objectMapper.treeToValue(dataNode, responseType);
     }
 }

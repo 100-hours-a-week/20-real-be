@@ -1,5 +1,6 @@
 package com.real.backend.domain.wiki.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,4 +62,13 @@ FROM Wiki
     Slice<Wiki> fetchTitle(@Param("keyword") String keyword,
         @Param("id")    Long id,
         Pageable pg);
+
+    @Query("""
+    SELECT w.id FROM Wiki w
+    WHERE w.updatedAt >= :start AND w.updatedAt < :end
+""")
+    List<Long> findAllIdByUpdatedBetween(
+        @Param("start") LocalDateTime start,
+        @Param("end") LocalDateTime end);
+
 }
