@@ -23,6 +23,7 @@ public class TokenGenController {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    // TODO 메인에 업로드시에는 반드시 삭제!!!!
     @PostMapping("/auth/signup")
     public StatusResponse signup(@RequestBody UserRequestDTO userRequestDTO){
         createUser(userRequestDTO);
