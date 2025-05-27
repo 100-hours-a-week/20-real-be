@@ -156,16 +156,6 @@ public class NewsService {
             throw new ServerException("ai가 응답을 주지 못했습니다.");
         }
 
-        newsRepository.save(News.builder()
-            .title(newsAiResponseDTO.headline())
-            .content(newsCreateRequestDTO.getContent())
-            .tag("뉴스")
-            .todayViewCount(0L)
-            .totalViewCount(0L)
-            .imageUrl(url)
-            .summary(newsAiResponseDTO.summary())
-            .likeCount(0L)
-            .commentCount(0L)
-            .build());
+        newsRepository.save(News.of(newsAiResponseDTO, newsCreateRequestDTO.getContent(), url));
     }
 }
