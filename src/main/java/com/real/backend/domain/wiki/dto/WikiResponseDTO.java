@@ -14,6 +14,7 @@ public class WikiResponseDTO {
     private Long id;
     private String title;
     private byte[] content;
+    private String html;
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm:ss")
     private LocalDateTime updatedAt;
 
@@ -22,6 +23,7 @@ public class WikiResponseDTO {
             .id(wiki.getId())
             .title(wiki.getTitle())
             .content(wiki.getContent())
+            .html(wiki.getHtml())
             .updatedAt(wiki.getUpdatedAt())
             .build();
     }

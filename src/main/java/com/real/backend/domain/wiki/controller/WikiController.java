@@ -16,6 +16,7 @@ import com.real.backend.domain.wiki.domain.SearchMethod;
 import com.real.backend.domain.wiki.domain.SortBy;
 import com.real.backend.domain.wiki.domain.Wiki;
 import com.real.backend.domain.wiki.dto.WikiCreateRequestDTO;
+import com.real.backend.domain.wiki.dto.WikiEditRequestDTO;
 import com.real.backend.domain.wiki.dto.WikiListResponseDTO;
 import com.real.backend.domain.wiki.dto.WikiResponseDTO;
 import com.real.backend.domain.wiki.service.WikiService;
@@ -26,7 +27,6 @@ import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 import com.real.backend.util.dto.SliceDTO;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -55,10 +55,12 @@ public class WikiController {
     public StatusResponse updateWiki(
         @PathVariable Long wikiId,
         @CurrentSession Session session,
-        HttpServletRequest request
+        @RequestBody WikiEditRequestDTO wikiEditRequestDTO
+        // HttpServletRequest request
     ) throws IOException {
 
-        wikiRedisService.updateWiki(wikiId, request.getInputStream().readAllBytes(), session.getUsername());
+        // wikiRedisService.updateWiki(wikiId, request.getInputStream().readAllBytes(), session.getUsername());
+        wikiRedisService.updateWiki(wikiId, wikiEditRequestDTO.getHtml(), session.getUsername());
         return StatusResponse.of(200, "문서가 redis에 정상적으로 저장되었습니다.");
     }
 

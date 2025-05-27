@@ -31,6 +31,9 @@ public class Wiki extends BaseEntity {
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private String editorName;
 
+    private String html;
+
     public void updateContent(byte[] content) { this.content = content; }
     public void updateEditorName(String editorName) { this.editorName = editorName; }
+    public void updateHtml(String html) { this.html = html; }
 }
