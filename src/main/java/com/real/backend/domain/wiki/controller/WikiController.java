@@ -1,7 +1,5 @@
 package com.real.backend.domain.wiki.controller;
 
-import java.io.IOException;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,10 +54,8 @@ public class WikiController {
         @PathVariable Long wikiId,
         @CurrentSession Session session,
         @RequestBody WikiEditRequestDTO wikiEditRequestDTO
-        // HttpServletRequest request
-    ) throws IOException {
+    ) {
 
-        // wikiRedisService.updateWiki(wikiId, request.getInputStream().readAllBytes(), session.getUsername());
         wikiRedisService.updateWiki(wikiId, wikiEditRequestDTO.getHtml(), session.getUsername());
         return StatusResponse.of(200, "문서가 redis에 정상적으로 저장되었습니다.");
     }

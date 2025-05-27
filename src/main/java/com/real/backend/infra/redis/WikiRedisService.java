@@ -17,13 +17,6 @@ import lombok.RequiredArgsConstructor;
 public class WikiRedisService {
     private final WikiRepository wikiRepository;
     private final RedisTemplate<String, Object> redisTemplate;
-    // private final RedisTemplate<String, byte[]> redisTemplateByteArray;
-
-    // public void updateWiki(Long wikiId, byte[] content, String username) {
-    //     redisTemplate.opsForValue().set("wiki:content:"+wikiId, content);
-    //     redisTemplate.opsForValue().set("wiki:editor_name:"+wikiId, username);
-    //     redisTemplate.opsForValue().set("wiki:updated_at:"+wikiId, LocalDateTime.now().toString());
-    // }
 
     public void updateWiki(Long wikiId, String html, String username) {
         redisTemplate.opsForValue().set("wiki:html:"+wikiId, html);
@@ -33,16 +26,12 @@ public class WikiRedisService {
 
     @Transactional
     public void flushToDB(Long wikiId) {
-        // byte[] content = redisTemplateByteArray.opsForValue().get("wiki:content:" + wikiId);
         String html = (String)redisTemplate.opsForValue().get("wiki:html:" + wikiId);
         String editor = (String)redisTemplate.opsForValue().get("wiki:editor_name:" + wikiId);
         String updatedAt = (String)redisTemplate.opsForValue().get("wiki:updated_at:" + wikiId);
 
-        // if (content == null || updatedAt == null)
-        //     continue;
 
         Wiki wiki = wikiRepository.findById(wikiId).orElse(new Wiki());
-        // wiki.updateContent(content);
         wiki.updateHtml(html);
         wiki.updateEditorName(editor);
         wiki.updateUpdatedAt(updatedAt);
@@ -50,7 +39,6 @@ public class WikiRedisService {
         wikiRepository.save(wiki);
 
         redisTemplate.delete(Arrays.asList(
-            // "wiki:content:" + wikiId,
             "wiki:html:"+wikiId,
             "wiki:editor_name:" + wikiId,
             "wiki:updated_at:" + wikiId
