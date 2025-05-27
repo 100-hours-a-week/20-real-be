@@ -10,11 +10,11 @@ import lombok.Data;
 public class NewsCreateRequestDTO {
     @NotBlank
     @Sanitizer
-    @Size(min = 1, max = 26)
+    @Size(min = 1, max = 50)
     private String title;
 
     @NotBlank
     @Sanitizer
-    @Size(min = 1, max = 1024)
+    @Size(min = 1, max = 5000)
     private String content;
 }

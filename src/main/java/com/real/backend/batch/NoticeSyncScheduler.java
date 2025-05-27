@@ -24,7 +24,7 @@ public class NoticeSyncScheduler {
     private final NoticeRedisService noticeRedisService;
 
     @Transactional
-    @Scheduled(cron = "* * */3 * * *")
+    @Scheduled(cron = "0 0 */3 * * *")
     // @Scheduled(cron = "*/1 * * * * *")
     public void syncNoticeCountsToDB() {
         List<Long> noticeIds = postRedisService.getIds("notice", "totalView");
@@ -39,7 +39,7 @@ public class NoticeSyncScheduler {
     }
 
     @Transactional
-    @Scheduled(cron = "* * */3 * * *")
+    @Scheduled(cron = "0 0 */3 * * *")
     // @Scheduled(cron = "* 14 15 * * *")
     public void SyncNoticeLikeToDB(){
         LocalDateTime threshold = LocalDateTime.now().minusMinutes(181); // 최근 3시간 1분 로그인한 유저
@@ -49,7 +49,7 @@ public class NoticeSyncScheduler {
     }
 
     @Transactional
-    @Scheduled(cron = "* * */3 * * *")
+    @Scheduled(cron = "0 0 */3 * * *")
     // @Scheduled(cron = "* 42 17 * * *")
     public void syncNoticeReadToDB() {
         noticeRedisService.syncNoticeRead();
