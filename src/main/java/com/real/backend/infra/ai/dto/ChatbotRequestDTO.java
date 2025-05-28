@@ -10,4 +10,6 @@ public class ChatbotRequestDTO {
     @NotBlank
     @Sanitizer
     String question;
+
+    Long userId;
 }
