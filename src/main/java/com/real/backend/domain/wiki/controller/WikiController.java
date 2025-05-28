@@ -77,11 +77,12 @@ public class WikiController {
     @GetMapping("/v1/wikis/list")
     public DataResponse<SliceDTO<WikiListResponseDTO>> getWikisList(
         @RequestParam(value = "cursorId", required = false) Long cursorId,
+        @RequestParam(value = "cursorStandard", required = false) String cursorStandard,
         @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
         @RequestParam(value = "sort", required = false) SortBy sort,
         @RequestParam(value = "keyword", required = false) String keyword
     ) {
-        SliceDTO<WikiListResponseDTO> wikiList = wikiService.getWikiListByCursor(cursorId, limit, sort, keyword);
+        SliceDTO<WikiListResponseDTO> wikiList = wikiService.getWikiListByCursor(cursorId, limit, sort, keyword, cursorStandard);
         return DataResponse.of(wikiList);
     }
 }

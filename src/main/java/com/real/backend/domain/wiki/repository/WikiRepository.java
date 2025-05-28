@@ -26,22 +26,21 @@ FROM Wiki
     @Query("""
         SELECT w FROM Wiki w
         WHERE  w.deletedAt IS NULL
-        AND w.title LIKE %:keyword%
         ORDER  BY w.updatedAt DESC, w.id DESC
         """)
-    Slice<Wiki> fetchLatestFirst(Pageable pg, @Param("keyword") String keyword);   // 첫 페이지
+    Slice<Wiki> fetchLatestFirst(Pageable pg);   // 첫 페이지
 
     @Query("""
         SELECT w FROM Wiki w
         WHERE  w.deletedAt IS NULL
-        AND w.title LIKE %:keyword%
-        AND w.id < :id
+        AND ( w.updatedAt < :uAt
+                OR (w.updatedAt = :uAt AND w.id < :id) )
         ORDER BY w.updatedAt DESC, w.id DESC
         """)
     Slice<Wiki> fetchLatest(
         @Param("id") Long id,
         Pageable pg,
-        @Param("keyword") String keyword);
+        @Param("uAt") LocalDateTime uAt);
 
     /* 인기순 ------------------------------------------------------------ */
     @Query("""

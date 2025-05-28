@@ -66,14 +66,14 @@ public class WikiService {
     }
 
     @Transactional(readOnly = true)
-    public SliceDTO<WikiListResponseDTO> getWikiListByCursor(Long cursorId, int limit, SortBy sort, String keyword) {
+    public SliceDTO<WikiListResponseDTO> getWikiListByCursor(Long cursorId, int limit, SortBy sort, String keyword, String cursorStandard) {
         String order = sort.toString().toLowerCase();
 
         if (!order.equals("latest") && !order.equals("title")) {
             throw new BadRequestException("sort 파라미터는 latest 또는 title 이어야 합니다.");
         }
 
-        if (keyword.isEmpty()) {
+        if (keyword != null && keyword.trim().isEmpty()) {
             throw new BadRequestException("keyword는 빈 문자열이 들어올 수 없습니다.");
         }
 
@@ -82,8 +82,8 @@ public class WikiService {
 
         Slice<Wiki> slice = switch (sort) {
             case LATEST -> firstPage
-                ? wikiRepository.fetchLatestFirst(pg, keyword)
-                : wikiRepository.fetchLatest(cursorId, pg, keyword);
+                ? wikiRepository.fetchLatestFirst(pg)
+                : wikiRepository.fetchLatest(cursorId, pg, LocalDateTime.parse(cursorStandard));
 
             case TITLE -> firstPage
                 ? wikiRepository.fetchTitleFirst(pg, keyword)
@@ -95,16 +95,20 @@ public class WikiService {
         List<Wiki> pageItems = content.size() > limit ? content.subList(0, limit) : content;
 
         // 다음 커서 계산
+        String nextCursorStandard = null;
         Long nextCursorId = null;
         if (hasNext) {
             Wiki last = pageItems.get(pageItems.size() - 1);
             nextCursorId = last.getId();
+            nextCursorStandard = order.equals("latest")
+                ? last.getUpdatedAt().toString()
+                : null;
         }
 
         List<WikiListResponseDTO> dtoList = pageItems.stream()
             .map(WikiListResponseDTO::of)
             .toList();
 
-        return new SliceDTO<>(dtoList, null, nextCursorId, hasNext);
+        return new SliceDTO<>(dtoList, nextCursorStandard, nextCursorId, hasNext);
     }
 }
