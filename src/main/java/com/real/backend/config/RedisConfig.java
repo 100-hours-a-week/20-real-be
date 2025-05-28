@@ -35,4 +35,23 @@ public class RedisConfig {
         return redisTemplate;
     }
 
+    @Bean
+    public RedisTemplate<String, byte[]> redisTemplateByteArray() {
+        RedisTemplate<String, byte[]> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new org.springframework.data.redis.serializer.RedisSerializer<byte[]>() {
+            @Override
+            public byte[] serialize(byte[] bytes) {
+                return bytes;
+            }
+
+            @Override
+            public byte[] deserialize(byte[] bytes) {
+                return bytes;
+            }
+        });
+        return redisTemplate;
+    }
+
 }

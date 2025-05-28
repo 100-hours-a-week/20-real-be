@@ -20,7 +20,6 @@ import com.real.backend.domain.notice.dto.NoticeFileGroups;
 import com.real.backend.domain.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.domain.notice.dto.NoticeListResponseDTO;
 import com.real.backend.domain.notice.repository.NoticeRepository;
-import com.real.backend.domain.user.repository.UserNoticeReadRepository;
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
 import com.real.backend.domain.user.repository.UserRepository;
