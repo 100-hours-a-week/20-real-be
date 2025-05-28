@@ -16,7 +16,7 @@ public class ChatbotService {
 
     public ChatbotResponseDataDTO makeQuestion(ChatbotRequestDTO dto) throws JsonProcessingException {
         return aiResponseService.postForAiResponse(
-            "/api/v1/chatbots",
+            "/api/v2/chatbots",
             dto,
             ChatbotResponseDataDTO.class
         );
