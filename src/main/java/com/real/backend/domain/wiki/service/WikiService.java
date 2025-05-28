@@ -73,6 +73,10 @@ public class WikiService {
             throw new BadRequestException("sort 파라미터는 latest 또는 title 이어야 합니다.");
         }
 
+        if (keyword.isEmpty()) {
+            throw new BadRequestException("keyword는 빈 문자열이 들어올 수 없습니다.");
+        }
+
         Pageable pg = PageRequest.of(0, limit);
         boolean firstPage = (cursorId == null);
 

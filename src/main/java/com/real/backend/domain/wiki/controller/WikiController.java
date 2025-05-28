@@ -79,7 +79,7 @@ public class WikiController {
         @RequestParam(value = "cursorId", required = false) Long cursorId,
         @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
         @RequestParam(value = "sort", required = false) SortBy sort,
-        @RequestParam String keyword
+        @RequestParam(value = "keyword", required = false) String keyword
     ) {
         SliceDTO<WikiListResponseDTO> wikiList = wikiService.getWikiListByCursor(cursorId, limit, sort, keyword);
         return DataResponse.of(wikiList);
