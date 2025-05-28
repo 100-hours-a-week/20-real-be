@@ -33,7 +33,7 @@ public class ChatbotService {
 
         // 요청
         HttpEntity<ChatbotRequestDTO> requestEntity = new HttpEntity<>(chatbotRequestDTO, headers);
-        ResponseEntity<String> response = restTemplate.exchange(aiUrl+"/api/v1/chatbots", HttpMethod.POST, requestEntity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(aiUrl+"/api/v2/chatbots", HttpMethod.POST, requestEntity, String.class);
 
         if (! response.getStatusCode().is2xxSuccessful()) {
 
