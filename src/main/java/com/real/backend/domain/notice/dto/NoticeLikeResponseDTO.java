@@ -13,11 +13,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NoticeLikeResponseDTO {
     private Long id;
+    private Long userId;
     private Boolean isActivated;
 
     public static NoticeLikeResponseDTO from(NoticeLike noticeLike) {
         return NoticeLikeResponseDTO.builder()
             .id(noticeLike.getId())
+            .userId(noticeLike.getUser().getId())
             .isActivated(noticeLike.getIsActivated())
             .build();
     }
