@@ -91,4 +91,14 @@ public class WikiController {
         SliceDTO<WikiListResponseDTO> wikiList = wikiService.getWikiListByCursor(cursorId, limit, sort, keyword, cursorStandard);
         return DataResponse.of(wikiList);
     }
+
+    // 위키 삭제
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
+    @DeleteMapping("v1/wikis/{wikiId}")
+    public StatusResponse deleteWiki(
+        @PathVariable Long wikiId
+    ) {
+        wikiService.deleteWiki(wikiId);
+        return StatusResponse.of(204, "위키가 성공적으로 삭제되었습니다.");
+    }
 }

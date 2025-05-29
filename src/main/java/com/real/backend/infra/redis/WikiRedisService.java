@@ -49,4 +49,14 @@ public class WikiRedisService {
             "wiki:updated_at:" + wikiId
         ));
     }
+
+    @Transactional
+    public void deleteWikiById(Long wikiId) {
+        redisTemplate.delete(Arrays.asList(
+            "wiki:html:" + wikiId,
+            "wiki:ydoc:" + wikiId,
+            "wiki:editor_name:" + wikiId,
+            "wiki:updated_at:" + wikiId
+        ));
+    }
 }

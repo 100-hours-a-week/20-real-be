@@ -113,4 +113,10 @@ public class WikiService {
 
         return new SliceDTO<>(dtoList, nextCursorStandard, nextCursorId, hasNext);
     }
+
+    @Transactional
+    public void deleteWiki(Long wikiId) {
+        wikiRepository.deleteById(wikiId);
+        wikiRedisService.deleteWikiById(wikiId);
+    }
 }
