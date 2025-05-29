@@ -18,6 +18,7 @@ import com.real.backend.domain.wiki.dto.WikiListResponseDTO;
 import com.real.backend.domain.wiki.repository.WikiRepository;
 import com.real.backend.exception.BadRequestException;
 import com.real.backend.exception.NotFoundException;
+import com.real.backend.infra.redis.WikiRedisService;
 import com.real.backend.util.dto.SliceDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,14 @@ import lombok.RequiredArgsConstructor;
 public class WikiService {
 
     private final WikiRepository wikiRepository;
+    private final WikiRedisService wikiRedisService;
 
     @Transactional
     public Wiki createWiki(WikiCreateRequestDTO wikiCreateRequestDTO, String userName) {
         return wikiRepository.save(Wiki.builder()
             .title(wikiCreateRequestDTO.getTitle())
             .editorName(userName)
-            .content(null)
+            .ydoc(null)
             .build());
     }
 

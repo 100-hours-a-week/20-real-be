@@ -13,7 +13,7 @@ import lombok.Getter;
 public class WikiResponseDTO {
     private Long id;
     private String title;
-    private byte[] content;
+    private byte[] ydoc;
     private String html;
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm:ss")
     private LocalDateTime updatedAt;
@@ -22,7 +22,7 @@ public class WikiResponseDTO {
         return WikiResponseDTO.builder()
             .id(wiki.getId())
             .title(wiki.getTitle())
-            .content(wiki.getContent())
+            .ydoc(wiki.getYdoc())
             .html(wiki.getHtml())
             .updatedAt(wiki.getUpdatedAt())
             .build();

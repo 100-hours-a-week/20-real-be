@@ -1,6 +1,10 @@
 package com.real.backend.domain.wiki.controller;
 
+import java.io.IOException;
+
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,7 +12,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.real.backend.domain.wiki.domain.SearchMethod;
 import com.real.backend.domain.wiki.domain.SortBy;
@@ -49,14 +55,14 @@ public class WikiController {
 
     // 위키 편집
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
-    @PutMapping("/v1/wikis/{wikiId}")
+    @PutMapping(value = "/v1/wikis/{wikiId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public StatusResponse updateWiki(
         @PathVariable Long wikiId,
         @CurrentSession Session session,
-        @RequestBody WikiEditRequestDTO wikiEditRequestDTO
-    ) {
-
-        wikiRedisService.updateWiki(wikiId, wikiEditRequestDTO.getHtml(), session.getUsername());
+        @RequestPart WikiEditRequestDTO wikiEditRequestDTO,
+        @RequestPart MultipartFile ydoc
+    ) throws IOException {
+        wikiRedisService.updateWiki(wikiId, ydoc.getBytes(), wikiEditRequestDTO.getHtml(), session.getUsername());
         return StatusResponse.of(200, "문서가 redis에 정상적으로 저장되었습니다.");
     }
 
