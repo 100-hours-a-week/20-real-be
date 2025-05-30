@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -25,15 +24,16 @@ public class Wiki extends BaseEntity {
     @Column(nullable = false, unique = true, columnDefinition = "VARCHAR(27)")
     private String title;
 
-    @Lob
-    private byte[] ydoc;
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String ydoc;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String html;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private String editorName;
 
-    private String html;
-
-    public void updateYdoc(byte[] content) { this.ydoc = content; }
+    public void updateYdoc(String content) { this.ydoc = content; }
     public void updateEditorName(String editorName) { this.editorName = editorName; }
     public void updateHtml(String html) { this.html = html; }
 }

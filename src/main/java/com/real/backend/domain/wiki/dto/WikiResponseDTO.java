@@ -13,7 +13,7 @@ import lombok.Getter;
 public class WikiResponseDTO {
     private Long id;
     private String title;
-    private byte[] ydoc;
+    private String ydoc;
     private String html;
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm:ss")
     private LocalDateTime updatedAt;
