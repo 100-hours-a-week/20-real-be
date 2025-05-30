@@ -18,8 +18,9 @@ public interface WikiRepository extends JpaRepository<Wiki, Long> {
     Optional<Wiki> findByTitle(String title);
 
     @Query("""
-SELECT id
-FROM Wiki
+SELECT w.id
+FROM Wiki w
+WHERE w.deletedAt IS NULL
 """)
     List<Long> getAllId();
 
@@ -65,11 +66,12 @@ FROM Wiki
     @Query("""
     SELECT w.id FROM Wiki w
     WHERE w.updatedAt >= :start AND w.updatedAt < :end
+    AND w.deletedAt IS NULL
 """)
     List<Long> findAllIdByUpdatedBetween(
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end);
 
-    @Query("SELECT w.id FROM Wiki w WHERE w.title = :title")
+    @Query("SELECT w.id FROM Wiki w WHERE w.title = :title AND w.deletedAt IS NULL")
 	Long getWikiIdByTitle(@Param("title") String title);
 }
