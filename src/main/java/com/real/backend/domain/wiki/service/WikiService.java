@@ -50,7 +50,11 @@ public class WikiService {
 
     @Transactional(readOnly = true)
     public Wiki getWikiByTitle(String title){
-        return wikiRepository.findByTitle(title).orElseThrow(() -> new NotFoundException("해당 제목을 가진 위키가 존재하지 않습니다."));
+        Wiki wiki = wikiRedisService.getWikiById(title);
+        if (wiki == null) {
+            return wikiRepository.findByTitle(title).orElseThrow(() -> new NotFoundException("해당 제목을 가진 위키가 존재하지 않습니다."));
+        }
+        return wiki;
     }
 
     @Transactional(readOnly = true)

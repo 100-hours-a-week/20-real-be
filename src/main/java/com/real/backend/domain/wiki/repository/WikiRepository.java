@@ -70,4 +70,5 @@ FROM Wiki
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end);
 
+	Long getWikiIdByTitle(String title);
 }

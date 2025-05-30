@@ -1,7 +1,8 @@
 package com.real.backend.infra.redis;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -17,46 +18,61 @@ import lombok.RequiredArgsConstructor;
 public class WikiRedisService {
     private final WikiRepository wikiRepository;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisTemplate<String, byte[]> redisTemplateByteArray;
 
-    public void updateWiki(Long wikiId, byte[] content, String html, String username) {
-        redisTemplate.opsForValue().set("wiki:html:"+wikiId, html);
-        redisTemplate.opsForValue().set("wiki:editor_name:"+wikiId, username);
-        redisTemplate.opsForValue().set("wiki:updated_at:"+wikiId, LocalDateTime.now().toString());
-        redisTemplateByteArray.opsForValue().set("wiki:content:"+wikiId, content);
+    @Transactional
+    public void updateWiki(Long wikiId, String ydoc, String html, String username) {
+        Map<String, String> wikiMap = new HashMap<>();
+        wikiMap.put("html", html);
+        wikiMap.put("editor_name", username);
+        wikiMap.put("updated_at", LocalDateTime.now().toString());
+        wikiMap.put("ydoc", ydoc);
+
+        redisTemplate.opsForHash().putAll("wiki:" + wikiId, wikiMap);
     }
 
     @Transactional
     public void flushToDB(Long wikiId) {
-        byte[] content = redisTemplateByteArray.opsForValue().get("wiki:content:" + wikiId);
-        String html = (String)redisTemplate.opsForValue().get("wiki:html:" + wikiId);
-        String editor = (String)redisTemplate.opsForValue().get("wiki:editor_name:" + wikiId);
-        String updatedAt = (String)redisTemplate.opsForValue().get("wiki:updated_at:" + wikiId);
-
+        Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
+        String html = (String) wikiMap.get("html");
+        String editor = (String) wikiMap.get("editor_name");
+        String updatedAt = (String) wikiMap.get("updated_at");
+        String ydoc = (String) wikiMap.get("ydoc");
 
         Wiki wiki = wikiRepository.findById(wikiId).orElse(new Wiki());
         wiki.updateHtml(html);
-        wiki.updateYdoc(content);
+        wiki.updateYdoc(ydoc);
         wiki.updateEditorName(editor);
         wiki.updateUpdatedAt(updatedAt);
 
         wikiRepository.save(wiki);
 
-        redisTemplate.delete(Arrays.asList(
-            "wiki:html:" + wikiId,
-            "wiki:ydoc:" + wikiId,
-            "wiki:editor_name:" + wikiId,
-            "wiki:updated_at:" + wikiId
-        ));
+        redisTemplate.delete("wiki:" + wikiId);
     }
 
     @Transactional
     public void deleteWikiById(Long wikiId) {
-        redisTemplate.delete(Arrays.asList(
-            "wiki:html:" + wikiId,
-            "wiki:ydoc:" + wikiId,
-            "wiki:editor_name:" + wikiId,
-            "wiki:updated_at:" + wikiId
-        ));
+        redisTemplate.delete("wiki:" + wikiId);
+    }
+
+    @Transactional(readOnly = true)
+    public Wiki getWikiById(String title) {
+        Long wikiId = wikiRepository.getWikiIdByTitle(title);
+        Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
+        String html = (String) wikiMap.get("html");
+        String editor = (String) wikiMap.get("editor_name");
+        String updatedAt = (String) wikiMap.get("updated_at");
+        String ydoc = (String) wikiMap.get("ydoc");
+
+        if (ydoc == null || html == null || editor == null || updatedAt == null) {
+            return null;
+        } else {
+            return Wiki.builder()
+                .title(title)
+                .ydoc(ydoc)
+                .html(html)
+                .editorName(editor)
+                .updatedAt(LocalDateTime.parse(updatedAt))
+                .build();
+        }
     }
 }
