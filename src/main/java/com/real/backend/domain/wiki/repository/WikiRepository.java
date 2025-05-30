@@ -70,5 +70,6 @@ FROM Wiki
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end);
 
-	Long getWikiIdByTitle(String title);
+    @Query("SELECT w.id FROM Wiki w WHERE w.title = :title")
+	Long getWikiIdByTitle(@Param("title") String title);
 }
