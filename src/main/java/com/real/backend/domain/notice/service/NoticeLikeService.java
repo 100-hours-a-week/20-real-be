@@ -30,7 +30,6 @@ public class NoticeLikeService {
         NoticeLike noticeLike = noticeLikeRepository.findByNoticeAndUser(notice, user).orElseThrow(() -> new NotFoundException("not found"));
 
         return NoticeLikeResponseDTO.from(noticeLike);
-
     }
 
     @Transactional(readOnly = true)

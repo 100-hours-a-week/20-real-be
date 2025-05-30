@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.notice.domain.Notice;
 import com.real.backend.domain.notice.component.NoticeFinder;
 import com.real.backend.domain.notice.dto.NoticePasteRequestDTO;
+import com.real.backend.domain.notice.repository.NoticeLikeRepository;
 import com.real.backend.domain.user.domain.UserNoticeRead;
 import com.real.backend.domain.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.domain.notice.dto.NoticeFileGroups;
@@ -46,6 +47,7 @@ public class NoticeService {
     private final UserNoticeReadRepository userNoticeReadRepository;
     private final NoticeFinder noticeFinder;
     private final UserFinder userFinder;
+    private final NoticeLikeRepository noticeLikeRepository;
 
     @Transactional(readOnly = true)
     public SliceDTO<NoticeListResponseDTO> getNoticeListByCursor(Long cursorId, int limit, String cursorStandard, Long userId) {
@@ -109,7 +111,8 @@ public class NoticeService {
     public NoticeInfoResponseDTO getNoticeById(Long noticeId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
         NoticeFileGroups noticeFileGroups = noticeFileService.getNoticeFileGroups(notice);
-        return NoticeInfoResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId), noticeFileGroups.files(), noticeFileGroups.images());
+        Long likeCount = noticeLikeRepository.countNoticeLikeByNoticeId(noticeId);
+        return NoticeInfoResponseDTO.from(notice, noticeLikeService.userIsLiked(noticeId, userId), likeCount, noticeFileGroups.files(), noticeFileGroups.images());
     }
 
     @Transactional

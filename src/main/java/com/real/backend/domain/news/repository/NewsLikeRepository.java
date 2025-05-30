@@ -24,5 +24,7 @@ public interface NewsLikeRepository extends JpaRepository<NewsLike, Long> {
     is_activated = NOT is_activated
 """, nativeQuery = true)
     void insertOrToggle(@Param("userId") Long userId, @Param("newsId") Long newsId);
+
+    Long countNewsLikeByNewsId(Long id);
 }
 

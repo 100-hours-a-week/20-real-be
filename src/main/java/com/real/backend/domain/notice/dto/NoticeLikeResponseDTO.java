@@ -23,4 +23,10 @@ public class NoticeLikeResponseDTO {
             .isActivated(noticeLike.getIsActivated())
             .build();
     }
+    public static NoticeLikeResponseDTO of(Long userId, Boolean isActivated) {
+        return NoticeLikeResponseDTO.builder()
+            .userId(userId)
+            .isActivated(isActivated)
+            .build();
+    }
 }

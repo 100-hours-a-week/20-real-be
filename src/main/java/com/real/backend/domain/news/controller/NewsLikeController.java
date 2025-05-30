@@ -29,7 +29,6 @@ public class NewsLikeController {
         Long userId = session.getId();
 
         NewsLikeResponseDTO newsLikeResponseDTO = newsLikeService.editNewsLike(newsId, userId);
-        newsService.updateLikeCount(newsId, newsLikeResponseDTO.getIsActivated());
         return DataResponse.of(newsLikeResponseDTO);
     }
 }

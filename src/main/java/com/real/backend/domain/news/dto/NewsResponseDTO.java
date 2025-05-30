@@ -30,7 +30,7 @@ public class NewsResponseDTO {
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm:ss")
     private LocalDateTime createdAt;
 
-    public static NewsResponseDTO from(News news, boolean userLike) {
+    public static NewsResponseDTO from(News news, boolean userLike, Long likeCount) {
         return NewsResponseDTO.builder()
             .id(news.getId())
             .title(news.getTitle())
@@ -38,7 +38,7 @@ public class NewsResponseDTO {
             .content(news.getContent())
             .tag(news.getTag())
             .viewCount(news.getTotalViewCount())
-            .likeCount(news.getLikeCount())
+            .likeCount(likeCount)
             .commentCount(news.getCommentCount())
             .userLike(userLike)
             .imageUrl(news.getImageUrl())

@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.news.component.NewsFinder;
 import com.real.backend.domain.news.dto.NewsCreateRequestDTO;
+import com.real.backend.domain.news.repository.NewsLikeRepository;
 import com.real.backend.exception.BadRequestException;
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.dto.NewsListResponseDTO;
@@ -37,6 +38,7 @@ public class NewsService {
     private final NewsFinder newsFinder;
     private final S3Utils s3Utils;
     private final NewsAiService newsAiService;
+    private final NewsLikeRepository newsLikeRepository;
 
     @Transactional(readOnly = true)
     public SliceDTO<NewsListResponseDTO> getNewsListByCursor(Long cursorId, int limit, String sort, String cursorStandard) {
@@ -95,7 +97,8 @@ public class NewsService {
     @Transactional(readOnly = true)
     public NewsResponseDTO getNewsWithUserLiked(Long newsId, Long userId) {
         News news = newsFinder.getNews(newsId);
-        return NewsResponseDTO.from(news, newsLikeService.userIsLiked(newsId, userId));
+        Long likeCount = newsLikeRepository.countNewsLikeByNewsId(newsId);
+        return NewsResponseDTO.from(news, newsLikeService.userIsLiked(newsId, userId), likeCount);
     }
 
     @Transactional

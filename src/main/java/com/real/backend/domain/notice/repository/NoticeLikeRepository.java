@@ -21,9 +21,10 @@ public interface NoticeLikeRepository extends JpaRepository<NoticeLike, Long> {
     @Query(value = """
     INSERT INTO notice_like (user_id, notice_id, is_activated)
     VALUES (:userId, :noticeId, true)
-    ON DUPLICATE KEY UPDATE
-    is_activated = NOT is_activated
+    ON DUPLICATE KEY
+    UPDATE is_activated = NOT is_activated
 """, nativeQuery = true)
     void insertOrToggle(@Param("userId") Long userId, @Param("noticeId") Long noticeId);
 
+    Long countNoticeLikeByNoticeId(Long id);
 }
