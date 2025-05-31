@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.real.backend.infra.s3.S3FileInfoResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -50,5 +51,29 @@ public class AiResponseService {
 
 
         return objectMapper.treeToValue(dataNode, responseType);
+    }
+
+    public S3FileInfoResponse getS3FileInfo(String path) throws JsonProcessingException {
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+            aiUrl + path,
+            HttpMethod.POST,
+            requestEntity,
+            String.class
+        );
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new ResponseStatusException(
+                response.getStatusCode(),
+                "FastAPI 호출 실패: status=" + response.getStatusCode() + ", body=" + response.getBody()
+            );
+        }
+
+        JsonNode body = objectMapper.readTree(response.getBody());
+        JsonNode dataNode = body.path("data");
+
+        return objectMapper.treeToValue(dataNode, S3FileInfoResponse.class);
     }
 }

@@ -44,14 +44,14 @@ public class News extends Post {
             .build();
     }
 
-    public static News of(NewsAiResponseDTO newsAiResponseDTO, String url) {
+    public static News of(NewsAiResponseDTO newsAiResponseDTO, String imageUrl) {
         return News.builder()
             .title(newsAiResponseDTO.headline())
-            .content(newsAiResponseDTO.content())
+            .content(newsAiResponseDTO.news())
             .tag("뉴스")
             .todayViewCount(0L)
             .totalViewCount(0L)
-            .imageUrl(url)
+            .imageUrl(imageUrl)
             .summary(newsAiResponseDTO.summary())
             .likeCount(0L)
             .commentCount(0L)
