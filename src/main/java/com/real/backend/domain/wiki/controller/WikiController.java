@@ -1,6 +1,5 @@
 package com.real.backend.domain.wiki.controller;
 
-import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +50,7 @@ public class WikiController {
 
     // 위키 편집
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
-    @PutMapping(value = "/v1/wikis/{wikiId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/v1/wikis/{wikiId}")
     public StatusResponse updateWiki(
         @PathVariable Long wikiId,
         @CurrentSession Session session,
