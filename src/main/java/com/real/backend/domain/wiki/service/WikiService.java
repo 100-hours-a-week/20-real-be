@@ -42,19 +42,14 @@ public class WikiService {
     @Transactional(readOnly = true)
     public Wiki getWiki(String title, SearchMethod method) {
         if (SearchMethod.NORMAL.equals(method)) {
-            return getWikiByTitle(title);
+            Wiki wiki = wikiRedisService.getWikiById(title);
+            if (wiki == null) {
+                return wikiRepository.findByTitle(title).orElseThrow(() -> new NotFoundException("해당 제목을 가진 위키가 존재하지 않습니다."));
+            }
+            return wiki;
         } else {
             return getRandomWiki(wikiRepository.getAllId());
         }
-    }
-
-    @Transactional(readOnly = true)
-    public Wiki getWikiByTitle(String title){
-        Wiki wiki = wikiRedisService.getWikiById(title);
-        if (wiki == null) {
-            return wikiRepository.findByTitle(title).orElseThrow(() -> new NotFoundException("해당 제목을 가진 위키가 존재하지 않습니다."));
-        }
-        return wiki;
     }
 
     @Transactional(readOnly = true)

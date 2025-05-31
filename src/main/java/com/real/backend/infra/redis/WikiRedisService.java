@@ -67,6 +67,7 @@ public class WikiRedisService {
             return null;
         } else {
             return Wiki.builder()
+                .id(wikiId)
                 .title(title)
                 .ydoc(ydoc)
                 .html(html)
