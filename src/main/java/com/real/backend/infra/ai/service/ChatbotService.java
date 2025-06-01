@@ -6,8 +6,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,13 +18,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.real.backend.infra.ai.dto.ChatbotRequestDTO;
 import com.real.backend.infra.ai.dto.ChatbotResponseDataDTO;
 
-import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 
 @Service
-@RequiredArgsConstructor
 public class ChatbotService {
     @Value("${spring.ai_url}")
     private String aiUrl;
+
+    private final WebClient webClient;
+
+    public ChatbotService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.baseUrl(aiUrl).build(); // FastAPI URL
+    }
 
     public ChatbotResponseDataDTO makeQuestion(ChatbotRequestDTO chatbotRequestDTO) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
@@ -48,5 +55,17 @@ public class ChatbotService {
         ChatbotResponseDataDTO data = objectMapper.treeToValue(dataNode, ChatbotResponseDataDTO.class);
 
         return new ChatbotResponseDataDTO(data.answer());
+    }
+
+    public Flux<ServerSentEvent<String>> streamAnswer(ChatbotRequestDTO question, Long userId) {
+        question.setUserId(userId);
+        return webClient.post()
+            .uri("/api/v2/chatbots")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(question)
+            .retrieve()
+            .bodyToFlux(String.class)
+            .map(chunk -> ServerSentEvent.builder(chunk).build())
+            .doOnError(err -> System.err.println("❌ SSE Error: " + err.getMessage()));
     }
 }
