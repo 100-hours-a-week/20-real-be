@@ -10,12 +10,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.news.domain.News;
 import com.real.backend.domain.news.repository.NewsRepository;
 import com.real.backend.domain.wiki.domain.Wiki;
+import com.real.backend.domain.wiki.repository.WikiRepository;
 import com.real.backend.domain.wiki.service.WikiService;
 import com.real.backend.infra.ai.dto.NewsAiRequestDTO;
 import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
 import com.real.backend.infra.ai.dto.WikiAiRequestDTO;
 import com.real.backend.infra.ai.service.AiResponseService;
-import com.real.backend.infra.s3.S3FileInfoResponse;
 import com.real.backend.util.S3Utils;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +30,7 @@ public class NewsAiService {
 
     private final int RECENTLY_UPDATED_DATE_STANDARD = 1;
     private final String DIR_NAME = "static/news/ai/images";
+    private final WikiRepository wikiRepository;
 
     public NewsAiResponseDTO makeTitleAndSummary(NewsAiRequestDTO dto) throws JsonProcessingException {
         return aiResponseService.postForAiResponse(
@@ -52,9 +53,12 @@ public class NewsAiService {
         List<Long> ids = wikiService.getRecentlyUpdatedWikiIdList(RECENTLY_UPDATED_DATE_STANDARD);
         Wiki wiki = wikiService.getRandomWiki(ids);
 
-        S3FileInfoResponse s3FileInfoResponse = aiResponseService.getS3FileInfo("/api/v1/presigned");
-        String key = s3Utils.generateKey(DIR_NAME, s3FileInfoResponse.getFileName());
-        String url = s3Utils.generatePresignedUrl(DIR_NAME, s3FileInfoResponse.getFileName(), Duration.ofMinutes(5), s3FileInfoResponse.getContentType());
+        // S3FileInfoResponse s3FileInfoResponse = aiResponseService.getS3FileInfo("/api/v1/presigned");
+        // String key = s3Utils.generateKey(DIR_NAME, s3FileInfoResponse.getFileName());
+        // String url = s3Utils.generatePresignedUrl(DIR_NAME, s3FileInfoResponse.getFileName(), Duration.ofMinutes(5), s3FileInfoResponse.getContentType());
+
+        String key = s3Utils.generateKey(DIR_NAME, "ai_gen.png");
+        String url = s3Utils.generatePresignedUrl(key, Duration.ofMinutes(5), "image/png");
 
         WikiAiRequestDTO wikiAiRequestDTO = WikiAiRequestDTO.from(wiki, url);
         NewsAiResponseDTO newsAiResponseDTO = makeNews(wikiAiRequestDTO);

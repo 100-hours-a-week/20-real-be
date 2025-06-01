@@ -64,9 +64,7 @@ public class S3Utils {
         return buildCloudFrontUrl(randomKey);
     }
 
-    public String generatePresignedUrl(String dirName, String originalFilename, Duration validDuration, String contentType) {
-        String key = generateKey(dirName, originalFilename);
-
+    public String generatePresignedUrl(String key, Duration validDuration, String contentType) {
         PutObjectRequest objectRequest = PutObjectRequest.builder()
             .bucket(bucketName)
             .key(key)

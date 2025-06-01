@@ -4,7 +4,7 @@ public record NewsAiResponseDTO(
     String headline,
     String summary,
     String news,
-    // String imageUrl,
+    String imageUrl,
     Boolean isCompleted
 ) {
 }
