@@ -60,7 +60,7 @@ public class ChatbotService {
     public Flux<ServerSentEvent<String>> streamAnswer(ChatbotRequestDTO question, Long userId) {
         question.setUserId(userId);
         return webClient.post()
-            .uri("/api/v2/chatbots")
+            .uri(aiUrl +"/api/v2/chatbots")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(question)
             .retrieve()

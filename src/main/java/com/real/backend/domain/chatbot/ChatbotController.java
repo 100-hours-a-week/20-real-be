@@ -3,7 +3,6 @@ package com.real.backend.domain.chatbot;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,7 +41,7 @@ public class ChatbotController {
     }
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
-    @GetMapping(value = "/v2/chatbots", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PostMapping(value = "/v2/chatbots", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> streamChatResponse(
         @Valid @RequestBody ChatbotRequestDTO chatbotRequestDTO,
         @CurrentSession Session session

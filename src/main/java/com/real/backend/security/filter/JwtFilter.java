@@ -27,10 +27,13 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CookieUtils cookieUtils;
 
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;   // 기본 true → false 로 변경
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
-
         // 건너 뛰어야 하는 경로 건너뛰기
         if (shouldSkip(request)) {
             filterChain.doFilter(request, response);
