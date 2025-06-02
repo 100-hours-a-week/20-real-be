@@ -32,4 +32,8 @@ public abstract class BaseEntity {
     public void updateCreatedAt(String createdAt) {
         this.createdAt = LocalDateTime.parse(createdAt);
     }
+
+    public void updateUpdatedAt(String updatedAt) {
+        this.updatedAt = LocalDateTime.parse(updatedAt);
+    }
 }

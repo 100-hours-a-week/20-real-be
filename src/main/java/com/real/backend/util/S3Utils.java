@@ -1,25 +1,35 @@
 package com.real.backend.util;
 
-import com.real.backend.exception.IOException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
-
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.real.backend.exception.IOException;
+
+import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 @Component
 @RequiredArgsConstructor
 public class S3Utils {
 
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
@@ -54,6 +64,23 @@ public class S3Utils {
         return buildCloudFrontUrl(randomKey);
     }
 
+    public String generatePresignedUrl(String key, Duration validDuration, String contentType) {
+        PutObjectRequest objectRequest = PutObjectRequest.builder()
+            .bucket(bucketName)
+            .key(key)
+            .contentType(contentType)
+            .build();
+
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+            .putObjectRequest(objectRequest)
+            .signatureDuration(validDuration)
+            .build();
+
+        PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
+
+        return presignedRequest.url().toString();
+    }
+
     /**
      * UUID 기반 고유 파일명을 생성하여 S3 key를 구성한다.
      *
@@ -61,7 +88,7 @@ public class S3Utils {
      * @param originalFilename 원본 파일 이름
      * @return S3에 저장할 고유한 key
      */
-    private String generateKey(String dirName, String originalFilename) {
+    public String generateKey(String dirName, String originalFilename) {
         String uuid = UUID.randomUUID().toString();
         return dirName + "/" + uuid + "_" + originalFilename;
     }
@@ -93,7 +120,7 @@ public class S3Utils {
      * @param key S3 객체 key
      * @return CloudFront 경유 접근 URL
      */
-    private String buildCloudFrontUrl(String key) {
+    public String buildCloudFrontUrl(String key) {
         return cloudFrontDomain + "/" + key;
     }
 
