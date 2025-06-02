@@ -14,8 +14,6 @@ import com.real.backend.security.JwtUtil;
 import com.real.backend.security.Session;
 import com.real.backend.util.CookieUtils;
 
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,21 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = cookieUtils.resolveTokenFromCookie(request, "ACCESS_TOKEN");
 
-        // token 검증
-        if (token == null) {
-            System.out.println("token is null");
-            setBody(response, 401, "MISSING_TOKEN");
-            return;
-        }
-
-        try {
-            if (jwtUtil.isExpired(token)) {
-                System.out.println("token is expired");
-                setBody(response, 401, "EXPIRED_TOKEN");
-                return;
-            }
-        } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException exception) {
-            setBody(response, 401, "INVALID_TOKEN");
+        if (!jwtUtil.validateToken(token, response)){
             return;
         }
 
@@ -73,13 +57,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 다음 필터로 넘기기
         filterChain.doFilter(request, response);
-    }
-
-    private void setBody(HttpServletResponse response, int code, String message) throws IOException {
-        response.setStatus(code);
-        response.setContentType("application/json");
-        String jsonResponse = String.format("{\"code\": %d, \"message\": \"%s\"}", code, message);
-        response.getWriter().write(jsonResponse);
     }
 
     private boolean shouldSkip(HttpServletRequest request) {
