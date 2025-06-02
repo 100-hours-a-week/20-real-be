@@ -1,7 +1,7 @@
 package com.real.backend.infra.s3;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +21,7 @@ public class S3Controller {
     private final String DIR_NAME = "static/wiki/images";
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
-    @GetMapping("/v1/presigned")
+    @PostMapping("/v1/presigned")
     public DataResponse<S3PresignedCreateResponseDTO> createPresignedUrl(
         @RequestBody S3PresignedCreateRequestDTO s3PresignedCreateRequestDTO
     ) {
