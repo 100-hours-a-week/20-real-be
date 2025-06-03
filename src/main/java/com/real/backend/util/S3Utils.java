@@ -111,10 +111,9 @@ public class S3Utils {
      * @return CloudFront 경유 접근 URL
      */
     public String buildCloudFrontUrl(String key) {
-        String normalizedDomain =
-            cloudFrontDomain.endsWith("/") ? cloudFrontDomain.substring(0, cloudFrontDomain.length() - 1)
-                : cloudFrontDomain;
-        return normalizedDomain + "/" + key;
+        String normalizedDomain = normalizeDomain(cloudFrontDomain);
+        String normalizedKey = normalizeKey(key);
+        return normalizedDomain + "/" + normalizedKey;
     }
 
     /**
@@ -151,5 +150,13 @@ public class S3Utils {
      */
     private String pickRandomKey(List<String> keys) {
         return keys.get(ThreadLocalRandom.current().nextInt(keys.size()));
+    }
+
+    private String normalizeDomain(String domain) {
+        return domain.endsWith("/") ? domain.substring(0, domain.length() - 1) : domain;
+    }
+
+    private String normalizeKey(String key) {
+        return key.startsWith("/") ? key.substring(1) : key;
     }
 }
