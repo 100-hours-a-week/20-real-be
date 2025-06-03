@@ -19,7 +19,7 @@ public class S3Service {
         String key = s3Utils.generateKey(directoryName, s3PresignedCreateRequestDTO.getFileName());
 
         String presignedUrl = s3Utils.generatePresignedUrl(key, Duration.ofMinutes(5), s3PresignedCreateRequestDTO.getContentType());
-        String cloudFrontUrl = s3Utils.buildCloudFrontUrl(presignedUrl);
+        String cloudFrontUrl = s3Utils.buildCloudFrontUrl(key);
 
         return S3PresignedCreateResponseDTO.of(presignedUrl, cloudFrontUrl);
     }

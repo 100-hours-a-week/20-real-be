@@ -38,10 +38,9 @@ public class S3Utils {
     private String cloudFrontDomain;
 
     /**
-     * MultipartFile을 지정된 S3 디렉토리에 업로드하고,
-     * CloudFront를 통해 접근 가능한 URL을 반환한다.
+     * MultipartFile을 지정된 S3 디렉토리에 업로드하고, CloudFront를 통해 접근 가능한 URL을 반환한다.
      *
-     * @param file Multipart 업로드 대상 파일
+     * @param file    Multipart 업로드 대상 파일
      * @param dirName S3 내 디렉토리 이름 (예: images, images/profile 등)
      * @return CloudFront 경유 이미지 접근 URL
      */
@@ -52,8 +51,7 @@ public class S3Utils {
     }
 
     /**
-     * S3의 기본 프로필 이미지 경로(images/default-profiles/)에서
-     * 랜덤으로 하나를 선택하여 CloudFront URL로 반환한다.
+     * S3의 기본 프로필 이미지 경로(images/default-profiles/)에서 랜덤으로 하나를 선택하여 CloudFront URL로 반환한다.
      *
      * @return CloudFront URL 형식의 랜덤 프로필 이미지 경로
      */
@@ -65,16 +63,11 @@ public class S3Utils {
     }
 
     public String generatePresignedUrl(String key, Duration validDuration, String contentType) {
-        PutObjectRequest objectRequest = PutObjectRequest.builder()
-            .bucket(bucketName)
-            .key(key)
-            .contentType(contentType)
+        PutObjectRequest objectRequest = PutObjectRequest.builder().bucket(bucketName).key(key).contentType(contentType)
             .build();
 
-        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-            .putObjectRequest(objectRequest)
-            .signatureDuration(validDuration)
-            .build();
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder().putObjectRequest(objectRequest)
+            .signatureDuration(validDuration).build();
 
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
 
@@ -84,7 +77,7 @@ public class S3Utils {
     /**
      * UUID 기반 고유 파일명을 생성하여 S3 key를 구성한다.
      *
-     * @param dirName S3 디렉토리 이름
+     * @param dirName          S3 디렉토리 이름
      * @param originalFilename 원본 파일 이름
      * @return S3에 저장할 고유한 key
      */
@@ -97,16 +90,13 @@ public class S3Utils {
      * 지정된 key로 S3에 파일을 업로드한다.
      *
      * @param file 업로드할 파일
-     * @param key S3에 저장할 key
+     * @param key  S3에 저장할 key
      * @throws IOException 사용자 정의 예외
      */
     private void putObjectToS3(MultipartFile file, String key) {
         try (InputStream inputStream = file.getInputStream()) {
-            PutObjectRequest request = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .contentType(file.getContentType())
-                .build();
+            PutObjectRequest request = PutObjectRequest.builder().bucket(bucketName).key(key)
+                .contentType(file.getContentType()).build();
 
             s3Client.putObject(request, RequestBody.fromInputStream(inputStream, file.getSize()));
         } catch (java.io.IOException | S3Exception e) {
@@ -121,7 +111,9 @@ public class S3Utils {
      * @return CloudFront 경유 접근 URL
      */
     public String buildCloudFrontUrl(String key) {
-        return cloudFrontDomain + "/" + key;
+        String normalizedDomain = normalizeDomain(cloudFrontDomain);
+        String normalizedKey = normalizeKey(key);
+        return normalizedDomain + "/" + normalizedKey;
     }
 
     /**
@@ -131,16 +123,11 @@ public class S3Utils {
      * @return 객체 key 리스트
      */
     private List<String> listS3Keys(String prefix) {
-        ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
-            .bucket(bucketName)
-            .prefix(prefix)
-            .build();
+        ListObjectsV2Request listRequest = ListObjectsV2Request.builder().bucket(bucketName).prefix(prefix).build();
 
         ListObjectsV2Response response = s3Client.listObjectsV2(listRequest);
 
-        return response.contents().stream()
-            .map(S3Object::key)
-            .filter(key -> !key.endsWith("/")) // 폴더 객체 제외
+        return response.contents().stream().map(S3Object::key).filter(key -> !key.endsWith("/")) // 폴더 객체 제외
             .toList();
     }
 
@@ -163,5 +150,13 @@ public class S3Utils {
      */
     private String pickRandomKey(List<String> keys) {
         return keys.get(ThreadLocalRandom.current().nextInt(keys.size()));
+    }
+
+    private String normalizeDomain(String domain) {
+        return domain.endsWith("/") ? domain.substring(0, domain.length() - 1) : domain;
+    }
+
+    private String normalizeKey(String key) {
+        return key.startsWith("/") ? key.substring(1) : key;
     }
 }
