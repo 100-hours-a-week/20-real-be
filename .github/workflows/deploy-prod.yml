@@ -1,0 +1,100 @@
+name: Deploy to Prod
+
+on:
+    workflow_run:
+        workflows: ["Auto Version Tagging"]
+        types:
+            - completed
+        branches:
+            - main
+env:
+    ENV: prod
+
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+
+            - name: Set variables
+              run: |
+                  TAG=$(git describe --tags --abbrev=0)
+                  SHA=$(git rev-parse --short=6 HEAD)
+                  echo "IMAGE_TAG=${ENV}-${TAG}-${SHA}" >> $GITHUB_ENV
+                  echo "S3_KEY=deploy-${ENV}-${TAG}-${SHA}.zip" >> $GITHUB_ENV
+                  echo "DEPLOYMENT_GROUP=${{ secrets.DEPLOYMENT_GROUP_PROD }}" >> $GITHUB_ENV
+
+            - name: Configure AWS credentials (via secrets)
+              uses: aws-actions/configure-aws-credentials@v2
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ secrets.AWS_REGION }}
+
+            - name: Login to ECR
+              run: |
+                  aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+                  docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+            - name: Build & Push image
+              run: |
+                  docker build -f Dockerfile.prod -t ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG .
+                  docker tag ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG
+                  docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG
+
+            - name: Generate appspec.yml
+              run: |
+                  cat <<EOF > appspec.yml
+                  version: 0.0
+                  os: linux
+                  files:
+                      - source: /
+                        destination: /home/ec2-user
+                        overwrite: yes
+
+                  permissions:
+                      - object: /
+                        pattern: "**"
+                        owner: ec2-user
+                        group: ec2-user
+                        mode: 755
+
+                  hooks:
+                      ApplicationStop:
+                        - location: scripts/stop.sh
+                          timeout: 60
+                          runas: ec2-user
+                      AfterInstall:
+                          - location: scripts/deploy.sh
+                            timeout: 60
+                            runas: ec2-user
+                  EOF
+
+            - name: Inject variables into deploy.sh
+              run: |
+                  sed -i "s|<IMAGE_TAG>|$IMAGE_TAG|g" scripts/deploy.sh
+                  sed -i "s|<ENV>|$ENV|g" scripts/deploy.sh
+                  sed -i "s|<AWS_ACCOUNT_ID>|${{ secrets.AWS_ACCOUNT_ID }}|g" scripts/deploy.sh
+                  sed -i "s|<AWS_REGION>|${{ secrets.AWS_REGION }}|g" scripts/deploy.sh
+                  sed -i "s|<ECR_REPOSITORY>|${{ secrets.ECR_REPOSITORY }}|g" scripts/deploy.sh
+                  chmod +x scripts/deploy.sh
+
+
+            - name: Zip files
+              run: zip -r $S3_KEY appspec.yml scripts/
+
+            - name: Upload to S3
+              run: aws s3 cp $S3_KEY s3://${{ secrets.S3_BUCKET }}/$S3_KEY
+
+            - name: Trigger CodeDeploy
+              run: |
+                  aws deploy create-deployment \
+                    --application-name ${{ secrets.APPLICATION_NAME }} \
+                    --deployment-group-name $DEPLOYMENT_GROUP \
+                    --s3-location bucket=${{ secrets.S3_BUCKET }},bundleType=zip,key=$S3_KEY \
+                    --file-exists-behavior OVERWRITE
