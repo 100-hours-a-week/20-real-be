@@ -13,13 +13,15 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - name: Wait for tag to be synced
+              run: sleep 15
+            
             - name: Checkout
               uses: actions/checkout@v3
               with:
                   fetch-depth: 0
 
-            - name: Wait for tag to be synced
-              run: sleep 10
+            
 
             - name: Set variables
               run: |
