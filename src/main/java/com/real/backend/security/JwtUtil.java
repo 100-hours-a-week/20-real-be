@@ -1,5 +1,6 @@
 package com.real.backend.security;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtUtil {
@@ -63,11 +66,38 @@ public class JwtUtil {
     }
 
     // 토큰 만료 확인
-    public boolean isExpired(String token) throws MalformedJwtException {
+    private boolean isExpired(String token) throws MalformedJwtException {
         try {
             return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
         } catch (ExpiredJwtException e) {
             return true;
         }
+    }
+
+    public boolean validateToken(String token, HttpServletResponse response) throws IOException {
+        if (token == null) {
+            System.out.println("token is null");
+            setBody(response, 401, "MISSING_TOKEN");
+            return false;
+        }
+
+        try {
+            if (isExpired(token)) {
+                System.out.println("token is expired");
+                setBody(response, 401, "EXPIRED_TOKEN");
+                return false;
+            }
+        } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException exception) {
+            setBody(response, 401, "INVALID_TOKEN");
+            return false;
+        }
+        return true;
+    }
+
+    private void setBody(HttpServletResponse response, int code, String message) throws IOException {
+        response.setStatus(code);
+        response.setContentType("application/json");
+        String jsonResponse = String.format("{\"code\": %d, \"message\": \"%s\"}", code, message);
+        response.getWriter().write(jsonResponse);
     }
 }
