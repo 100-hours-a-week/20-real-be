@@ -5,8 +5,6 @@ on:
         workflows: ["Auto Version Tagging"]
         types:
             - completed
-        branches:
-            - dev
 env:
     ENV: dev
 
