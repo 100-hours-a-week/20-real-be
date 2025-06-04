@@ -1,36 +1,28 @@
 package com.real.backend.domain.user.service;
 
-import static com.real.backend.util.CursorUtils.*;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.real.backend.domain.notice.domain.Notice;
-import com.real.backend.domain.notice.repository.NoticeRepository;
-import com.real.backend.domain.user.domain.UserNoticeRead;
-import com.real.backend.domain.user.dto.UserUnreadNoticeResponseDTO;
 import com.real.backend.domain.user.component.UserFinder;
-import com.real.backend.domain.user.dto.LoginResponseDTO;
 import com.real.backend.domain.user.domain.User;
-import com.real.backend.domain.user.repository.UserNoticeReadRepository;
-import com.real.backend.util.CursorUtils;
-import com.real.backend.util.dto.SliceDTO;
+import com.real.backend.domain.user.dto.ChangeUserInfoRequestDTO;
+import com.real.backend.domain.user.dto.ChangeUserRoleRequestDTO;
+import com.real.backend.domain.user.dto.LoginResponseDTO;
+import com.real.backend.domain.user.repository.UserRepository;
+import com.real.backend.exception.ForbiddenException;
+import com.real.backend.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    private final UserRepository userRepository;
+    @Value("${spring.api.secret}")
+    private String apiKey;
+
     private final UserFinder userFinder;
-    private final NoticeRepository noticeRepository;
-    private final UserNoticeReadRepository userNoticeReadRepository;
 
     @Transactional(readOnly = true)
     public LoginResponseDTO getUserInfo(Long userId) {
@@ -38,45 +30,23 @@ public class UserService {
         return LoginResponseDTO.from(user);
     }
 
-    @Transactional(readOnly = true)
-    public SliceDTO<UserUnreadNoticeResponseDTO> getNoticeListByCursor(Long cursorId, int limit, String cursorStandard, Long userId) {
+    @Transactional
+    public void changeUserRole(ChangeUserRoleRequestDTO changeUserRoleRequestDTO) {
+        User user = userRepository.findByEmail(changeUserRoleRequestDTO.getUserEmail()).orElseThrow(() -> new NotFoundException("해당 이메일을 가진 사용자가 없습니다."));
 
-        Pageable pg = buildPageable(limit);
-
-        Slice<Notice> slice = (cursorId == null || cursorStandard == null)
-            ? noticeRepository.fetchUnreadLatestFirst(userId, pg)
-            : noticeRepository.fetchUnreadLatest(LocalDateTime.parse(cursorStandard), cursorId, userId, pg);
-
-        return CursorUtils.toCursorDto(
-            slice,
-            limit,
-            notice -> new UserUnreadNoticeResponseDTO(
-                notice.getId(),
-                notice.getTitle()
-            ),
-            notice -> notice.getCreatedAt().toString(),
-            Notice::getId,
-            SliceDTO::new
-        );
+        user.updateRole(changeUserRoleRequestDTO.getRole());
+        userRepository.save(user);
     }
 
     @Transactional
-    public void readNotices(Long userId) {
-        User user = userFinder.getUser(userId);
+    public void enrollUser(ChangeUserInfoRequestDTO changeUserInfoRequestDTO) {
+        User user = userRepository.findByEmail(changeUserInfoRequestDTO.getUserEmail()).orElseThrow(() -> new NotFoundException("해당 이메일을 가진 사용자가 없습니다."));
 
-        List<Notice> unread = noticeRepository.findAllUnreadNotices(userId);
-        if (unread.isEmpty()) {
-            return;
+        if (!apiKey.equals(changeUserInfoRequestDTO.getApiKey())) {
+            throw new ForbiddenException("권한이 없습니다.");
         }
 
-        List<UserNoticeRead> reads = unread.stream()
-            .map(notice -> UserNoticeRead.builder()
-                .notice(notice)
-                .user(user)
-                .build()
-            )
-            .toList();
-
-        userNoticeReadRepository.saveAll(reads);
+        user.enroll(changeUserInfoRequestDTO.getUserName(), changeUserInfoRequestDTO.getRole());
+        userRepository.save(user);
     }
 }
