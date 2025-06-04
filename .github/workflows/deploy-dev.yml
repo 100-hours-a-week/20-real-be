@@ -5,14 +5,13 @@ on:
         workflows: ["Auto Version Tagging"]
         types:
             - completed
-        branches:
-            - dev
 env:
     ENV: dev
 
 
 jobs:
     deploy:
+        if: ${{ github.event.workflow_run.head_branch == 'dev' }}
         runs-on: ubuntu-latest
 
         steps:
