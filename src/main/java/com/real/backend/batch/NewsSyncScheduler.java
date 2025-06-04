@@ -7,7 +7,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.domain.news.repository.NewsRepository;
+import com.real.backend.domain.news.service.NewsAiService;
 import com.real.backend.domain.user.repository.UserRepository;
 import com.real.backend.infra.redis.NewsRedisService;
 import com.real.backend.infra.redis.PostRedisService;
@@ -22,6 +24,7 @@ public class NewsSyncScheduler {
     private final NewsRedisService newsRedisService;
     private final NewsRepository newsRepository;
     private final UserRepository userRepository;
+    private final NewsAiService newsAiService;
 
     @Transactional
     @Scheduled(cron = "0 0 */3 * * *")
@@ -57,5 +60,11 @@ public class NewsSyncScheduler {
         List<Long> activeUserIds = userRepository.findRecentlyActiveUserIds(threshold);
 
         newsRedisService.syncLike(activeUserIds);
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 0 0 * * *")
+    public void createNewsAi() throws JsonProcessingException {
+        newsAiService.createNewsAi();
     }
 }

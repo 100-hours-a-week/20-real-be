@@ -1,10 +1,9 @@
 package com.real.backend.exception;
 
-import org.springframework.security.access.AccessDeniedException;
-import com.real.backend.response.StatusResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -13,6 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.HandlerMapping;
+
+import com.real.backend.response.StatusResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -98,7 +99,7 @@ public class GlobalExceptionHandler {
                 String expr = PreAuthorize.value();                  // 절대로 pa가 null일 때 여기 안 옴
                 String norm = expr.replaceAll("\\s+", ""); // 공백 제거
 
-                if (norm.contains("hasAnyAuthority('OUTSIDER','TRAINEE')")) {
+                if (norm.contains("hasAnyAuthority('OUTSIDER', 'TRAINEE')")) {
                     message = "운영진만 접근할 수 있습니다.";
                 } else if (norm.contains("hasAnyAuthority('OUTSIDER')")) {
                     message = "외부인은 접근할 수 없습니다.";
