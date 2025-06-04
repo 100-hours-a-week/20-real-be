@@ -7,6 +7,7 @@ on:
       - dev
       - hotfix/*
 
+
 jobs:
     tagging:
         runs-on: ubuntu-latest
