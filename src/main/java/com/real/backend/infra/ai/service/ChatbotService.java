@@ -66,6 +66,7 @@ public class ChatbotService {
             .retrieve()
             .bodyToFlux(String.class)
             .map(chunk -> ServerSentEvent.builder(chunk).build())
+            .concatWith(Flux.just(ServerSentEvent.builder("[DONE]").event("done").build()))
             .doOnError(err -> System.err.println("❌ SSE Error: " + err.getMessage()));
     }
 }
