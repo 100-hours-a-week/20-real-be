@@ -12,6 +12,7 @@ on:
         branches:
             - main
 
+
 jobs:
     tagging:
         runs-on: ubuntu-latest

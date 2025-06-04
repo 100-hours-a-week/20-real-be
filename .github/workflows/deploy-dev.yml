@@ -1,12 +1,9 @@
 name: Deploy to Dev
 
 on:
-    workflow_run:
-        workflows: ["Auto Version Tagging"]
-        types:
-            - completed
+    push:
         branches:
-            - dev
+            dev
 env:
     ENV: dev
 

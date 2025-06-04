@@ -1,12 +1,9 @@
 name: Deploy to Prod
 
 on:
-    workflow_run:
-        workflows: ["Auto Version Tagging"]
-        types:
-            - completed
+    push:
         branches:
-            - main
+            main
 env:
     ENV: prod
 
