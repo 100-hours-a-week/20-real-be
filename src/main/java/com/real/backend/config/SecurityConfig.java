@@ -62,6 +62,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/refresh").permitAll()
                 .requestMatchers("/api/healthz").permitAll()    //서버 헬스 체크용 API, Security Filter 우회
                 .requestMatchers("/monitoring/health","/monitoring/info","/monitoring/prometheus").permitAll() // 모니터링 API, Security Filter 우회
+                .requestMatchers("/api/v1/users/role").permitAll()
                 .anyRequest().authenticated()  // 나머지는 필터 통과
             );
 

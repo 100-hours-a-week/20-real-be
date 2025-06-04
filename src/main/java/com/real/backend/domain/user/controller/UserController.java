@@ -1,12 +1,16 @@
 package com.real.backend.domain.user.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.real.backend.domain.user.dto.ChangeUserRoleRequestDTO;
 import com.real.backend.domain.user.dto.LoginResponseDTO;
 import com.real.backend.domain.user.service.UserService;
 import com.real.backend.response.DataResponse;
+import com.real.backend.response.StatusResponse;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 
@@ -24,5 +28,14 @@ public class UserController {
         LoginResponseDTO loginResponseDTO = userService.getUserInfo(session.getId());
 
         return DataResponse.of(loginResponseDTO);
+    }
+
+    @PatchMapping("/v1/users/role")
+    public StatusResponse changeRole(
+        @RequestBody ChangeUserRoleRequestDTO changeUserRoleRequestDTO
+    ) {
+        userService.changeUserRole(changeUserRoleRequestDTO);
+
+        return StatusResponse.of(200, "사용자 role이 정상적으로 수정되었습니다.");
     }
 }
