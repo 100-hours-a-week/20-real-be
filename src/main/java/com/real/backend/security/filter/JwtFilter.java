@@ -83,7 +83,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private boolean shouldSkip(HttpServletRequest request) {
-        List<String> skipURI = Arrays.asList("/login", "/auth/.*", "/users/signup", "/api/v1/oauth/.*", "/api/healthz", "/error", "/api/v1/auth/refresh","/monitoring/health","/monitoring/info","/monitoring/prometheus", "/api/v1/news");
+        List<String> skipURI = Arrays.asList("/login", "/auth/.*", "/users/signup", "/api/v1/oauth/.*", "/api/healthz", "/error", "/api/v1/auth/refresh","/monitoring/health","/monitoring/info","/monitoring/prometheus", "/api/v1/news", "/api/v1/users/enroll", "/api/v1/invited-user");
         return skipURI.stream().anyMatch(uri -> {
             Pattern pattern = Pattern.compile(uri);
             return pattern.matcher(request.getRequestURI()).matches();
