@@ -1,5 +1,6 @@
 package com.real.backend.domain.user.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,7 @@ public class UserController {
         return DataResponse.of(loginResponseDTO);
     }
 
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PatchMapping("/v1/users/role")
     public StatusResponse changeRole(
         @RequestBody ChangeUserRoleRequestDTO changeUserRoleRequestDTO

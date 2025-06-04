@@ -14,5 +14,4 @@ import lombok.NoArgsConstructor;
 public class ChangeUserRoleRequestDTO {
     private String userEmail;
     private Role role;
-    private String apiKey;
 }
