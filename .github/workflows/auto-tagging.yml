@@ -1,16 +1,11 @@
 name: Auto Version Tagging
 
 on:
-    pull_request:
-        types:
-            - closed
-        branches:
-            - main
-            - dev
-            - hotfix/*
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+      - dev
+      - hotfix/*
 
 jobs:
     tagging:
@@ -22,11 +17,6 @@ jobs:
             # 1. 코드 체크아웃
             - name: Checkout code
               uses: actions/checkout@v3
-
-            # 2. 병합된 PR인지 확인
-            - name: Check if Merged
-              if: github.event.pull_request.merged == true
-              run: echo "PR is merged, continuing..."
 
             # 3. 병합된 커밋 ID 가져오기
             - name: Get Merged Commit SHA
