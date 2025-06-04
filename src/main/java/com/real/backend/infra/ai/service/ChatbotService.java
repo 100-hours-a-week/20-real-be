@@ -57,12 +57,12 @@ public class ChatbotService {
         return new ChatbotResponseDataDTO(data.answer());
     }
 
-    public Flux<ServerSentEvent<String>> streamAnswer(ChatbotRequestDTO question, Long userId) {
-        question.setUserId(userId);
+    public Flux<ServerSentEvent<String>> streamAnswer(String question, Long userId) {
+        ChatbotRequestDTO chatbotRequestDTO = ChatbotRequestDTO.of(question, userId);
         return webClient.post()
             .uri(aiUrl +"/api/v3/chatbots")
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(question)
+            .bodyValue(chatbotRequestDTO)
             .retrieve()
             .bodyToFlux(String.class)
             .map(chunk -> ServerSentEvent.builder(chunk).build())
