@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.real.backend.domain.user.dto.ChangeUserInfoRequestDTO;
 import com.real.backend.domain.user.dto.ChangeUserRoleRequestDTO;
 import com.real.backend.domain.user.dto.LoginResponseDTO;
 import com.real.backend.domain.user.service.UserService;
@@ -37,5 +38,14 @@ public class UserController {
         userService.changeUserRole(changeUserRoleRequestDTO);
 
         return StatusResponse.of(200, "사용자 role이 정상적으로 수정되었습니다.");
+    }
+
+    @PatchMapping("/v1/users/enroll")
+    public StatusResponse changeUserInfo(
+        @RequestBody ChangeUserInfoRequestDTO changeUserInfoRequestDTO
+    ) {
+        userService.enrollUser(changeUserInfoRequestDTO);
+
+        return StatusResponse.of(200, "사용자가 정상적으로 등록되었습니다.");
     }
 }

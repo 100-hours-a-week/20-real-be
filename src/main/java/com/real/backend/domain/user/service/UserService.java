@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.domain.user.component.UserFinder;
 import com.real.backend.domain.user.domain.User;
+import com.real.backend.domain.user.dto.ChangeUserInfoRequestDTO;
 import com.real.backend.domain.user.dto.ChangeUserRoleRequestDTO;
 import com.real.backend.domain.user.dto.LoginResponseDTO;
 import com.real.backend.domain.user.repository.UserRepository;
@@ -33,11 +34,19 @@ public class UserService {
     public void changeUserRole(ChangeUserRoleRequestDTO changeUserRoleRequestDTO) {
         User user = userRepository.findByEmail(changeUserRoleRequestDTO.getUserEmail()).orElseThrow(() -> new NotFoundException("해당 이메일을 가진 사용자가 없습니다."));
 
-        if (!apiKey.equals(changeUserRoleRequestDTO.getApiKey())) {
+        user.updateRole(changeUserRoleRequestDTO.getRole());
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void enrollUser(ChangeUserInfoRequestDTO changeUserInfoRequestDTO) {
+        User user = userRepository.findByEmail(changeUserInfoRequestDTO.getUserEmail()).orElseThrow(() -> new NotFoundException("해당 이메일을 가진 사용자가 없습니다."));
+
+        if (!apiKey.equals(changeUserInfoRequestDTO.getApiKey())) {
             throw new ForbiddenException("권한이 없습니다.");
         }
 
-        user.updateRole(changeUserRoleRequestDTO.getRole());
+        user.enroll(changeUserInfoRequestDTO.getUserName(), changeUserInfoRequestDTO.getRole());
         userRepository.save(user);
     }
 }
