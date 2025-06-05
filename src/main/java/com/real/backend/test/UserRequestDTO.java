@@ -14,4 +14,5 @@ public class UserRequestDTO {
     private String email;
     private LoginType loginType;
     private Status status;
+    private String apiKey;
 }
