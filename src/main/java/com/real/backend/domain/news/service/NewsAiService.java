@@ -50,7 +50,7 @@ public class NewsAiService {
 
     @Transactional
     public void createNewsAi() throws JsonProcessingException {
-        List<Long> ids = wikiService.getRecentlyUpdatedWikiIdList(RECENTLY_UPDATED_DATE_STANDARD);
+        List<Long> ids = wikiRepository.getAllIdOrderByUpdatedAtLimit(5);
         Wiki wiki = wikiService.getRandomWiki(ids);
 
         // S3FileInfoResponse s3FileInfoResponse = aiResponseService.getS3FileInfo("/api/v1/presigned");

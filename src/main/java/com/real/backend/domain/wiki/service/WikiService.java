@@ -1,6 +1,5 @@
 package com.real.backend.domain.wiki.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -56,14 +55,6 @@ public class WikiService {
     public Wiki getRandomWiki(List<Long> wikiIds) {
         Long randomId = wikiIds.get((int) (Math.random() * wikiIds.size()));
         return wikiRepository.findById(randomId).orElseThrow(() -> new NotFoundException("해당 id를 가진 위키가 존재하지 않습니다."));
-    }
-
-    @Transactional(readOnly = true)
-    public List<Long> getRecentlyUpdatedWikiIdList(int date) {
-        LocalDateTime start = LocalDate.now().minusDays(date).atStartOfDay(); // 전날 00:00
-        LocalDateTime end = start.plusDays(1); // 다음날 00:00
-
-        return wikiRepository.findAllIdByUpdatedBetween(start, end);
     }
 
     @Transactional(readOnly = true)

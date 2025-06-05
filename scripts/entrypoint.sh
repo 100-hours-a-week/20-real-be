@@ -25,4 +25,5 @@ exec java \
   -Dotel.instrumentation.http.enabled=true \
   -Dotel.instrumentation.servlet.enabled=true \
   -Dotel.instrumentation.jdbc.enabled=true \
+  -Duser.timezone=Asia/Seoul \
   -jar app.jar >> "$LOG_FILE" 2>&1
