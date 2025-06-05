@@ -157,4 +157,10 @@ public class NewsService {
 
         newsRepository.save(News.of(newsAiResponseDTO, newsCreateRequestDTO.getContent(), url));
     }
+
+    @Transactional
+    public void deleteNews(Long newsId) {
+        News news = newsFinder.getNews(newsId);
+        news.delete();
+    }
 }

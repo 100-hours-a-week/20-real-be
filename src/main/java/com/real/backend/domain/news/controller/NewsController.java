@@ -1,6 +1,7 @@
 package com.real.backend.domain.news.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,5 +58,14 @@ public class NewsController {
 
         newsService.createNews(newsCreateRequestDTO, image);
         return StatusResponse.of(201, "뉴스가 성공적으로 생성되었습니다.");
+    }
+
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
+    @DeleteMapping("/v1/news/{newsId}")
+    public StatusResponse deleteNews(
+    @PathVariable Long newsId
+    ) {
+        newsService.deleteNews(newsId);
+        return StatusResponse.of(204, "뉴스가 성공적으로 삭제되었습니다.");
     }
 }
