@@ -63,8 +63,7 @@ public class NewsSyncScheduler {
     }
 
     @Transactional
-    // @Scheduled(cron = "0 10 12 * * *")
-    @Scheduled(cron = "0 31 10 * * *")
+    @Scheduled(cron = "0 10 12 * * *")
     public void createNewsAi() throws JsonProcessingException {
         newsAiService.createNewsAi();
     }
