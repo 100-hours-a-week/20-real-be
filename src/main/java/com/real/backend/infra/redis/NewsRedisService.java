@@ -6,10 +6,10 @@ import java.util.Set;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.real.backend.domain.news.component.NewsFinder;
-import com.real.backend.domain.news.domain.NewsLike;
-import com.real.backend.domain.news.repository.NewsLikeRepository;
-import com.real.backend.domain.user.component.UserFinder;
+import com.real.backend.modules.news.component.NewsFinder;
+import com.real.backend.modules.news.domain.NewsLike;
+import com.real.backend.modules.news.repository.NewsLikeRepository;
+import com.real.backend.modules.user.component.UserFinder;
 
 import lombok.RequiredArgsConstructor;
 

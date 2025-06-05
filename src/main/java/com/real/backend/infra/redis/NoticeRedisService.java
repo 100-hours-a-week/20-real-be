@@ -6,12 +6,12 @@ import java.util.Set;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.real.backend.domain.notice.component.NoticeFinder;
-import com.real.backend.domain.notice.domain.NoticeLike;
-import com.real.backend.domain.notice.repository.NoticeLikeRepository;
-import com.real.backend.domain.user.component.UserFinder;
-import com.real.backend.domain.user.domain.UserNoticeRead;
-import com.real.backend.domain.user.repository.UserNoticeReadRepository;
+import com.real.backend.modules.notice.component.NoticeFinder;
+import com.real.backend.modules.notice.domain.NoticeLike;
+import com.real.backend.modules.notice.repository.NoticeLikeRepository;
+import com.real.backend.modules.user.component.UserFinder;
+import com.real.backend.modules.user.domain.UserNoticeRead;
+import com.real.backend.modules.user.repository.UserNoticeReadRepository;
 
 import lombok.RequiredArgsConstructor;
 

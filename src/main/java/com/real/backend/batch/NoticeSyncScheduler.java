@@ -7,8 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.real.backend.domain.notice.repository.NoticeRepository;
-import com.real.backend.domain.user.repository.UserRepository;
+import com.real.backend.modules.notice.repository.NoticeRepository;
+import com.real.backend.modules.user.repository.UserRepository;
 import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.infra.redis.PostRedisService;
 
