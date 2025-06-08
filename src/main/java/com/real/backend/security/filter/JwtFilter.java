@@ -10,9 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.real.backend.security.JwtUtil;
+import com.real.backend.security.JwtUtils;
 import com.real.backend.security.Session;
-import com.real.backend.util.CookieUtils;
+import com.real.backend.common.util.CookieUtils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    private final JwtUtils jwtUtils;
     private final CookieUtils cookieUtils;
 
     @Override
@@ -42,14 +42,14 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = cookieUtils.resolveTokenFromCookie(request, "ACCESS_TOKEN");
 
-        if (!jwtUtil.validateToken(token, response)){
+        if (!jwtUtils.validateToken(token, response)){
             return;
         }
 
         // 토큰에서 정보 획득
-        Long id = jwtUtil.getId(token);
-        String username = jwtUtil.getUsername(token);
-        String role = jwtUtil.getRole(token);
+        Long id = jwtUtils.getId(token);
+        String username = jwtUtils.getUsername(token);
+        String role = jwtUtils.getRole(token);
 
         // 매 요청마다 ContextHolder에 Authentication 추가
         Session session = new Session(id, username, role);

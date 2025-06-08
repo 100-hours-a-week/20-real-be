@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.infra.s3.dto.S3PresignedCreateRequestDTO;
 import com.real.backend.infra.s3.dto.S3PresignedCreateResponseDTO;
-import com.real.backend.response.DataResponse;
+import com.real.backend.common.response.DataResponse;
 
 import lombok.RequiredArgsConstructor;
 

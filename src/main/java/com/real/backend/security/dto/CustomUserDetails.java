@@ -6,8 +6,8 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.real.backend.domain.user.domain.Role;
-import com.real.backend.domain.user.domain.User;
+import com.real.backend.modules.user.domain.Role;
+import com.real.backend.modules.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
 

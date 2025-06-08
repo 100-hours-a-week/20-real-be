@@ -1,6 +1,6 @@
 package com.real.backend.infra.ai.dto;
 
-import com.real.backend.domain.wiki.domain.Wiki;
+import com.real.backend.modules.wiki.domain.Wiki;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -8,8 +8,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.real.backend.domain.wiki.domain.Wiki;
-import com.real.backend.domain.wiki.repository.WikiRepository;
+import com.real.backend.modules.wiki.domain.Wiki;
+import com.real.backend.modules.wiki.repository.WikiRepository;
 
 import lombok.RequiredArgsConstructor;
 

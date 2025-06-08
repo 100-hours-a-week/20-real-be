@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.real.backend.infra.s3.dto.S3PresignedCreateRequestDTO;
 import com.real.backend.infra.s3.dto.S3PresignedCreateResponseDTO;
-import com.real.backend.util.S3Utils;
+import com.real.backend.common.util.S3Utils;
 
 import lombok.RequiredArgsConstructor;
 

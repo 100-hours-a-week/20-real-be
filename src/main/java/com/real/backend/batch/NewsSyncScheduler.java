@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.real.backend.domain.news.repository.NewsRepository;
-import com.real.backend.domain.news.service.NewsAiService;
-import com.real.backend.domain.user.repository.UserRepository;
+import com.real.backend.modules.news.repository.NewsRepository;
+import com.real.backend.modules.news.service.NewsAiService;
+import com.real.backend.modules.user.repository.UserRepository;
 import com.real.backend.infra.redis.NewsRedisService;
 import com.real.backend.infra.redis.PostRedisService;
 
