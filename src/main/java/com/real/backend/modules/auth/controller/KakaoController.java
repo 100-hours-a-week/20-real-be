@@ -27,10 +27,8 @@ public class KakaoController {
     private String serverUrl;
 
     @GetMapping("/v1/oauth/kakao/callback")
-    public void kakaoLogin(
-        @RequestParam("code") String accessCode,
-        HttpServletResponse response
-    ) throws IOException {
+    public void kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse response)
+        throws IOException {
         TokenDTO tokenDTO = authService.oAuthLogin(accessCode);
         cookieUtils.setTokenCookie(response, tokenDTO.accessToken(), tokenDTO.refreshToken());
         response.sendRedirect(serverUrl + "/login/success");

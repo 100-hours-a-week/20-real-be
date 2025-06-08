@@ -101,12 +101,9 @@ public class AuthService {
     }
 
     @Transactional
-    public void refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN");
+    public TokenDTO refreshAccessToken(String refreshToken) {
+        if (refreshToken == null) { throw new UnauthorizedException("refresh token is null"); }
 
-        if (refreshToken == null) {
-            throw new UnauthorizedException("refresh token is null");
-        }
         User user = userFinder.getUser(jwtUtils.getId(refreshToken));
         RefreshToken saved = refreshTokenRepository.findByUser(user).orElseThrow(() -> new UnauthorizedException("refresh token not found"));
 
@@ -114,6 +111,9 @@ public class AuthService {
             throw new UnauthorizedException("refresh token does not match");
         }
 
-        generateToken(response, user);
+        String accessToken = tokenService.generateAccessToken(user);
+        String newRefreshToken = tokenService.generateRefreshToken(user);
+
+        return new TokenDTO(accessToken, newRefreshToken);
     }
 }

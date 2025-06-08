@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.real.backend.common.util.CookieUtils;
+import com.real.backend.modules.auth.dto.TokenDTO;
 import com.real.backend.modules.auth.kakao.KakaoUtil;
 import com.real.backend.modules.auth.service.AuthService;
 import com.real.backend.common.response.StatusResponse;
@@ -21,8 +23,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api")
 public class AuthController {
 
-    private final KakaoUtil kakaoUtil;
     private final AuthService authService;
+    private final KakaoUtil kakaoUtil;
+    private final CookieUtils cookieUtils;
 
     @GetMapping("/v1/oauth/{provider}")
     public void oauthLogin(@PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
@@ -39,8 +42,8 @@ public class AuthController {
 
     @PostMapping("v1/auth/refresh")
     public StatusResponse refresh(HttpServletRequest request, HttpServletResponse response) {
-        authService.refreshAccessToken(request, response);
-
+        TokenDTO tokenDTO = authService.refreshAccessToken(cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN"));
+        cookieUtils.setTokenCookie(response, tokenDTO.accessToken(), tokenDTO.refreshToken());
         return StatusResponse.of(200, "OK");
     }
 }

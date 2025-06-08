@@ -15,7 +15,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class JwtUtils {
 
@@ -76,14 +78,14 @@ public class JwtUtils {
 
     public boolean validateToken(String token, HttpServletResponse response) throws IOException {
         if (token == null) {
-            System.out.println("token is null");
+            log.info("token is null");
             setBody(response, 401, "MISSING_TOKEN");
             return false;
         }
 
         try {
             if (isExpired(token)) {
-                System.out.println("token is expired");
+                log.info("token is expired");
                 setBody(response, 401, "EXPIRED_TOKEN");
                 return false;
             }
