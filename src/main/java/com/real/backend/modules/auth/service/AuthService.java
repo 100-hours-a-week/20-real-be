@@ -8,26 +8,25 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.common.exception.UnauthorizedException;
+import com.real.backend.common.util.CONSTANT;
+import com.real.backend.common.util.CookieUtils;
 import com.real.backend.modules.auth.domain.RefreshToken;
 import com.real.backend.modules.auth.dto.KakaoProfileDTO;
 import com.real.backend.modules.auth.dto.KakaoTokenDTO;
+import com.real.backend.modules.auth.dto.TokenDTO;
 import com.real.backend.modules.auth.kakao.KakaoUtil;
 import com.real.backend.modules.auth.repository.RefreshTokenRepository;
 import com.real.backend.modules.user.component.UserFinder;
-import com.real.backend.common.exception.UnauthorizedException;
-import com.real.backend.security.JwtUtils;
 import com.real.backend.modules.user.domain.User;
 import com.real.backend.modules.user.repository.UserRepository;
 import com.real.backend.modules.user.service.UserSignupService;
-import com.real.backend.common.util.CONSTANT;
-import com.real.backend.common.util.CookieUtils;
+import com.real.backend.security.JwtUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -41,6 +40,7 @@ public class AuthService {
     private final boolean isSecure = true;
     private final boolean isHttpOnly = true;
     private final UserFinder userFinder;
+    private final TokenService tokenService;
 
     @Transactional
     protected void generateToken(HttpServletResponse response, User user) {
@@ -68,17 +68,18 @@ public class AuthService {
     }
 
     @Transactional
-    public User oAuthLogin(String accessCode, HttpServletResponse response) {
+    public TokenDTO oAuthLogin(String accessCode) {
         KakaoTokenDTO oauthToken = kakaoUtil.getAccessToken(accessCode);
         KakaoProfileDTO kakaoProfile = kakaoUtil.getKakaoProfile(oauthToken);
 
         String email = kakaoProfile.getKakao_account().getEmail();
 
         User user = userRepository.findByEmail(email).orElseGet(() -> userSignupService.createOAuthUser(kakaoProfile));
-        generateToken(response, user);
 
-        return user;
+        String accessToken = tokenService.generateAccessToken(user);
+        String refreshToken = tokenService.generateRefreshToken(user);
 
+        return new TokenDTO(accessToken, refreshToken);
     }
 
     @Transactional

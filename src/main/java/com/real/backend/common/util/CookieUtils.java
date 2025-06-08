@@ -2,11 +2,13 @@ package com.real.backend.common.util;
 
 import java.util.Arrays;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class CookieUtils {
@@ -19,6 +21,19 @@ public class CookieUtils {
             .findFirst()
             .map(Cookie::getValue)
             .orElse(null);
+    }
+
+    public void setTokenCookie(HttpServletResponse response, String accessToken, String refreshToken) {
+        boolean isSecure = true;
+        boolean isHttpOnly = true;
+
+        ResponseCookie accessCookie = createResponseCookie("ACCESS_TOKEN", accessToken, isHttpOnly, isSecure, "/",
+            "Lax");
+        ResponseCookie refreshCookie = createResponseCookie("REFRESH_TOKEN", refreshToken, isHttpOnly, isSecure,
+            "/api/v1/auth", "None");
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }
 
     public ResponseCookie createResponseCookie(String name, String token, boolean isHttpOnly, boolean isSecure, String path, String sameSite) {
