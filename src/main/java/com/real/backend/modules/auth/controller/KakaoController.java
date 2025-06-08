@@ -30,7 +30,7 @@ public class KakaoController {
     public void kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse response)
         throws IOException {
         TokenDTO tokenDTO = authService.oAuthLogin(accessCode);
-        cookieUtils.setTokenCookie(response, tokenDTO.accessToken(), tokenDTO.refreshToken());
+        cookieUtils.setTokenCookies(response, tokenDTO.accessToken(), tokenDTO.refreshToken());
         response.sendRedirect(serverUrl + "/login/success");
     }
 }
