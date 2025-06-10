@@ -27,7 +27,7 @@ public class TokenGenController {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @PostMapping("/auth/signup")
+    @PostMapping("/api/v1/auth/signup")
     public StatusResponse signup(@RequestBody UserRequestDTO userRequestDTO){
         createUser(userRequestDTO);
         return StatusResponse.of(201, "register_success");
