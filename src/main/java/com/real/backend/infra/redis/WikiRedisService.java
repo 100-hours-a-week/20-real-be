@@ -76,4 +76,9 @@ public class WikiRedisService {
                 .build();
         }
     }
+
+    public String getUpdatedAtByWikiId(Long wikiId) {
+        Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
+        return (String) wikiMap.get("updated_at");
+    }
 }

@@ -99,6 +99,7 @@ public class WikiService {
 
         List<WikiListResponseDTO> dtoList = pageItems.stream()
             .map(WikiListResponseDTO::of)
+            .map(this::updateUpdatedAt)
             .toList();
 
         return new SliceDTO<>(dtoList, nextCursorStandard, nextCursorId, hasNext);
@@ -108,5 +109,13 @@ public class WikiService {
     public void deleteWiki(Long wikiId) {
         wikiRepository.deleteById(wikiId);
         wikiRedisService.deleteWikiById(wikiId);
+    }
+
+    public WikiListResponseDTO updateUpdatedAt(WikiListResponseDTO wikiListResponseDTO) {
+        String updateAt = wikiRedisService.getUpdatedAtByWikiId(wikiListResponseDTO.getId());
+        if (updateAt != null) {
+            wikiListResponseDTO.updateUpdatedAt(LocalDateTime.parse(updateAt));
+        }
+        return wikiListResponseDTO;
     }
 }
