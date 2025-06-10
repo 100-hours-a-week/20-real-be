@@ -20,7 +20,7 @@ fi
 exec java \
   -javaagent:"$SIGNOZ_PATH" \
   -Dotel.service.name=$OTEL_SERVICE_NAME \
-  -Dotel.exporter.otlp.endpoint=http://43.200.4.253:4318 \
+  -Dotel.exporter.otlp.endpoint=https://collector.kakaotech.com/ \
   -Dotel.instrumentation.spring-web.enabled=true \
   -Dotel.instrumentation.http.enabled=true \
   -Dotel.instrumentation.servlet.enabled=true \
