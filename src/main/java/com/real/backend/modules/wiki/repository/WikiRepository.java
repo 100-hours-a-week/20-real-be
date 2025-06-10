@@ -64,7 +64,7 @@ WHERE w.deletedAt IS NULL
         Pageable pg);
 
     @Query(value = """
-    SELECT id FROM Wiki
+    SELECT id FROM wiki
     ORDER BY updated_at DESC
     LIMIT :limit
 """, nativeQuery = true)
