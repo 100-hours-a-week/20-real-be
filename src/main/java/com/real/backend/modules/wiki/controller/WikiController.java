@@ -22,6 +22,7 @@ import com.real.backend.modules.wiki.service.WikiService;
 import com.real.backend.infra.redis.WikiRedisService;
 import com.real.backend.common.response.DataResponse;
 import com.real.backend.common.response.StatusResponse;
+import com.real.backend.modules.wiki.service.WikiSyncService;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 import com.real.backend.common.util.dto.SliceDTO;
@@ -35,6 +36,7 @@ public class WikiController {
 
     private final WikiService wikiService;
     private final WikiRedisService wikiRedisService;
+    private final WikiSyncService wikiSyncService;
 
     // 새로운 위키 생성
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
@@ -82,6 +84,7 @@ public class WikiController {
         @RequestParam(value = "sort", required = false) SortBy sort,
         @RequestParam(value = "keyword", required = false) String keyword
     ) {
+        wikiSyncService.syncWiki();
         SliceDTO<WikiListResponseDTO> wikiList = wikiService.getWikiListByCursor(cursorId, limit, sort, keyword, cursorStandard);
         return DataResponse.of(wikiList);
     }
