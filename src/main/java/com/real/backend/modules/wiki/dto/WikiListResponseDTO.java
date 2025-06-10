@@ -23,4 +23,8 @@ public class WikiListResponseDTO {
             .updatedAt(wiki.getUpdatedAt())
             .build();
     }
+
+    public void updateUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

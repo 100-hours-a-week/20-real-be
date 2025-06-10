@@ -1,6 +1,8 @@
 package com.real.backend.modules.wiki.domain;
 
-import com.real.backend.common.base.BaseEntity;
+import java.time.LocalDateTime;
+
+import org.springframework.data.annotation.CreatedDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
-public class Wiki extends BaseEntity {
+public class Wiki {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "INT UNSIGNED")
@@ -32,6 +34,19 @@ public class Wiki extends BaseEntity {
 
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private String editorName;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
+
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+    public void updateUpdatedAt(String updatedAt) {
+        this.updatedAt = LocalDateTime.parse(updatedAt);
+    }
 
     public void updateYdoc(String ydoc) { this.ydoc = ydoc; }
     public void updateEditorName(String editorName) { this.editorName = editorName; }
