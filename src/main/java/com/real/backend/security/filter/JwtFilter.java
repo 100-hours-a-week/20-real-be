@@ -10,12 +10,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.real.backend.security.JwtUtil;
+import com.real.backend.security.JwtUtils;
 import com.real.backend.security.Session;
-import com.real.backend.util.CookieUtils;
+import com.real.backend.common.util.CookieUtils;
 
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,13 +24,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    private final JwtUtils jwtUtils;
     private final CookieUtils cookieUtils;
 
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;   // 기본 true → false 로 변경
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
-
         // 건너 뛰어야 하는 경로 건너뛰기
         if (shouldSkip(request)) {
             filterChain.doFilter(request, response);
@@ -41,28 +42,14 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = cookieUtils.resolveTokenFromCookie(request, "ACCESS_TOKEN");
 
-        // token 검증
-        if (token == null) {
-            System.out.println("token is null");
-            setBody(response, 401, "MISSING_TOKEN");
-            return;
-        }
-
-        try {
-            if (jwtUtil.isExpired(token)) {
-                System.out.println("token is expired");
-                setBody(response, 401, "EXPIRED_TOKEN");
-                return;
-            }
-        } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException exception) {
-            setBody(response, 401, "INVALID_TOKEN");
+        if (!jwtUtils.validateToken(token, response)){
             return;
         }
 
         // 토큰에서 정보 획득
-        Long id = jwtUtil.getId(token);
-        String username = jwtUtil.getUsername(token);
-        String role = jwtUtil.getRole(token);
+        Long id = jwtUtils.getId(token);
+        String username = jwtUtils.getUsername(token);
+        String role = jwtUtils.getRole(token);
 
         // 매 요청마다 ContextHolder에 Authentication 추가
         Session session = new Session(id, username, role);
@@ -75,15 +62,8 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void setBody(HttpServletResponse response, int code, String message) throws IOException {
-        response.setStatus(code);
-        response.setContentType("application/json");
-        String jsonResponse = String.format("{\"code\": %d, \"message\": \"%s\"}", code, message);
-        response.getWriter().write(jsonResponse);
-    }
-
     private boolean shouldSkip(HttpServletRequest request) {
-        List<String> skipURI = Arrays.asList("/login", "/auth/.*", "/users/signup", "/api/v1/oauth/.*", "/api/v1/news", "/api/healthz", "/error", "/api/v1/notices/tmp", "/api/v1/auth/refresh");
+        List<String> skipURI = Arrays.asList("/api/v1/auth/login", "/api/v1/auth/signup", "/api/v1/oauth/.*", "/api/healthz", "/error", "/api/v1/auth/refresh","/monitoring/health","/monitoring/info","/monitoring/prometheus", "/api/v1/news", "/api/v1/users/enroll", "/api/v1/invited-user");
         return skipURI.stream().anyMatch(uri -> {
             Pattern pattern = Pattern.compile(uri);
             return pattern.matcher(request.getRequestURI()).matches();

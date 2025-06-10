@@ -9,25 +9,29 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.real.backend.response.DataResponse;
-import com.real.backend.security.JwtUtil;
+import com.real.backend.common.response.DataResponse;
+import com.real.backend.security.JwtUtils;
 import com.real.backend.security.dto.CustomUserDetails;
 import com.real.backend.security.dto.TokenResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.real.backend.util.CONSTANT;
+import com.real.backend.common.util.CONSTANT;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
-
     private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
+    private final JwtUtils jwtUtils;
 
+    public CustomLoginFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
+
+        setFilterProcessesUrl("/api/v1/auth/login");
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -74,8 +78,8 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = customUserDetails.getRole().toString();
 
         // token 만들기
-        String accessToken = jwtUtil.generateToken("access", id, username, role, CONSTANT.ACCESS_TOKEN_EXPIRED);
-        String refreshToken = jwtUtil.generateToken("refresh", id, username, role, CONSTANT.REFRESH_TOKEN_EXPIRED);
+        String accessToken = jwtUtils.generateToken("access", id, username, role, CONSTANT.ACCESS_TOKEN_EXPIRED);
+        String refreshToken = jwtUtils.generateToken("refresh", id, username, role, CONSTANT.REFRESH_TOKEN_EXPIRED);
 
         // 응답 구성하기 (헤더, 바디) (액세스 토큰)
         TokenResponse tokenDto = new TokenResponse(accessToken);
