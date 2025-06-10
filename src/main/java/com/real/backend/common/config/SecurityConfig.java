@@ -56,7 +56,7 @@ public class SecurityConfig {
         // 경로별 인가 작업
         http
             .authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/auth/**", "/login").permitAll() // 필터 거치지 않고 통과
+                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/signup").permitAll() // 필터 거치지 않고 통과
                 .requestMatchers("/api/v1/oauth/**", "/api/v1/news").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/api/v1/auth/refresh").permitAll()
