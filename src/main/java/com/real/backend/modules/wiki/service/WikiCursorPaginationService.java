@@ -35,13 +35,13 @@ public class WikiCursorPaginationService {
             ? Double.POSITIVE_INFINITY
             : LocalDateTime.parse(cursorStandard)
             .toEpochSecond(ZoneOffset.UTC);
-
+        long offset = cursorStandard == null ? 0 : 1;
         Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet()
             .reverseRangeByScoreWithScores(
                 SORTED_KEY,
                 Double.NEGATIVE_INFINITY,
                 maxScore,
-                0,
+                offset,
                 limit + 1
             );
 
@@ -50,7 +50,6 @@ public class WikiCursorPaginationService {
         }
 
         List<Long> idList = tuples.stream()
-            .limit(limit)
             .map(ZSetOperations.TypedTuple::getValue)
             .map(Long::valueOf)
             .collect(Collectors.toList());

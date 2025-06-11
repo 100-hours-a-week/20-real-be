@@ -80,7 +80,7 @@ public class WikiController {
     public DataResponse<SliceDTO<WikiListResponseDTO>> getWikisList(
         @RequestParam(value = "cursorId", required = false) Long cursorId,
         @RequestParam(value = "cursorStandard", required = false) String cursorStandard,
-        @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
+        @RequestParam(value = "limit", required = false, defaultValue = "4") int limit,
         @RequestParam(value = "sort", required = false) SortBy sort,
         @RequestParam(value = "keyword", required = false) String keyword
     ) {
