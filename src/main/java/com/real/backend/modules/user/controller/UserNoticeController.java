@@ -40,7 +40,7 @@ public class UserNoticeController {
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @PostMapping("v1/users/notices/read")
     public StatusResponse readNotices(@CurrentSession Session session) {
-        userNoticeService.readNotices(session.getId());
+        userNoticeService.readAllNotice(session.getId());
         return StatusResponse.of(200, "안 읽은 공지들이 성공적으로 읽음 처리 되었습니다.");
     }
 }

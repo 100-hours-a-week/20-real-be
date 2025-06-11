@@ -1,12 +1,12 @@
 package com.real.backend.common.util;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 public class CursorUtils {
 
@@ -40,6 +40,31 @@ public class CursorUtils {
         if (hasNext && !pageItems.isEmpty()) {
             T last = pageItems.get(pageItems.size() - 1);
             nextCursor   = cursorExtractor.apply(last);
+            nextCursorId = idExtractor.apply(last);
+        }
+
+        List<D> dtoList = pageItems.stream()
+            .map(mapper)
+            .collect(Collectors.toList());
+
+        return builder.build(dtoList, nextCursor, nextCursorId, hasNext);
+    }
+
+    public static <T, D, R> R toCursorDto(
+        List<T> fullList, int limit,
+        Function<T, D> mapper,
+        Function<T, String> cursorExtractor,
+        Function<T, Long> idExtractor,
+        SliceDtoBuilder<D, R> builder
+    ) {
+        boolean hasNext = fullList.size() > limit;
+        List<T> pageItems = hasNext ? fullList.subList(0, limit) : fullList;
+
+        String nextCursor = null;
+        Long nextCursorId = null;
+        if (hasNext && !pageItems.isEmpty()) {
+            T last = pageItems.get(pageItems.size() - 1);
+            nextCursor = cursorExtractor.apply(last);
             nextCursorId = idExtractor.apply(last);
         }
 
