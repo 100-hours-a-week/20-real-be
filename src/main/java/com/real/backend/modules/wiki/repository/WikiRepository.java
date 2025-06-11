@@ -72,4 +72,7 @@ WHERE w.deletedAt IS NULL
 
     @Query("SELECT w.id FROM Wiki w WHERE w.title = :title AND w.deletedAt IS NULL")
 	Long getWikiIdByTitle(@Param("title") String title);
+
+    @Query("SELECT w.title FROM Wiki w WHERE w.id = :id")
+    String getWikiTitleById(@Param("id") Long id);
 }

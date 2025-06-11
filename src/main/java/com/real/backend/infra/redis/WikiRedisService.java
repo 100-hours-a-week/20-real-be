@@ -1,7 +1,9 @@
 package com.real.backend.infra.redis;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,17 +19,22 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WikiRedisService {
     private final WikiRepository wikiRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
     public void updateWiki(Long wikiId, String ydoc, String html, String username) {
+        LocalDateTime now = LocalDateTime.now();
+        String title = wikiRepository.getWikiTitleById(wikiId);
         Map<String, String> wikiMap = new HashMap<>();
+        wikiMap.put("title", title);
         wikiMap.put("html", html);
         wikiMap.put("editor_name", username);
-        wikiMap.put("updated_at", LocalDateTime.now().toString());
+        wikiMap.put("updated_at", now.toString());
         wikiMap.put("ydoc", ydoc);
 
         redisTemplate.opsForHash().putAll("wiki:" + wikiId, wikiMap);
+
+        addZSetWiki(wikiId, now.toEpochSecond(ZoneOffset.UTC));
     }
 
     @Transactional
@@ -45,13 +52,6 @@ public class WikiRedisService {
         wiki.updateUpdatedAt(updatedAt);
 
         wikiRepository.save(wiki);
-
-        redisTemplate.delete("wiki:" + wikiId);
-    }
-
-    @Transactional
-    public void deleteWikiById(Long wikiId) {
-        redisTemplate.delete("wiki:" + wikiId);
     }
 
     @Transactional(readOnly = true)
@@ -80,5 +80,27 @@ public class WikiRedisService {
     public String getUpdatedAtByWikiId(Long wikiId) {
         Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
         return (String) wikiMap.get("updated_at");
+    }
+
+    public void loadAllWikisToRedis() {
+        List<Wiki> wikis = wikiRepository.findAll();
+        for (Wiki wiki : wikis) {
+            String key = "wiki:" + wiki.getId();
+            Map<String, String> hash = new HashMap<>();
+            hash.put("html", wiki.getHtml());
+            hash.put("editor_name", wiki.getEditorName());
+            hash.put("updated_at", wiki.getUpdatedAt().toString());
+            hash.put("ydoc", wiki.getYdoc());
+            hash.put("title", wiki.getTitle());
+
+            redisTemplate.opsForHash().putAll(key, hash);
+
+            double score = wiki.getUpdatedAt().toEpochSecond(ZoneOffset.UTC);
+            addZSetWiki(wiki.getId(), score);
+        }
+    }
+
+    public void addZSetWiki(Long wikiId, double score) {
+        redisTemplate.opsForZSet().add("wikis:sorted:latest", String.valueOf(wikiId), score);
     }
 }

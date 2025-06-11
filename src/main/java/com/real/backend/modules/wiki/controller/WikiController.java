@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.real.backend.common.response.DataResponse;
+import com.real.backend.common.response.StatusResponse;
+import com.real.backend.common.util.dto.SliceDTO;
+import com.real.backend.infra.redis.WikiRedisService;
 import com.real.backend.modules.wiki.domain.SearchMethod;
 import com.real.backend.modules.wiki.domain.SortBy;
 import com.real.backend.modules.wiki.domain.Wiki;
@@ -18,14 +22,10 @@ import com.real.backend.modules.wiki.dto.WikiCreateRequestDTO;
 import com.real.backend.modules.wiki.dto.WikiEditRequestDTO;
 import com.real.backend.modules.wiki.dto.WikiListResponseDTO;
 import com.real.backend.modules.wiki.dto.WikiResponseDTO;
+import com.real.backend.modules.wiki.service.WikiCursorPaginationService;
 import com.real.backend.modules.wiki.service.WikiService;
-import com.real.backend.infra.redis.WikiRedisService;
-import com.real.backend.common.response.DataResponse;
-import com.real.backend.common.response.StatusResponse;
-import com.real.backend.modules.wiki.service.WikiSyncService;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
-import com.real.backend.common.util.dto.SliceDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,7 +36,7 @@ public class WikiController {
 
     private final WikiService wikiService;
     private final WikiRedisService wikiRedisService;
-    private final WikiSyncService wikiSyncService;
+    private final WikiCursorPaginationService wikiCursorPaginationService;
 
     // 새로운 위키 생성
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
@@ -84,8 +84,7 @@ public class WikiController {
         @RequestParam(value = "sort", required = false) SortBy sort,
         @RequestParam(value = "keyword", required = false) String keyword
     ) {
-        wikiSyncService.syncWiki();
-        SliceDTO<WikiListResponseDTO> wikiList = wikiService.getWikiListByCursor(cursorId, limit, sort, keyword, cursorStandard);
+        SliceDTO<WikiListResponseDTO> wikiList = wikiCursorPaginationService.getWikiListByCursor(cursorId, limit, cursorStandard);
         return DataResponse.of(wikiList);
     }
 
