@@ -44,7 +44,9 @@ public class UserNoticeService {
             limit,
             notice -> new UserUnreadNoticeResponseDTO(
                 notice.getId(),
-                notice.getTitle()
+                notice.getTitle(),
+                notice.getCreatedAt()
+
             ),
             notice -> notice.getCreatedAt().toString(),
             Notice::getId,
