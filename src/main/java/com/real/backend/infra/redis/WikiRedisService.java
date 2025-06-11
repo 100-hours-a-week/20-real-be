@@ -35,6 +35,7 @@ public class WikiRedisService {
         redisTemplate.opsForHash().putAll("wiki:" + wikiId, wikiMap);
 
         addZSetWiki(wikiId, now.toEpochSecond(ZoneOffset.UTC));
+        addZSetWikiTitle(wikiId, title);
     }
 
     @Transactional
@@ -97,10 +98,15 @@ public class WikiRedisService {
 
             double score = wiki.getUpdatedAt().toEpochSecond(ZoneOffset.UTC);
             addZSetWiki(wiki.getId(), score);
+            addZSetWikiTitle(wiki.getId(), wiki.getTitle());
         }
     }
 
     public void addZSetWiki(Long wikiId, double score) {
         redisTemplate.opsForZSet().add("wikis:sorted:latest", String.valueOf(wikiId), score);
+    }
+
+    public void addZSetWikiTitle(Long wikiId, String title) {
+        redisTemplate.opsForZSet().add("wikis:title:index", title+":"+wikiId.toString(), 0);
     }
 }

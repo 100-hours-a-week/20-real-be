@@ -84,7 +84,7 @@ public class WikiController {
         @RequestParam(value = "sort", required = false) SortBy sort,
         @RequestParam(value = "keyword", required = false) String keyword
     ) {
-        SliceDTO<WikiListResponseDTO> wikiList = wikiCursorPaginationService.getWikiListByCursor(cursorId, limit, cursorStandard);
+        SliceDTO<WikiListResponseDTO> wikiList = wikiCursorPaginationService.getWikiListByCursor(cursorId, limit, cursorStandard, sort, keyword);
         return DataResponse.of(wikiList);
     }
 
