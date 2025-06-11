@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class NoticeReadCacheLoader implements ApplicationRunner {
 
     private final UserNoticeReadRepository userNoticeReadRepository;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional(readOnly = true)
     @Override
