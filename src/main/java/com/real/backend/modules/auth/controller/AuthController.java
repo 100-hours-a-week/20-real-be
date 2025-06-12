@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.real.backend.common.response.StatusResponse;
 import com.real.backend.common.util.CookieUtils;
 import com.real.backend.modules.auth.dto.TokenDTO;
-import com.real.backend.modules.auth.kakao.KakaoUtil;
+import com.real.backend.modules.auth.util.KakaoUtil;
 import com.real.backend.modules.auth.service.RefreshTokenService;
 import com.real.backend.modules.auth.service.TokenService;
 

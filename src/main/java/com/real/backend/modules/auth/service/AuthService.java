@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.real.backend.modules.auth.dto.KakaoProfileDTO;
 import com.real.backend.modules.auth.dto.KakaoTokenDTO;
 import com.real.backend.modules.auth.dto.TokenDTO;
-import com.real.backend.modules.auth.kakao.KakaoUtil;
+import com.real.backend.modules.auth.util.KakaoUtil;
 import com.real.backend.modules.user.domain.User;
 import com.real.backend.modules.user.repository.UserRepository;
 import com.real.backend.modules.user.service.UserSignupService;
