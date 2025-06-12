@@ -14,12 +14,15 @@ import com.real.backend.modules.wiki.domain.Wiki;
 import com.real.backend.modules.wiki.repository.WikiRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WikiRedisService {
     private final WikiRepository wikiRepository;
     private final RedisTemplate<String, String> redisTemplate;
+    private final String latestZSetKey = "wikis:sorted:latest";
 
     @Transactional
     public void updateWiki(Long wikiId, String ydoc, String html, String username) {
@@ -85,28 +88,41 @@ public class WikiRedisService {
 
     public void loadAllWikisToRedis() {
         List<Wiki> wikis = wikiRepository.findAll();
-        for (Wiki wiki : wikis) {
-            String key = "wiki:" + wiki.getId();
-            Map<String, String> hash = new HashMap<>();
-            hash.put("html", wiki.getHtml());
-            hash.put("editor_name", wiki.getEditorName());
-            hash.put("updated_at", wiki.getUpdatedAt().toString());
-            hash.put("ydoc", wiki.getYdoc());
-            hash.put("title", wiki.getTitle());
+        boolean isExist = isExist(latestZSetKey);
+        log.info("isExist: {}", isExist);
+        if (!isExist) {
+            log.info("loadAllWikisToRedis is executed");
+            for (Wiki wiki : wikis) {
+                String key = "wiki:" + wiki.getId();
+                Map<String, String> hash = new HashMap<>();
+                hash.put("html", wiki.getHtml());
+                hash.put("editor_name", wiki.getEditorName());
+                hash.put("updated_at", wiki.getUpdatedAt().toString());
+                hash.put("ydoc", wiki.getYdoc());
+                hash.put("title", wiki.getTitle());
 
-            redisTemplate.opsForHash().putAll(key, hash);
+                redisTemplate.opsForHash().putAll(key, hash);
 
-            double score = wiki.getUpdatedAt().toEpochSecond(ZoneOffset.UTC);
-            addZSetWiki(wiki.getId(), score);
-            addZSetWikiTitle(wiki.getId(), wiki.getTitle());
+                double score = wiki.getUpdatedAt().toEpochSecond(ZoneOffset.UTC);
+                addZSetWiki(wiki.getId(), score);
+                addZSetWikiTitle(wiki.getId(), wiki.getTitle());
+            }
         }
     }
 
     public void addZSetWiki(Long wikiId, double score) {
-        redisTemplate.opsForZSet().add("wikis:sorted:latest", String.valueOf(wikiId), score);
+        redisTemplate.opsForZSet().add(latestZSetKey, String.valueOf(wikiId), score);
     }
 
     public void addZSetWikiTitle(Long wikiId, String title) {
         redisTemplate.opsForZSet().add("wikis:title:index", title+":"+wikiId.toString(), 0);
+    }
+
+    private boolean isExist(String key){
+        Long size = redisTemplate.opsForZSet().size(key);
+        if ( size == null || size == 0 ){
+            return false;
+        }
+        return true;
     }
 }
