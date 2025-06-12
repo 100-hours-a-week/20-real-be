@@ -34,6 +34,8 @@ public class WikiService {
         return wikiRepository.save(Wiki.builder()
             .title(wikiCreateRequestDTO.getTitle())
             .editorName(userName)
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
             .ydoc(null)
             .build());
     }

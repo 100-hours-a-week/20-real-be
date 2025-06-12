@@ -95,4 +95,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Modifying
     @Query("UPDATE Notice n SET n.totalViewCount = :totalView, n.likeCount = :likeCount, n.commentCount = :commentCount WHERE n.id = :id")
     void updateCounts(Long id, Long totalView, Long likeCount, Long commentCount);
+
+    @Query("select n.id from Notice n")
+    List<Long> findAllNoticeIds();
 }

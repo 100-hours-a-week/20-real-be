@@ -1,5 +1,6 @@
 package com.real.backend.infra.redis;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +33,24 @@ public class NoticeRedisService {
     public Boolean getUserRead(Long userId, Long noticeId) {
         String key = "notice:read:user:"+userId;
         return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(key, noticeId.toString()));
+    }
+
+    public List<Long> getUserReadList(Long userId) {
+        String key = "notice:read:user:"+userId;
+        Set<Object> noticeIds = redisTemplate.opsForSet().members(key);
+        if (noticeIds == null) {
+            return new ArrayList<>();
+        }
+        return noticeIds
+            .stream()
+            .map(noticeId -> Long.parseLong(noticeId.toString()))
+            .toList();
+    }
+
+    public void userNoticeReadAll(List<Long> noticeIds, Long userId) {
+        String redisKey = "notice:read:user:" + userId;
+        redisTemplate.opsForSet().add(redisKey,
+            noticeIds.stream().map(String::valueOf).toArray(String[]::new));
     }
 
     public void syncLike(List<Long> userIds) {
