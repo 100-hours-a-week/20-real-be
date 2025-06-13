@@ -6,12 +6,12 @@ mkdir -p /home/ec2-user/logs
 touch /home/ec2-user/logs/docker.log
 
 echo "[INFO] Starting Spring Boot with Scouter Agent..."
-echo "Profile : $SPRING_PROFILE"
+echo "Profile : $SPRING_PROFILES_ACTIVE"
 echo "Logging to : $LOG_FILE"
 echo "SIGNOZ : $SIGNOZ_PATH"
 
 # 🧠 환경에 따라 서비스 이름 분기
-if [ "$SPRING_PROFILE" = "prod" ]; then
+if [ "$SPRING_PROFILES_ACTIVE" = "prod" ]; then
   OTEL_SERVICE_NAME="spring-prod"
 else
   OTEL_SERVICE_NAME="spring-dev"
