@@ -87,7 +87,7 @@ public class WikiRedisService {
     }
 
     public void loadAllWikisToRedis() {
-        List<Wiki> wikis = wikiRepository.findAll();
+        List<Wiki> wikis = wikiRepository.findAllWithoutDeleted();
         boolean isExist = isExist(latestZSetKey);
         log.info("isExist: {}", isExist);
         if (!isExist) {
