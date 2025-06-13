@@ -61,7 +61,8 @@ public class SecurityConfig {
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/api/v1/auth/refresh").permitAll()
                 .requestMatchers("/api/healthz").permitAll()    //서버 헬스 체크용 API, Security Filter 우회
-                .requestMatchers("/monitoring/health","/monitoring/info","/monitoring/prometheus").permitAll() // 모니터링 API, Security Filter 우회
+                .requestMatchers("/monitoring-prod/health","/monitoring-prod/info","/monitoring-prod/prometheus").permitAll() // 모니터링 API, Security Filter 우회
+                .requestMatchers("/monitoring-dev/health", "/monitoring-dev/info", "/monitoring-dev/prometheus").permitAll()
                 .requestMatchers("/api/v1/users/enroll", "/api/v1/invited-user").permitAll()
                 .anyRequest().authenticated()  // 나머지는 필터 통과
             );
