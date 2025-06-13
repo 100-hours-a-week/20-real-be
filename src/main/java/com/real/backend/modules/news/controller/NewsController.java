@@ -81,7 +81,7 @@ public class NewsController {
     @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PostMapping("/v1/news/ai")
     public StatusResponse createNewsWithAi() throws JsonProcessingException {
-        newsAiService.createNewsAi();
+        newsAiService.createNewsAiByRandomWiki();
         return StatusResponse.of(201, "뉴스가 성공적으로 생성되었습니다.");
     }
 }
