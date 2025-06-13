@@ -78,14 +78,12 @@ public class JwtUtils {
 
     public boolean validateToken(String token, HttpServletResponse response) throws IOException {
         if (token == null) {
-            // log.info("token is null");
             setBody(response, 401, "MISSING_TOKEN");
             return false;
         }
 
         try {
             if (isExpired(token)) {
-                // log.info("token is expired");
                 setBody(response, 401, "EXPIRED_TOKEN");
                 return false;
             }
