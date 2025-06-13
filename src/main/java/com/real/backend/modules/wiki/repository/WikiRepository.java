@@ -75,4 +75,7 @@ WHERE w.deletedAt IS NULL
 
     @Query("SELECT w.title FROM Wiki w WHERE w.id = :id")
     String getWikiTitleById(@Param("id") Long id);
+
+    @Query(value = "SELECT * from Wiki WHERE deleted_at IS NULL",nativeQuery = true)
+    List<Wiki> findAllWithoutDeleted();
 }
