@@ -17,9 +17,9 @@ import com.real.backend.common.response.StatusResponse;
 import com.real.backend.common.util.dto.SliceDTO;
 import com.real.backend.modules.news.dto.NewsCreateRequestDTO;
 import com.real.backend.modules.news.dto.NewsListResponseDTO;
-import com.real.backend.modules.news.dto.NewsResponseDTO;
 import com.real.backend.modules.news.service.NewsAiService;
 import com.real.backend.modules.news.service.NewsService;
+import com.real.backend.modules.news.dto.NewsResponseDTO;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 
@@ -63,6 +63,13 @@ public class NewsController {
     }
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
+    @PostMapping("/v1/news/{wikiId}")
+    public StatusResponse createWikiNewsById(@PathVariable Long wikiId) throws JsonProcessingException {
+        newsAiService.createNewsAiByWikiId(wikiId);
+        return StatusResponse.of(201, "뉴스가 성공적으로 생성되었습니다.");
+    }
+
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @DeleteMapping("/v1/news/{newsId}")
     public StatusResponse deleteNews(
     @PathVariable Long newsId
@@ -74,7 +81,7 @@ public class NewsController {
     @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PostMapping("/v1/news/ai")
     public StatusResponse createNewsWithAi() throws JsonProcessingException {
-        newsAiService.createNewsAi();
+        newsAiService.createNewsAiByRandomWiki();
         return StatusResponse.of(201, "뉴스가 성공적으로 생성되었습니다.");
     }
 }
