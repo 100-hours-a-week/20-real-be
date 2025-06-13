@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.real.backend.common.response.StatusResponse;
 import com.real.backend.common.util.CookieUtils;
 import com.real.backend.modules.auth.dto.TokenDTO;
-import com.real.backend.modules.auth.util.KakaoUtil;
-import com.real.backend.modules.auth.service.RefreshTokenService;
+import com.real.backend.modules.auth.kakao.KakaoUtil;
 import com.real.backend.modules.auth.service.TokenService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +25,6 @@ public class AuthController {
     private final KakaoUtil kakaoUtil;
     private final CookieUtils cookieUtils;
     private final TokenService tokenService;
-    private final RefreshTokenService refreshTokenService;
 
     @GetMapping("/v1/oauth/{provider}")
     public void oauthLogin(@PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
@@ -37,7 +35,7 @@ public class AuthController {
 
     @PostMapping("/v1/auth/logout")
     public StatusResponse logout(HttpServletRequest request, HttpServletResponse response) {
-        refreshTokenService.deleteRefreshToken(cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN"));
+        tokenService.deleteRefreshToken(cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN"));
         cookieUtils.deleteTokenCookies(response);
         return StatusResponse.of(204, "성공적으로 로그아웃 됐습니다.");
     }

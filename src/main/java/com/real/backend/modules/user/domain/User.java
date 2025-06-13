@@ -6,12 +6,11 @@ import java.util.List;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.real.backend.common.base.BaseEntity;
 import com.real.backend.modules.news.domain.NewsComment;
 import com.real.backend.modules.news.domain.NewsLike;
 import com.real.backend.modules.notice.domain.Notice;
 import com.real.backend.modules.notice.domain.NoticeComment;
-import com.real.backend.modules.auth.domain.RefreshToken;
-import com.real.backend.common.base.BaseEntity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -85,9 +84,6 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserNoticeRead> userNoticeReads;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RefreshToken> refreshTokens;
 
 
     public void updateNickname(String nickname) {this.nickname = nickname;}
