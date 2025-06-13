@@ -1,4 +1,4 @@
-package com.real.backend.modules.auth.util;
+package com.real.backend.modules.auth.kakao;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

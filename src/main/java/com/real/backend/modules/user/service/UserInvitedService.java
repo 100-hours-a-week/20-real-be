@@ -4,12 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.real.backend.common.exception.ForbiddenException;
 import com.real.backend.modules.user.domain.InvitedUser;
-import com.real.backend.modules.user.domain.Role;
-import com.real.backend.modules.user.domain.User;
 import com.real.backend.modules.user.dto.InvitedUserCreateRequestDTO;
 import com.real.backend.modules.user.repository.InvitedUserRepository;
+import com.real.backend.common.exception.ForbiddenException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,15 +30,5 @@ public class UserInvitedService {
                 .name(invitedUserCreateRequestDTO.getUserName())
                 .build()
         );
-    }
-
-    @Transactional
-    public User setUserInfoWithInvitedUser(User user) {
-        InvitedUser invitedUser = invitedUserRepository.findByEmail(user.getEmail()).orElse(null);
-
-        if (invitedUser != null) {
-            user.enroll(invitedUser.getName(), Role.TRAINEE);
-        }
-        return user;
     }
 }
