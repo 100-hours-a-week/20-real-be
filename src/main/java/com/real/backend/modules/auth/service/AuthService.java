@@ -17,8 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthService {
     private final UserSignupService userSignupService;
-    private final AccessTokenService accessTokenService;
-    private final RefreshTokenService refreshTokenService;
+    private final TokenService tokenService;
     private final UserRepository userRepository;
     private final KakaoUtil kakaoUtil;
 
@@ -31,8 +30,8 @@ public class AuthService {
 
         User user = userRepository.findByEmail(email).orElseGet(() -> userSignupService.createOAuthUser(kakaoProfile));
 
-        String accessToken = accessTokenService.generateAccessToken(user);
-        String refreshToken = refreshTokenService.generateRefreshToken(user);
+        String accessToken = tokenService.generateAccessToken(user);
+        String refreshToken = tokenService.generateRefreshToken(user);
 
         return new TokenDTO(accessToken, refreshToken);
     }
