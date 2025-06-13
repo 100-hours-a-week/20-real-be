@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.modules.news.dto.NewsCreateRequestDTO;
 import com.real.backend.modules.news.dto.NewsListResponseDTO;
+import com.real.backend.modules.news.service.NewsAiService;
 import com.real.backend.modules.news.service.NewsService;
 import com.real.backend.modules.news.dto.NewsResponseDTO;
 import com.real.backend.common.response.DataResponse;
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class NewsController {
 
     private final NewsService newsService;
+    private final NewsAiService newsAiService;
 
     @GetMapping("/v1/news")
     public DataResponse<SliceDTO<NewsListResponseDTO>> getNewsListByCursor(@RequestParam(value = "cursorId", required = false) Long cursorId,
@@ -57,6 +59,13 @@ public class NewsController {
         @RequestPart(value = "image", required = false) MultipartFile image) throws JsonProcessingException {
 
         newsService.createNews(newsCreateRequestDTO, image);
+        return StatusResponse.of(201, "뉴스가 성공적으로 생성되었습니다.");
+    }
+
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
+    @PostMapping("/v1/news/{wikiId}")
+    public StatusResponse createWikiNewsById(@PathVariable Long wikiId) throws JsonProcessingException {
+        newsAiService.createNewsAiByWikiId(wikiId);
         return StatusResponse.of(201, "뉴스가 성공적으로 생성되었습니다.");
     }
 
