@@ -53,10 +53,6 @@ public class NewsAiService {
         List<Long> ids = wikiRepository.getAllIdOrderByUpdatedAtLimit(5);
         Wiki wiki = wikiService.getRandomWiki(ids);
 
-        // S3FileInfoResponse s3FileInfoResponse = aiResponseService.getS3FileInfo("/api/v1/presigned");
-        // String key = s3Utils.generateKey(DIR_NAME, s3FileInfoResponse.getFileName());
-        // String url = s3Utils.generatePresignedUrl(DIR_NAME, s3FileInfoResponse.getFileName(), Duration.ofMinutes(5), s3FileInfoResponse.getContentType());
-
         String key = s3Utils.generateKey(DIR_NAME, "ai_gen.png");
         String url = s3Utils.generatePresignedUrl(key, Duration.ofMinutes(5), "image/png");
 
