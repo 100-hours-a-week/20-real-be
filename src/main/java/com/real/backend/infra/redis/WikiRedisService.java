@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,11 +89,23 @@ public class WikiRedisService {
 
     public void loadAllWikisToRedis() {
         List<Wiki> wikis = wikiRepository.findAllWithoutDeleted();
-        boolean isExist = isExist(latestZSetKey);
-        log.info("isExist: {}", isExist);
-        if (!isExist) {
-            log.info("loadAllWikisToRedis is executed");
-            for (Wiki wiki : wikis) {
+
+        List<String> keys = wikis.stream()
+            .map(w -> "wiki:" + w.getId())
+            .toList();
+
+        List<Object> results = redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            for (String key : keys) {
+                byte[] redisKey = redisTemplate.getStringSerializer().serialize(key);
+                connection.keyCommands().exists(redisKey);
+            }
+            return null;
+        });
+
+        for (int i = 0; i < wikis.size(); i++) {
+            Boolean exists = (Boolean) results.get(i);
+            if (!exists) {
+                Wiki wiki = wikis.get(i);
                 String key = "wiki:" + wiki.getId();
                 Map<String, String> hash = new HashMap<>();
                 hash.put("html", wiki.getHtml());
@@ -109,6 +122,7 @@ public class WikiRedisService {
             }
         }
     }
+
 
     public void addZSetWiki(Long wikiId, double score) {
         redisTemplate.opsForZSet().add(latestZSetKey, String.valueOf(wikiId), score);
