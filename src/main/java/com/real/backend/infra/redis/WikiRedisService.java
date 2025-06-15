@@ -5,8 +5,10 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,8 @@ public class WikiRedisService {
     private final WikiRepository wikiRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final String latestZSetKey = "wikis:sorted:latest";
+    private final String titleZSetKey = "wikis:sorted:title";
+
 
     @Transactional
     public void updateWiki(Long wikiId, String ydoc, String html, String username) {
@@ -37,7 +41,7 @@ public class WikiRedisService {
 
         redisTemplate.opsForHash().putAll("wiki:" + wikiId, wikiMap);
 
-        addZSetWiki(wikiId, now.toEpochSecond(ZoneOffset.UTC));
+        addZSetWikiUpdatedAt(wikiId, now.toEpochSecond(ZoneOffset.UTC));
         addZSetWikiTitle(wikiId, title);
     }
 
@@ -54,6 +58,8 @@ public class WikiRedisService {
         wiki.updateYdoc(ydoc);
         wiki.updateEditorName(editor);
         wiki.updateUpdatedAt(updatedAt);
+
+        deleteWikiHash(wikiId);
 
         wikiRepository.save(wiki);
     }
@@ -81,48 +87,51 @@ public class WikiRedisService {
         }
     }
 
-    public String getUpdatedAtByWikiId(Long wikiId) {
-        Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
-        return (String) wikiMap.get("updated_at");
-    }
-
-    public void loadAllWikisToRedis() {
+    public void loadAllWikiDataToRedis() {
         List<Wiki> wikis = wikiRepository.findAllWithoutDeleted();
-        boolean isExist = isExist(latestZSetKey);
-        log.info("isExist: {}", isExist);
-        if (!isExist) {
-            log.info("loadAllWikisToRedis is executed");
-            for (Wiki wiki : wikis) {
-                String key = "wiki:" + wiki.getId();
-                Map<String, String> hash = new HashMap<>();
-                hash.put("html", wiki.getHtml());
-                hash.put("editor_name", wiki.getEditorName());
-                hash.put("updated_at", wiki.getUpdatedAt().toString());
-                hash.put("ydoc", wiki.getYdoc());
-                hash.put("title", wiki.getTitle());
+        ZSetOperations<String, String> zSetOps = redisTemplate.opsForZSet();
 
-                redisTemplate.opsForHash().putAll(key, hash);
+        Set<String> titleSet = getZSetValues(titleZSetKey);
+        Set<String> latestSet = getZSetValues(latestZSetKey);
 
-                double score = wiki.getUpdatedAt().toEpochSecond(ZoneOffset.UTC);
-                addZSetWiki(wiki.getId(), score);
-                addZSetWikiTitle(wiki.getId(), wiki.getTitle());
+        for (Wiki wiki : wikis) {
+            String titleEntry = wiki.getTitle() + ":" + wiki.getId();
+            String latestEntry = String.valueOf(wiki.getId());
+            if (!titleSet.contains(titleEntry)) {
+                zSetOps.add(titleZSetKey, titleEntry, 0);
+            }
+            if (!latestSet.contains(latestEntry)) {
+                long score = wiki.getUpdatedAt().toEpochSecond(ZoneOffset.UTC);
+                zSetOps.add(latestZSetKey, latestEntry, score);
             }
         }
     }
 
-    public void addZSetWiki(Long wikiId, double score) {
+    private Set<String> getZSetValues(String key) {
+
+        ZSetOperations<String, String> zSetOps = redisTemplate.opsForZSet();
+        Set<String> existing = zSetOps.range(key, 0, -1);
+
+        return (existing != null) ? existing : Set.of();
+    }
+
+    public void addZSetWikiUpdatedAt(Long wikiId, double score) {
         redisTemplate.opsForZSet().add(latestZSetKey, String.valueOf(wikiId), score);
     }
 
     public void addZSetWikiTitle(Long wikiId, String title) {
-        redisTemplate.opsForZSet().add("wikis:title:index", title+":"+wikiId.toString(), 0);
+        redisTemplate.opsForZSet().add(titleZSetKey, title+":"+wikiId.toString(), 0);
     }
 
-    private boolean isExist(String key){
-        Long size = redisTemplate.opsForZSet().size(key);
-        if ( size == null || size == 0 ){
-            return false;
-        }
-        return true;
+    public void deleteZSetWikiUpdatedAt(Long wikiId) {
+        redisTemplate.opsForZSet().remove(latestZSetKey, String.valueOf(wikiId));
+    }
+
+    public void deleteZSetWikiTitle(Long wikiId, String title) {
+        redisTemplate.opsForZSet().remove(titleZSetKey, title+":"+wikiId.toString());
+    }
+
+    public void deleteWikiHash(Long wikiId) {
+        redisTemplate.opsForHash().delete("wiki:" + wikiId, "html", "title", "ydoc", "updated_at", "editor_name");
     }
 }
