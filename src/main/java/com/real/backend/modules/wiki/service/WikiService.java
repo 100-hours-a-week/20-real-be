@@ -2,10 +2,12 @@ package com.real.backend.modules.wiki.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.common.exception.BadRequestException;
 import com.real.backend.common.exception.NotFoundException;
 import com.real.backend.infra.redis.WikiRedisService;
 import com.real.backend.modules.wiki.domain.SearchMethod;
@@ -35,6 +37,9 @@ public class WikiService {
 
     @Transactional(readOnly = true)
     public Wiki getWiki(String title, SearchMethod method) {
+        if (Objects.equals(title, " ") || Objects.equals(title, "")) {
+            throw new BadRequestException("빈 문자열은 입력으로 들어올 수 없습니다.");
+        }
         if (SearchMethod.NORMAL.equals(method)) {
             Wiki wiki = wikiRedisService.getWikiById(title);
             if (wiki == null) {

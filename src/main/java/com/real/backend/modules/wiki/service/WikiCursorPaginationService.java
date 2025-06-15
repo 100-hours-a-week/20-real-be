@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -84,6 +85,9 @@ public class WikiCursorPaginationService {
     }
 
     public SliceDTO<WikiListResponseDTO> getWikiListWithTitle(int limit, String cursorStandard, String keyword) {
+        if (Objects.equals(keyword, " ") || Objects.equals(keyword, "") || keyword == null) {
+            throw new BadRequestException("빈 문자열은 입력으로 들어올 수 없습니다.");
+        }
         boolean isFirstPage = (cursorStandard == null);
 
         ZSetOperations<String, String> zSetOps = redisTemplate.opsForZSet();
