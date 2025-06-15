@@ -5,9 +5,10 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,8 @@ public class WikiRedisService {
     private final WikiRepository wikiRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final String latestZSetKey = "wikis:sorted:latest";
+    private final String titleZSetKey = "wikis:sorted:title";
+
 
     @Transactional
     public void updateWiki(Long wikiId, String ydoc, String html, String username) {
@@ -82,61 +85,39 @@ public class WikiRedisService {
         }
     }
 
-    public String getUpdatedAtByWikiId(Long wikiId) {
-        Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
-        return (String) wikiMap.get("updated_at");
-    }
-
-    public void loadAllWikisToRedis() {
+    public void loadAllWikiDataToRedis() {
         List<Wiki> wikis = wikiRepository.findAllWithoutDeleted();
+        ZSetOperations<String, String> zSetOps = redisTemplate.opsForZSet();
 
-        List<String> keys = wikis.stream()
-            .map(w -> "wiki:" + w.getId())
-            .toList();
+        Set<String> titleSet = getZSetValues(titleZSetKey);
+        Set<String> latestSet = getZSetValues(latestZSetKey);
 
-        List<Object> results = redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            for (String key : keys) {
-                byte[] redisKey = redisTemplate.getStringSerializer().serialize(key);
-                connection.keyCommands().exists(redisKey);
+        for (Wiki wiki : wikis) {
+            String titleEntry = wiki.getTitle() + ":" + wiki.getId();
+            String latestEntry = String.valueOf(wiki.getId());
+            if (!titleSet.contains(titleEntry)) {
+                zSetOps.add(titleZSetKey, titleEntry, 0);
             }
-            return null;
-        });
-
-        for (int i = 0; i < wikis.size(); i++) {
-            Boolean exists = (Boolean) results.get(i);
-            if (!exists) {
-                Wiki wiki = wikis.get(i);
-                String key = "wiki:" + wiki.getId();
-                Map<String, String> hash = new HashMap<>();
-                hash.put("html", wiki.getHtml());
-                hash.put("editor_name", wiki.getEditorName());
-                hash.put("updated_at", wiki.getUpdatedAt().toString());
-                hash.put("ydoc", wiki.getYdoc());
-                hash.put("title", wiki.getTitle());
-
-                redisTemplate.opsForHash().putAll(key, hash);
-
-                double score = wiki.getUpdatedAt().toEpochSecond(ZoneOffset.UTC);
-                addZSetWiki(wiki.getId(), score);
-                addZSetWikiTitle(wiki.getId(), wiki.getTitle());
+            if (!latestSet.contains(latestEntry)) {
+                long score = wiki.getUpdatedAt().toEpochSecond(ZoneOffset.UTC);
+                zSetOps.add(latestZSetKey, latestEntry, score);
             }
         }
     }
 
+    private Set<String> getZSetValues(String key) {
+
+        ZSetOperations<String, String> zSetOps = redisTemplate.opsForZSet();
+        Set<String> existing = zSetOps.range(key, 0, -1);
+
+        return (existing != null) ? existing : Set.of();
+    }
 
     public void addZSetWiki(Long wikiId, double score) {
         redisTemplate.opsForZSet().add(latestZSetKey, String.valueOf(wikiId), score);
     }
 
     public void addZSetWikiTitle(Long wikiId, String title) {
-        redisTemplate.opsForZSet().add("wikis:title:index", title+":"+wikiId.toString(), 0);
-    }
-
-    private boolean isExist(String key){
-        Long size = redisTemplate.opsForZSet().size(key);
-        if ( size == null || size == 0 ){
-            return false;
-        }
-        return true;
+        redisTemplate.opsForZSet().add(titleZSetKey, title+":"+wikiId.toString(), 0);
     }
 }
