@@ -9,14 +9,13 @@ import com.real.backend.modules.auth.dto.TokenDTO;
 import com.real.backend.modules.auth.kakao.KakaoUtil;
 import com.real.backend.modules.user.domain.User;
 import com.real.backend.modules.user.repository.UserRepository;
-import com.real.backend.modules.user.service.UserSignupService;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserSignupService userSignupService;
+    private final KakaoService kakaoService;
     private final TokenService tokenService;
     private final UserRepository userRepository;
     private final KakaoUtil kakaoUtil;
@@ -28,7 +27,7 @@ public class AuthService {
 
         String email = kakaoProfile.getKakao_account().getEmail();
 
-        User user = userRepository.findByEmail(email).orElseGet(() -> userSignupService.createOAuthUser(kakaoProfile));
+        User user = userRepository.findByEmail(email).orElseGet(() -> kakaoService.createKakaoUser(kakaoProfile));
 
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);
