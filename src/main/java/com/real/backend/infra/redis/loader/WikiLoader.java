@@ -15,6 +15,6 @@ public class WikiLoader implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        wikiRedisService.loadAllWikisToRedis();
+        wikiRedisService.loadAllWikiDataToRedis();
     }
 }
