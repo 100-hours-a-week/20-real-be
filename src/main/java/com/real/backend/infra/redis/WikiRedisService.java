@@ -41,7 +41,7 @@ public class WikiRedisService {
 
         redisTemplate.opsForHash().putAll("wiki:" + wikiId, wikiMap);
 
-        addZSetWiki(wikiId, now.toEpochSecond(ZoneOffset.UTC));
+        addZSetWikiUpdatedAt(wikiId, now.toEpochSecond(ZoneOffset.UTC));
         addZSetWikiTitle(wikiId, title);
     }
 
@@ -58,6 +58,8 @@ public class WikiRedisService {
         wiki.updateYdoc(ydoc);
         wiki.updateEditorName(editor);
         wiki.updateUpdatedAt(updatedAt);
+
+        deleteWikiHash(wikiId);
 
         wikiRepository.save(wiki);
     }
@@ -113,11 +115,23 @@ public class WikiRedisService {
         return (existing != null) ? existing : Set.of();
     }
 
-    public void addZSetWiki(Long wikiId, double score) {
+    public void addZSetWikiUpdatedAt(Long wikiId, double score) {
         redisTemplate.opsForZSet().add(latestZSetKey, String.valueOf(wikiId), score);
     }
 
     public void addZSetWikiTitle(Long wikiId, String title) {
         redisTemplate.opsForZSet().add(titleZSetKey, title+":"+wikiId.toString(), 0);
+    }
+
+    public void deleteZSetWikiUpdatedAt(Long wikiId) {
+        redisTemplate.opsForZSet().remove(latestZSetKey, String.valueOf(wikiId));
+    }
+
+    public void deleteZSetWikiTitle(Long wikiId, String title) {
+        redisTemplate.opsForZSet().remove(titleZSetKey, title+":"+wikiId.toString());
+    }
+
+    public void deleteWikiHash(Long wikiId) {
+        redisTemplate.opsForHash().delete("wiki:" + wikiId, "html", "title", "ydoc", "updated_at", "editor_name");
     }
 }

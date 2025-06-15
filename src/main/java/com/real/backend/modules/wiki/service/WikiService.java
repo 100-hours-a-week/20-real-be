@@ -61,6 +61,9 @@ public class WikiService {
     public void deleteWiki(Long wikiId) {
         Wiki wiki = wikiRepository.findById(wikiId).orElseThrow(() -> new NotFoundException("해당 Id를 가진 위키가 존재하지 않습니다."));
         wiki.delete();
+        wikiRedisService.deleteZSetWikiTitle(wikiId, wiki.getTitle());
+        wikiRedisService.deleteZSetWikiUpdatedAt(wikiId);
+        wikiRedisService.deleteWikiHash(wikiId);
         wikiRepository.save(wiki);
     }
 }
