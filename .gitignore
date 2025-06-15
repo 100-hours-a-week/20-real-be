@@ -7,6 +7,7 @@ build/
 /src/main/resources/application-local.properties
 /src/main/resources/application.properties
 /src/main/resources/data.sql
+/src/test/resources/application.properties
 .DS_Store
 
 ### STS ###
