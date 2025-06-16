@@ -16,11 +16,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.real.backend.config.SecurityTestConfig;
 import com.real.backend.modules.user.dto.InvitedUserCreateRequestDTO;
+import com.real.backend.modules.user.service.UserInvitedService;
 import com.real.backend.security.Session;
 import com.real.backend.util.WithMockUser;
 
@@ -32,6 +34,9 @@ class UserInvitedControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private UserInvitedService userInvitedService;
 
     private Session session;
 
