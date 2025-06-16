@@ -24,7 +24,11 @@ public class WikiListResponseDTO {
             .build();
     }
 
-    public void updateUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    public static WikiListResponseDTO from(Long id, String title, LocalDateTime updatedAt) {
+        return WikiListResponseDTO.builder()
+            .id(id)
+            .title(title)
+            .updatedAt(updatedAt)
+            .build();
     }
 }
