@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -19,6 +20,7 @@ import com.real.backend.common.util.dto.SliceDTO;
 import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.modules.notice.domain.Notice;
 import com.real.backend.modules.notice.repository.NoticeRepository;
+import com.real.backend.modules.user.component.UserFinder;
 import com.real.backend.modules.user.domain.LoginType;
 import com.real.backend.modules.user.domain.Role;
 import com.real.backend.modules.user.domain.Status;
@@ -48,6 +50,9 @@ class UserNoticeServiceTest extends UserServiceTest {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    private UserFinder userFinder;
 
     @AfterEach
     void tearDown() {
@@ -184,6 +189,29 @@ class UserNoticeServiceTest extends UserServiceTest {
             notices.get(0).getId(),
             notices.get(3).getId(),
             notices.get(4).getId());
+    }
+
+    @DisplayName("readAllNotice 성공: 모든 공지를 읽음 처리한다.")
+    @Test
+    void readAllNotice_success() {
+        // given
+        User mockUser = createUser();
+        Long userId = mockUser.getId();
+        createNotices();
+
+        // when
+        userNoticeService.readAllNotice(userId);
+
+        // then
+        String redisKey = "notice:read:user:" + userId;
+        Set<Object> redisValues = redisTemplate.opsForSet().members(redisKey);
+
+        assertThat(redisValues)
+            .containsExactlyInAnyOrderElementsOf(
+                noticeRepository.findAllNoticeIds().stream()
+                    .map(String::valueOf)
+                    .toList()
+            );
     }
 
     private User createUser() {
