@@ -111,4 +111,17 @@ class UserNoticeControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").exists());
     }
+
+    @DisplayName("readNotices 성공: 읽지 않은 모든 공지사항을 읽음 처리")
+    @Test
+    @WithMockUser
+    void readNotices_success() throws Exception {
+        // when & then
+        mockMvc.perform(post("/api/v1/users/notices/read"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message").value("OK - 안 읽은 공지들이 성공적으로 읽음 처리 되었습니다."));
+
+        // then
+        verify(userNoticeService).readAllNotice(session.getId());
+    }
 }
