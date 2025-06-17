@@ -15,6 +15,7 @@ import com.real.backend.modules.user.service.UserNoticeService;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -29,7 +30,8 @@ public class UserNoticeController {
     public DataResponse<?> getUnreadNotices(
         @RequestParam(value = "cursorId", required = false) Long cursorId,
         @RequestParam(value = "cursorStandard", required = false) String cursorStandard,
-        @RequestParam(value = "limit", required = false, defaultValue = "5") int limit,
+        @RequestParam(value = "limit", required = false, defaultValue = "5")
+        @Min(1) int limit,
         @CurrentSession Session session) {
         SliceDTO<UserUnreadNoticeResponseDTO> userUnreadNoticeResponseDTOList = userNoticeService.getNoticeListByCursor(
             cursorId, limit, cursorStandard, session.getId());
