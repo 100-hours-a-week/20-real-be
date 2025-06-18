@@ -109,7 +109,7 @@ public class WikiCursorPaginationService {
                 String[] parts = val.split(":");
                 return new WikiTitleCursor(parts[0], Long.valueOf(parts[1]));
             })
-            .filter(e -> e.getTitle().contains(keyword))
+            .filter(e -> e.getTitle().toLowerCase().contains(keyword.toLowerCase()))
             .filter(e -> isFirstPage || e.getTitle().compareTo(cursorStandard) > 0) // 커서 처리
             .sorted(Comparator.comparing(WikiTitleCursor::getTitle))
             .collect(Collectors.toList());
