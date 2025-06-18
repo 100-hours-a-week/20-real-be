@@ -59,7 +59,7 @@ public class NoticeService {
             slice,
             limit,
             notice -> {
-                Boolean userRead = getUserRead(userId, notice.getId());
+                Boolean userRead = noticeRedisService.getUserRead(userId, notice.getId());
                 return NoticeListResponseDTO.from(
                     notice,
                     userRead,
@@ -70,15 +70,6 @@ public class NoticeService {
             Notice::getId,
             SliceDTO::new
         );
-    }
-
-    @Transactional(readOnly = true)
-    public Boolean getUserRead(Long userId, Long noticeId) {
-        User user = userFinder.getUser(userId);
-        Notice notice = noticeFinder.getNotice(noticeId);
-
-        return noticeRedisService.getUserRead(userId, noticeId);
-
     }
 
     @Transactional
@@ -118,14 +109,6 @@ public class NoticeService {
         NoticeFileGroups noticeFileGroups = noticeFileService.getNoticeFileGroups(notice);
         boolean liked = postRedisService.userLiked("notice", userId, noticeId);
         return NoticeInfoResponseDTO.from(notice, liked, likeCount, commentCount, noticeFileGroups.files(), noticeFileGroups.images());
-    }
-
-    @Transactional
-    public void userReadNotice(Long noticeId, Long userId) {
-        User user = userFinder.getUser(userId);
-        Notice notice = noticeFinder.getNotice(noticeId);
-
-        noticeRedisService.createUserNoticeRead(userId, noticeId);
     }
 
     @Transactional

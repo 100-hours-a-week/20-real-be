@@ -23,6 +23,7 @@ import com.real.backend.modules.notice.service.NoticeService;
 import com.real.backend.modules.notice.dto.NoticePasteRequestDTO;
 import com.real.backend.common.response.DataResponse;
 import com.real.backend.common.response.StatusResponse;
+import com.real.backend.modules.user.service.UserNoticeService;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 import com.real.backend.common.util.dto.SliceDTO;
@@ -34,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class NoticeController {
+    private final UserNoticeService userNoticeService;
     private final NoticeService noticeService;
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
@@ -66,7 +68,7 @@ public class NoticeController {
         @PathVariable Long noticeId,
         @CurrentSession Session session
     ) {
-        noticeService.userReadNotice(noticeId, session.getId());
+        userNoticeService.userReadNotice(noticeId, session.getId());
         NoticeInfoResponseDTO noticeInfoResponseDTO = noticeService.getNoticeById(noticeId, session.getId());
 
         return DataResponse.of(noticeInfoResponseDTO);
