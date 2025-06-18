@@ -8,10 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.common.exception.NotFoundException;
+import com.real.backend.common.exception.ServerException;
 import com.real.backend.common.util.S3Utils;
 import com.real.backend.infra.ai.dto.NewsAiRequestDTO;
 import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
 import com.real.backend.infra.ai.dto.WikiAiRequestDTO;
+import com.real.backend.infra.ai.dto.WikiNewsAiResponseDTO;
 import com.real.backend.infra.ai.service.AiResponseService;
 import com.real.backend.modules.news.domain.News;
 import com.real.backend.modules.news.repository.NewsRepository;
@@ -19,7 +21,9 @@ import com.real.backend.modules.wiki.domain.Wiki;
 import com.real.backend.modules.wiki.repository.WikiRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NewsAiService {
@@ -38,11 +42,11 @@ public class NewsAiService {
         );
     }
 
-    public NewsAiResponseDTO makeNews(WikiAiRequestDTO dto) throws JsonProcessingException {
+    public WikiNewsAiResponseDTO makeNews(WikiAiRequestDTO dto) throws JsonProcessingException {
         return aiResponseService.postForAiResponse(
             "/api/v2/news",
             dto,
-            NewsAiResponseDTO.class
+            WikiNewsAiResponseDTO.class
         );
     }
 
@@ -72,10 +76,18 @@ public class NewsAiService {
         String url = s3Utils.generatePresignedUrl(key, Duration.ofMinutes(5), "image/png");
 
         WikiAiRequestDTO wikiAiRequestDTO = WikiAiRequestDTO.from(wiki, url);
-        NewsAiResponseDTO newsAiResponseDTO = makeNews(wikiAiRequestDTO);
+        WikiNewsAiResponseDTO wikiNewsAiResponseDTO = null;
+        for (int i = 0; i < 3; i++) {
+            wikiNewsAiResponseDTO = makeNews(wikiAiRequestDTO);
+            if (wikiNewsAiResponseDTO.getIsCompleted())
+                break;
+            }
+        if (!wikiNewsAiResponseDTO.getIsCompleted()) {
+            throw new ServerException("ai가 응답을 주지 못했습니다.");
+        }
 
         String cloudFrontUrl = s3Utils.buildCloudFrontUrl(key);
 
-        newsRepository.save(News.of(newsAiResponseDTO, cloudFrontUrl));
+        newsRepository.save(News.of(wikiNewsAiResponseDTO, cloudFrontUrl));
     }
 }
