@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
 import com.real.backend.common.base.Post;
+import com.real.backend.infra.ai.dto.WikiNewsAiResponseDTO;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -44,15 +45,15 @@ public class News extends Post {
             .build();
     }
 
-    public static News of(NewsAiResponseDTO newsAiResponseDTO, String imageUrl) {
+    public static News of(WikiNewsAiResponseDTO wikiNewsAiResponseDTO, String imageUrl) {
         return News.builder()
-            .title(newsAiResponseDTO.headline())
-            .content(newsAiResponseDTO.news())
+            .title(wikiNewsAiResponseDTO.getHeadline())
+            .content(wikiNewsAiResponseDTO.getNews())
             .tag("뉴스")
             .todayViewCount(0L)
             .totalViewCount(0L)
             .imageUrl(imageUrl)
-            .summary(newsAiResponseDTO.summary())
+            .summary(wikiNewsAiResponseDTO.getSummary())
             .likeCount(0L)
             .commentCount(0L)
             .build();
