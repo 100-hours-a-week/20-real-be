@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.common.config.RedisConfig;
@@ -20,7 +20,6 @@ import com.real.backend.common.util.dto.SliceDTO;
 import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.modules.notice.domain.Notice;
 import com.real.backend.modules.notice.repository.NoticeRepository;
-import com.real.backend.modules.user.component.UserFinder;
 import com.real.backend.modules.user.domain.LoginType;
 import com.real.backend.modules.user.domain.Role;
 import com.real.backend.modules.user.domain.Status;
@@ -31,6 +30,7 @@ import com.real.backend.modules.user.repository.UserNoticeReadRepository;
 import com.real.backend.modules.user.repository.UserRepository;
 
 @Transactional
+@Rollback
 @Import(RedisConfig.class)
 class UserNoticeServiceTest extends UserServiceTest {
     @Autowired
@@ -50,15 +50,6 @@ class UserNoticeServiceTest extends UserServiceTest {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
-
-    @Autowired
-    private UserFinder userFinder;
-
-    @AfterEach
-    void tearDown() {
-        String key = "notice:read:user:1";
-        redisTemplate.delete(key);
-    }
 
     @DisplayName("getNoticeListByCursor 성공: 레디스에 읽은 공지가 2개 있고, 공지는 5개 있을 때 안 읽은 공지id 3개가 반환된다.")
     @Test
