@@ -83,6 +83,32 @@ class NoticeServiceTest extends NoticeServiceTestIntegration {
         assertThat(result.nextCursorStandard()).isEqualTo(notices.get(10).getCreatedAt().toString());
     }
 
+    @DisplayName("getNoticeListByCursor 성공: 중간부터 공지를 읽고, 뒤에 더이상 남은 공지가 없음")
+    @Test
+    void getNoticeListByCursor_success_hasNextFalse() {
+        // given
+        int limit = 10;
+        User user = createUser();
+        Long userId = user.getId();
+        List<Notice> notices = createNotices(user, 20);
+
+        // when
+        SliceDTO<NoticeListResponseDTO> result = noticeService.getNoticeListByCursor(notices.get(10).getId(), limit, notices.get(10).getCreatedAt().toString(), userId);
+
+        // then
+        assertThat(result.items()).hasSize(10);
+        assertThat(result.hasNext()).isFalse();
+        assertThat(result.nextCursorId()).isNull();
+        assertThat(result.nextCursorStandard()).isNull();
+        List<Long> resultIds = result.items().stream()
+            .map(NoticeListResponseDTO::getId)
+            .toList();
+        List<Long> previousIds = IntStream.range(10, 20)
+            .mapToObj(i -> notices.get(i).getId())
+            .toList();
+        assertThat(resultIds).doesNotContainAnyElementsOf(previousIds);
+    }
+
     private User createUser() {
         User user = User.builder()
             .email("notice@test.com")
