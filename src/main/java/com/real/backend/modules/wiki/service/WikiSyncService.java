@@ -49,6 +49,7 @@ public class WikiSyncService {
             for (Long wikiId : failedIds) {
                 try {
                     wikiRedisService.flushToDB(wikiId);
+                    stillFailed.remove(wikiId);
                 } catch (Exception e) {
                     stillFailed.add(wikiId);
                     log.warn("{}차 flush 재시도 실패 - wikiId: {}", attempt + 1, wikiId, e);
