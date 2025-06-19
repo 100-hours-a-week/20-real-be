@@ -1,7 +1,6 @@
 package com.real.backend.modules.notice.service;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,14 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.common.config.RedisConfig;
 import com.real.backend.common.util.dto.SliceDTO;
-import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
-import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
+import com.real.backend.config.AiResponseConfig;
 import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.modules.notice.domain.Notice;
 import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
@@ -33,7 +30,7 @@ import com.real.backend.modules.user.repository.UserRepository;
 
 @Transactional
 @Rollback
-@Import(RedisConfig.class)
+@Import({RedisConfig.class, AiResponseConfig.class})
 class NoticeServiceTest extends NoticeServiceTestIntegration {
     @Autowired
     private NoticeService noticeService;
@@ -46,9 +43,6 @@ class NoticeServiceTest extends NoticeServiceTestIntegration {
 
     @Autowired
     private NoticeRedisService noticeRedisService;
-
-    @MockitoBean
-    private NoticeAiService noticeAiService;
 
     @DisplayName("getNoticeListByCursor 성공: 읽음 여부 확인 및 공지의 첫 페이지를 최대 10개까지 보여준다.")
     @Test
@@ -130,9 +124,6 @@ class NoticeServiceTest extends NoticeServiceTestIntegration {
             .tag("공지")
             .originalUrl("https://example.com/original")
             .build();
-        NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(dto.getContent(), dto.getTitle());
-        NoticeSummaryResponseDTO noticeSummaryResponseDTO = new NoticeSummaryResponseDTO("요약", true);
-        given(noticeAiService.makeSummary(noticeSummaryRequestDTO)).willReturn(noticeSummaryResponseDTO);
 
         // when
         noticeService.createNotice(userId, dto);
