@@ -2,6 +2,7 @@ package com.real.backend.common.aop;
 
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
+import org.apache.commons.text.StringEscapeUtils;
 
 public class XssSanitizer {
 
@@ -12,6 +13,7 @@ public class XssSanitizer {
         .toFactory();
 
     public static String sanitize(String input) {
-        return POLICY.sanitize(input);
+        String cleaned = POLICY.sanitize(input);
+        return StringEscapeUtils.unescapeHtml4(cleaned);
     }
 }
