@@ -47,6 +47,7 @@ dependencies {
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     implementation 'software.amazon.awssdk:s3:2.21.12' // AWS SDK v2
     implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.1' // Sanitizer
+    implementation 'org.apache.commons:commons-text:1.10.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis' // redis
     implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0")
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store' // AWS Parameter Store
