@@ -97,6 +97,7 @@ public class NoticeService {
     @Transactional(readOnly = true)
     public NoticeInfoResponseDTO getNoticeById(Long noticeId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
+        userFinder.getUser(userId);
 
         postRedisService.initCount("notice", "totalView", noticeId, notice.getTotalViewCount());
         postRedisService.initCount("notice", "like", noticeId, notice.getLikeCount());
