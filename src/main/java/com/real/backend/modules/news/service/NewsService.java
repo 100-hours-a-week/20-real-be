@@ -14,19 +14,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.real.backend.common.exception.BadRequestException;
+import com.real.backend.common.util.S3Utils;
+import com.real.backend.common.util.dto.SliceDTO;
+import com.real.backend.infra.ai.dto.NewsAiRequestDTO;
+import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
+import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.modules.news.component.NewsFinder;
 import com.real.backend.modules.news.domain.News;
 import com.real.backend.modules.news.dto.NewsCreateRequestDTO;
 import com.real.backend.modules.news.dto.NewsListResponseDTO;
 import com.real.backend.modules.news.dto.NewsResponseDTO;
 import com.real.backend.modules.news.repository.NewsRepository;
-import com.real.backend.common.exception.BadRequestException;
-import com.real.backend.common.exception.ServerException;
-import com.real.backend.infra.ai.dto.NewsAiRequestDTO;
-import com.real.backend.infra.ai.dto.NewsAiResponseDTO;
-import com.real.backend.infra.redis.PostRedisService;
-import com.real.backend.common.util.S3Utils;
-import com.real.backend.common.util.dto.SliceDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -144,16 +143,10 @@ public class NewsService {
         String url = "";
         if (image != null) { url = s3Utils.upload(image, "static/news/images");}
 
-        NewsAiResponseDTO newsAiResponseDTO = null;
-        for (int i = 0; i < 3; i++) {
-            newsAiResponseDTO = newsAiService.makeTitleAndSummary(
-                new NewsAiRequestDTO(newsCreateRequestDTO.getContent(), newsCreateRequestDTO.getTitle()));
-            if (newsAiResponseDTO.isCompleted())
-                break;
-        }
-        if (!newsAiResponseDTO.isCompleted()){
-            throw new ServerException("ai가 응답을 주지 못했습니다.");
-        }
+        NewsAiResponseDTO newsAiResponseDTO = newsAiService.makeTitleAndSummary(
+            new NewsAiRequestDTO(
+                newsCreateRequestDTO.getContent(),
+                newsCreateRequestDTO.getTitle()));
 
         newsRepository.save(News.of(newsAiResponseDTO, newsCreateRequestDTO.getContent(), url));
     }

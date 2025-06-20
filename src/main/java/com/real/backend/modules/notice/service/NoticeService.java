@@ -12,25 +12,24 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.real.backend.modules.notice.domain.Notice;
-import com.real.backend.modules.notice.component.NoticeFinder;
-import com.real.backend.modules.notice.dto.NoticePasteRequestDTO;
-import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
-import com.real.backend.modules.notice.dto.NoticeFileGroups;
-import com.real.backend.modules.notice.dto.NoticeInfoResponseDTO;
-import com.real.backend.modules.notice.dto.NoticeListResponseDTO;
-import com.real.backend.modules.notice.repository.NoticeRepository;
-import com.real.backend.modules.user.component.UserFinder;
-import com.real.backend.modules.user.domain.User;
-import com.real.backend.modules.user.repository.UserRepository;
 import com.real.backend.common.exception.NotFoundException;
-import com.real.backend.common.exception.ServerException;
+import com.real.backend.common.util.CursorUtils;
+import com.real.backend.common.util.dto.SliceDTO;
 import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
 import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.infra.redis.PostRedisService;
-import com.real.backend.common.util.CursorUtils;
-import com.real.backend.common.util.dto.SliceDTO;
+import com.real.backend.modules.notice.component.NoticeFinder;
+import com.real.backend.modules.notice.domain.Notice;
+import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
+import com.real.backend.modules.notice.dto.NoticeFileGroups;
+import com.real.backend.modules.notice.dto.NoticeInfoResponseDTO;
+import com.real.backend.modules.notice.dto.NoticeListResponseDTO;
+import com.real.backend.modules.notice.dto.NoticePasteRequestDTO;
+import com.real.backend.modules.notice.repository.NoticeRepository;
+import com.real.backend.modules.user.component.UserFinder;
+import com.real.backend.modules.user.domain.User;
+import com.real.backend.modules.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -140,15 +139,7 @@ public class NoticeService {
         // ai에 summary 요청 로직
         NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.getContent(),
             noticeCreateRequestDTO.getTitle());
-        NoticeSummaryResponseDTO noticeSummaryResponseDTO = null;
-        for (int i = 0; i < 3; i++) {
-            noticeSummaryResponseDTO = noticeAiService.makeSummary(noticeSummaryRequestDTO);
-            if (noticeSummaryResponseDTO.isCompleted())
-                break;
-        }
-        if (!noticeSummaryResponseDTO.isCompleted()){
-            throw new ServerException("ai가 응답을 주지 못했습니다.");
-        }
+        NoticeSummaryResponseDTO noticeSummaryResponseDTO = noticeAiService.makeSummary(noticeSummaryRequestDTO);
 
         Notice notice = Notice.builder()
             .user(user)
