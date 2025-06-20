@@ -1,5 +1,7 @@
 package com.real.backend.modules.notice.service;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,6 +18,9 @@ public abstract class NoticeServiceTestIntegration {
 
     @AfterEach
     void clearRedis() {
-        redisTemplate.getConnectionFactory().getConnection().flushAll();
+        Set<String> keys = redisTemplate.keys("*");
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
     }
 }
