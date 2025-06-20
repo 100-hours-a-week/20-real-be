@@ -14,10 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.real.backend.common.util.CursorUtils;
 import com.real.backend.common.util.dto.SliceDTO;
 import com.real.backend.infra.redis.NoticeRedisService;
+import com.real.backend.modules.notice.component.NoticeFinder;
 import com.real.backend.modules.notice.domain.Notice;
 import com.real.backend.modules.notice.repository.NoticeRepository;
 import com.real.backend.modules.user.component.UserFinder;
-import com.real.backend.modules.user.domain.User;
 import com.real.backend.modules.user.dto.UserUnreadNoticeResponseDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserNoticeService {
-
+    private final NoticeFinder noticeFinder;
     private final UserFinder userFinder;
     private final NoticeRepository noticeRepository;
     private final NoticeRedisService noticeRedisService;
@@ -75,10 +75,19 @@ public class UserNoticeService {
         );
     }
 
+    @Transactional(readOnly = true)
     public void readAllNotice(Long userId) {
-        User user = userFinder.getUser(userId);
+        userFinder.getUser(userId);
 
         List<Long> noticeIds = noticeRepository.findAllNoticeIds();
         noticeRedisService.userNoticeReadAll(noticeIds, userId);
+    }
+
+    @Transactional
+    public void userReadNotice(Long noticeId, Long userId) {
+        userFinder.getUser(userId);
+        noticeFinder.getNotice(noticeId);
+
+        noticeRedisService.createUserNoticeRead(userId, noticeId);
     }
 }

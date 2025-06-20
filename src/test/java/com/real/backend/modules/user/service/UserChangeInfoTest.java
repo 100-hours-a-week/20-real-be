@@ -25,7 +25,7 @@ class UserChangeInfoTest extends UserServiceTest {
     @Autowired
     private UserService userService;
 
-    @DisplayName("사용자 정보 변경 성공")
+    @DisplayName("changeUserRole 성공: 사용자 정보 변경 성공")
     @Test
     void test() {
         // given
@@ -55,7 +55,7 @@ class UserChangeInfoTest extends UserServiceTest {
     }
 
     @Test
-    @DisplayName("없는 이메일로 역할 변경 시 예외가 발생한다")
+    @DisplayName("changeUserRole 실패: 없는 이메일로 역할 변경 시 예외가 발생한다")
     void changeUserRoleFail_EmailNotFound() {
         // given
         ChangeUserRoleRequestDTO dto = ChangeUserRoleRequestDTO.builder()

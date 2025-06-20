@@ -59,7 +59,7 @@ public class NoticeService {
             slice,
             limit,
             notice -> {
-                Boolean userRead = getUserRead(userId, notice.getId());
+                Boolean userRead = noticeRedisService.getUserRead(userId, notice.getId());
                 return NoticeListResponseDTO.from(
                     notice,
                     userRead,
@@ -70,15 +70,6 @@ public class NoticeService {
             Notice::getId,
             SliceDTO::new
         );
-    }
-
-    @Transactional(readOnly = true)
-    public Boolean getUserRead(Long userId, Long noticeId) {
-        User user = userFinder.getUser(userId);
-        Notice notice = noticeFinder.getNotice(noticeId);
-
-        return noticeRedisService.getUserRead(userId, noticeId);
-
     }
 
     @Transactional
@@ -106,6 +97,7 @@ public class NoticeService {
     @Transactional(readOnly = true)
     public NoticeInfoResponseDTO getNoticeById(Long noticeId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
+        userFinder.getUser(userId);
 
         postRedisService.initCount("notice", "totalView", noticeId, notice.getTotalViewCount());
         postRedisService.initCount("notice", "like", noticeId, notice.getLikeCount());
@@ -121,17 +113,10 @@ public class NoticeService {
     }
 
     @Transactional
-    public void userReadNotice(Long noticeId, Long userId) {
-        User user = userFinder.getUser(userId);
-        Notice notice = noticeFinder.getNotice(noticeId);
-
-        noticeRedisService.createUserNoticeRead(userId, noticeId);
-    }
-
-    @Transactional
     public void deleteNotice(Long noticeId) {
         Notice notice = noticeFinder.getNotice(noticeId);
-        noticeRepository.delete(notice);
+        notice.delete();
+        noticeRepository.save(notice);
     }
 
     @Transactional
