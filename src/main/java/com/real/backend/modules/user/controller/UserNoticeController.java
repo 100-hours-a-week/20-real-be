@@ -15,6 +15,7 @@ import com.real.backend.modules.user.service.UserNoticeService;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,11 +26,12 @@ public class UserNoticeController {
     private final UserNoticeService userNoticeService;
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
-    @GetMapping("v1/users/notices/unread")
+    @GetMapping("/v1/users/notices/unread")
     public DataResponse<?> getUnreadNotices(
         @RequestParam(value = "cursorId", required = false) Long cursorId,
         @RequestParam(value = "cursorStandard", required = false) String cursorStandard,
-        @RequestParam(value = "limit", required = false, defaultValue = "5") int limit,
+        @RequestParam(value = "limit", required = false, defaultValue = "5")
+        @Min(1) int limit,
         @CurrentSession Session session) {
         SliceDTO<UserUnreadNoticeResponseDTO> userUnreadNoticeResponseDTOList = userNoticeService.getNoticeListByCursor(
             cursorId, limit, cursorStandard, session.getId());
@@ -38,7 +40,7 @@ public class UserNoticeController {
     }
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
-    @PostMapping("v1/users/notices/read")
+    @PostMapping("/v1/users/notices/read")
     public StatusResponse readNotices(@CurrentSession Session session) {
         userNoticeService.readAllNotice(session.getId());
         return StatusResponse.of(200, "안 읽은 공지들이 성공적으로 읽음 처리 되었습니다.");

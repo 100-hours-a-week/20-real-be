@@ -16,6 +16,7 @@ import com.real.backend.common.response.StatusResponse;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -35,7 +36,7 @@ public class UserController {
     @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
     @PatchMapping("/v1/users/role")
     public StatusResponse changeRole(
-        @RequestBody ChangeUserRoleRequestDTO changeUserRoleRequestDTO
+        @Valid @RequestBody ChangeUserRoleRequestDTO changeUserRoleRequestDTO
     ) {
         userService.changeUserRole(changeUserRoleRequestDTO);
 
@@ -44,7 +45,7 @@ public class UserController {
 
     @PatchMapping("/v1/users/enroll")
     public StatusResponse changeUserInfo(
-        @RequestBody ChangeUserInfoRequestDTO changeUserInfoRequestDTO
+        @Valid @RequestBody ChangeUserInfoRequestDTO changeUserInfoRequestDTO
     ) {
         userService.enrollUser(changeUserInfoRequestDTO);
 

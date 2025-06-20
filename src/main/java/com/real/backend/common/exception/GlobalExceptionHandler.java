@@ -10,6 +10,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -97,11 +98,11 @@ public class GlobalExceptionHandler {
 
             if (PreAuthorize != null) {
                 String expr = PreAuthorize.value();                  // 절대로 pa가 null일 때 여기 안 옴
-                String norm = expr.replaceAll("\\s+", ""); // 공백 제거
+                // String norm = expr.replaceAll("\\s+", ""); // 공백 제거
 
-                if (norm.contains("hasAnyAuthority('OUTSIDER', 'TRAINEE')")) {
+                if (expr.contains("OUTSIDER") && expr.contains("TRAINEE")) {
                     message = "운영진만 접근할 수 있습니다.";
-                } else if (norm.contains("hasAnyAuthority('OUTSIDER')")) {
+                } else if (expr.contains("OUTSIDER")) {
                     message = "외부인은 접근할 수 없습니다.";
                 }
             }
@@ -111,4 +112,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<StatusResponse> handleMethodValidationException(HandlerMethodValidationException e) {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(StatusResponse.of(400, "파라미터 혹은 리소스 속성 값이 제한 설정을 초과했습니다."));
+    }
 }
