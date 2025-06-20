@@ -115,7 +115,8 @@ public class NoticeService {
     @Transactional
     public void deleteNotice(Long noticeId) {
         Notice notice = noticeFinder.getNotice(noticeId);
-        noticeRepository.delete(notice);
+        notice.delete();
+        noticeRepository.save(notice);
     }
 
     @Transactional
