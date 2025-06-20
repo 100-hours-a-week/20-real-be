@@ -18,10 +18,11 @@ public class ApiAccessInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
-        if (!uri.startsWith("/api/")) return true;
+        if (!uri.startsWith("/api/") || uri.startsWith("/api/v1/auth/") || uri.startsWith("/api/v1/oauth/")
+            || uri.startsWith("/api/vi/news/")) return true;
 
         String token = extractTokenFromCookie(request);
-        if (token == null || !jwtUtils.validateToken(token, response)) return true;
+        if (token == null || !jwtUtils.validateToken(token, response)) return false;
 
         Long userId = jwtUtils.getId(token);
         if (userId != null) {
