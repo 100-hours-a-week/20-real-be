@@ -1,17 +1,25 @@
 package com.real.backend.common.config;
 
+import com.real.backend.common.interceptor.ApiAccessInterceptor;
+import com.real.backend.security.JwtUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
     @Value("${spring.server_url}")
     private String serverUrl;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final JwtUtils jwtUtils;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -37,4 +45,8 @@ public class WebConfig implements WebMvcConfigurer {
         return source;
     }
 
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new ApiAccessInterceptor(redisTemplate, jwtUtils));
+    }
 }
