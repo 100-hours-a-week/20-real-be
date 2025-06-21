@@ -16,17 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
-import com.real.backend.modules.notice.dto.NoticeInfoResponseDTO;
-import com.real.backend.modules.notice.dto.NoticeListResponseDTO;
-import com.real.backend.modules.notice.service.NoticeService;
-import com.real.backend.modules.notice.dto.NoticePasteRequestDTO;
 import com.real.backend.common.response.DataResponse;
 import com.real.backend.common.response.StatusResponse;
+import com.real.backend.common.util.dto.SliceDTO;
+import com.real.backend.modules.notice.dto.NoticeInfoResponseDTO;
+import com.real.backend.modules.notice.dto.NoticeListResponseDTO;
+import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
+import com.real.backend.modules.notice.service.NoticeService;
 import com.real.backend.modules.user.service.UserNoticeService;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
-import com.real.backend.common.util.dto.SliceDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,17 +48,6 @@ public class NoticeController {
         SliceDTO<NoticeListResponseDTO> noticeList = noticeService.getNoticeListByCursor(cursorId, limit,
             cursorStandard, session.getId());
         return DataResponse.of(noticeList);
-    }
-
-    // TODO 파일 받는 로직
-    @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
-    @PostMapping("/v1/notices")
-    public StatusResponse createNotice(
-        @CurrentSession Session session,
-        @Valid @RequestBody NoticeCreateRequestDTO noticeCreateRequestDTO
-    ) throws JsonProcessingException {
-        noticeService.createNotice(session.getId(), noticeCreateRequestDTO);
-        return StatusResponse.of(201, "공지가 성공적으로 생성되었습니다.");
     }
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
@@ -88,21 +76,21 @@ public class NoticeController {
     @PutMapping("/v1/notices/{noticeId}")
     public StatusResponse editNotice(
         @PathVariable Long noticeId,
-        @Valid @RequestBody NoticePasteRequestDTO noticePasteRequestDTO,
+        @Valid @RequestBody NoticeCreateRequestDTO noticeCreateRequestDTO,
         @CurrentSession Session session
     ) {
-        noticeService.editNotice(noticeId, noticePasteRequestDTO);
+        noticeService.editNotice(noticeId, noticeCreateRequestDTO);
         return StatusResponse.of(200, "공지가 성공적으로 수정되었습니다.");
     }
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER', 'TRAINEE')")
-    @PostMapping("/v1/notices/tmp")
-    public StatusResponse pasteNoticeTmp(
-        @Valid @RequestPart("notice") NoticePasteRequestDTO noticePasteRequestDTO,
+    @PostMapping("/v1/notices")
+    public StatusResponse createNotice(
+        @Valid @RequestPart("notice") NoticeCreateRequestDTO noticeCreateRequestDTO,
         @RequestPart(value = "images", required = false) List<MultipartFile> images,
         @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) throws JsonProcessingException {
-        noticeService.pasteNoticeTmp(noticePasteRequestDTO, images, files);
+        noticeService.createNotice(noticeCreateRequestDTO, images, files);
         return StatusResponse.of(201, "공지가 성공적으로 생성되었습니다.");
     }
 }
