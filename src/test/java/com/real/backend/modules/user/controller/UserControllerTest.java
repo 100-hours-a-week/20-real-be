@@ -13,25 +13,23 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.real.backend.config.SecurityTestConfig;
 import com.real.backend.modules.user.domain.Role;
 import com.real.backend.modules.user.dto.ChangeUserInfoRequestDTO;
 import com.real.backend.modules.user.dto.ChangeUserRoleRequestDTO;
 import com.real.backend.modules.user.dto.LoginResponseDTO;
 import com.real.backend.modules.user.service.UserService;
 import com.real.backend.security.Session;
+import com.real.backend.util.SharedWebMvcTest;
 import com.real.backend.util.WithMockUser;
 
-@WebMvcTest(UserController.class)
-@Import(SecurityTestConfig.class)
+@SharedWebMvcTest(controllers = UserController.class)
 class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -41,6 +39,9 @@ class UserControllerTest {
 
     @MockitoBean
     private UserService userService;
+
+    @MockitoBean
+    private RedisTemplate<String, String> redisTemplate;
 
     private Session session;
 

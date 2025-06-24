@@ -14,22 +14,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.real.backend.common.util.dto.SliceDTO;
-import com.real.backend.config.SecurityTestConfig;
 import com.real.backend.modules.user.dto.UserUnreadNoticeResponseDTO;
 import com.real.backend.modules.user.service.UserNoticeService;
 import com.real.backend.security.Session;
+import com.real.backend.util.SharedWebMvcTest;
 import com.real.backend.util.WithMockUser;
 
-@WebMvcTest(UserNoticeController.class)
-@Import(SecurityTestConfig.class)
+@SharedWebMvcTest(controllers = UserNoticeController.class)
 class UserNoticeControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -39,6 +37,9 @@ class UserNoticeControllerTest {
 
     @MockitoBean
     private UserNoticeService userNoticeService;
+
+    @MockitoBean
+    private RedisTemplate<String, String> redisTemplate;
 
     private Session session;
 

@@ -2,7 +2,7 @@ package com.real.backend.modules.notice.domain;
 
 import java.util.List;
 
-import com.real.backend.modules.notice.dto.NoticePasteRequestDTO;
+import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.modules.user.domain.User;
 import com.real.backend.modules.user.domain.UserNoticeRead;
 import com.real.backend.common.base.Post;
@@ -40,14 +40,14 @@ public class Notice extends Post {
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserNoticeRead> userNoticeReads;
 
-    public void updateNotice(NoticePasteRequestDTO noticePasteRequestDTO, User user) {
-        this.originalUrl = noticePasteRequestDTO.getOriginalUrl();
-        this.platform = noticePasteRequestDTO.getPlatform();
+    public void updateNotice(NoticeCreateRequestDTO noticeCreateRequestDTO, User user) {
+        this.originalUrl = noticeCreateRequestDTO.getOriginalUrl();
+        this.platform = noticeCreateRequestDTO.getPlatform();
         this.user = user;
         this.updatePost(
-            noticePasteRequestDTO.getTitle(),
-            noticePasteRequestDTO.getContent(),
-            noticePasteRequestDTO.getTag()
+            noticeCreateRequestDTO.getTitle(),
+            noticeCreateRequestDTO.getContent(),
+            noticeCreateRequestDTO.getTag()
             );
     }
 }
