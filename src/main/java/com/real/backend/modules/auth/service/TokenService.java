@@ -15,6 +15,7 @@ import com.real.backend.common.util.CONSTANT;
 import com.real.backend.modules.auth.dto.TokenDTO;
 import com.real.backend.modules.user.component.UserFinder;
 import com.real.backend.modules.user.domain.User;
+import com.real.backend.modules.user.service.UserService;
 import com.real.backend.security.JwtUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class TokenService {
     private final JwtUtils jwtUtils;
     private final UserFinder userFinder;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final UserService userService;
 
     @Transactional
     public TokenDTO refreshAccessToken(String refreshToken) {
@@ -32,6 +34,7 @@ public class TokenService {
         String refreshKey = "refresh:" + hashToken(refreshToken);
 
         User user = userFinder.getUser(jwtUtils.getId(refreshToken));
+        userService.updateLastLoginTime(user);
 
         if (redisTemplate.opsForValue().get(refreshKey) == null) {
             throw new UnauthorizedException("refresh token does not match");

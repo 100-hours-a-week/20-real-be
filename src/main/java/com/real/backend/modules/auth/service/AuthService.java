@@ -1,5 +1,7 @@
 package com.real.backend.modules.auth.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ public class AuthService {
         String email = kakaoProfile.getKakao_account().getEmail();
 
         User user = userRepository.findByEmail(email).orElseGet(() -> kakaoService.createKakaoUser(kakaoProfile));
+        user.updateLastLoginAt(LocalDateTime.now());
 
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);
