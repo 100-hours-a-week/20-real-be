@@ -1,6 +1,5 @@
 package com.real.backend.infra.redis;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -8,8 +7,6 @@ import java.util.stream.Collectors;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
-
-import com.real.backend.common.util.CONSTANT;
 
 import lombok.RequiredArgsConstructor;
 
@@ -44,7 +41,6 @@ public class PostRedisService {
     public void initCount(String domain, String type, Long id, Long value) {
         String key = buildKey(domain, type, id);
         redisTemplate.opsForValue().setIfAbsent(key, value);
-        redisTemplate.expire(key, Duration.ofSeconds(CONSTANT.POST_COUNT_TTL));
     }
 
     public Long increment(String domain, String type, Long id) {
