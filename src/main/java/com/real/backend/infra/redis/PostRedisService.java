@@ -1,5 +1,6 @@
 package com.real.backend.infra.redis;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -7,6 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
+
+import com.real.backend.common.util.CONSTANT;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,15 +20,17 @@ public class PostRedisService {
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String TOGGLE_LIKE_LUA = """
         local likeKey = KEYS[1]
-        local countKey = KEYS[2]
-        local domain = KEYS[3]
+        local unlikeKey = KEYS[2]
+        local countKey = KEYS[3]
         local id = ARGV[1]
 
         if redis.call("SISMEMBER", likeKey, id) == 1 then
             redis.call("SREM", likeKey, id)
+            redis.call("SADD", unlikeKey, id)
             redis.call("DECR", countKey)
             return 0
         else
+            redis.call("SREM", unlikeKey, id)
             redis.call("SADD", likeKey, id)
             redis.call("INCR", countKey)
             return 1
@@ -39,6 +44,7 @@ public class PostRedisService {
     public void initCount(String domain, String type, Long id, Long value) {
         String key = buildKey(domain, type, id);
         redisTemplate.opsForValue().setIfAbsent(key, value);
+        redisTemplate.expire(key, Duration.ofSeconds(CONSTANT.POST_COUNT_TTL));
     }
 
     public Long increment(String domain, String type, Long id) {
@@ -77,13 +83,14 @@ public class PostRedisService {
 
     public boolean toggleLikeInRedis(String domain, Long userId, Long id) {
         String likeKey = domain + ":like:user:" + userId;
+        String unlikeKey = domain + ":like:cancel:user:" + userId;
         String countKey = domain + ":like:" + id;
 
         RedisScript<Long> script = RedisScript.of(TOGGLE_LIKE_LUA, Long.class);
 
         Long result = redisTemplate.execute(
             script,
-            List.of(likeKey, countKey),
+            List.of(likeKey, unlikeKey, countKey),
             id.toString()
         );
 
