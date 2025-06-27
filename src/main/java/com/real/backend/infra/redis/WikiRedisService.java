@@ -65,9 +65,32 @@ public class WikiRedisService {
     }
 
     @Transactional(readOnly = true)
-    public Wiki getWikiById(String title) {
+    public Wiki getWikiByTitle(String title) {
         Long wikiId = wikiRepository.getWikiIdByTitle(title);
         Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
+        String html = (String) wikiMap.get("html");
+        String editor = (String) wikiMap.get("editor_name");
+        String updatedAt = (String) wikiMap.get("updated_at");
+        String ydoc = (String) wikiMap.get("ydoc");
+
+        if (ydoc == null || html == null || editor == null || updatedAt == null) {
+            return null;
+        } else {
+            return Wiki.builder()
+                .id(wikiId)
+                .title(title)
+                .ydoc(ydoc)
+                .html(html)
+                .editorName(editor)
+                .updatedAt(LocalDateTime.parse(updatedAt))
+                .build();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public Wiki getWikiById(Long wikiId) {
+        Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
+        String title = wikiRepository.getWikiTitleById(wikiId);
         String html = (String) wikiMap.get("html");
         String editor = (String) wikiMap.get("editor_name");
         String updatedAt = (String) wikiMap.get("updated_at");

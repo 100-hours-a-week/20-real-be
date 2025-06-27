@@ -74,6 +74,15 @@ public class WikiController {
         return DataResponse.of(wikiResponseDTO);
     }
 
+    // 위키 id로 상세 검색
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
+    @GetMapping("/v1/wikis/{wikiId}")
+    public DataResponse<WikiResponseDTO> getWikiById(
+        @PathVariable Long wikiId
+    ) {
+        return DataResponse.of(wikiService.getWikiById(wikiId));
+    }
+
     // 위키 목록
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("/v1/wikis/list")
