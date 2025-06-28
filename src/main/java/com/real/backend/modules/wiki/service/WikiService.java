@@ -4,10 +4,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.common.exception.BadRequestException;
+import com.real.backend.common.exception.ForbiddenException;
 import com.real.backend.common.exception.NotFoundException;
 import com.real.backend.infra.redis.WikiRedisService;
 import com.real.backend.modules.wiki.component.WikiFinder;
@@ -22,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class WikiService {
+    @Value("${spring.api.secret}")
+    private String apiKey;
 
     private final WikiRepository wikiRepository;
     private final WikiRedisService wikiRedisService;
@@ -55,7 +59,11 @@ public class WikiService {
     }
 
     @Transactional(readOnly = true)
-    public WikiResponseDTO getWikiById(Long wikiId) {
+    public WikiResponseDTO getWikiById(Long wikiId, String key) {
+        // TODO 임시 보안. api key로 요청 허가 받는 방법 말고 다른 방법 생각하기
+        if(!apiKey.equals(key)) {
+            throw new ForbiddenException("접근할 수 없는 api입니다.");
+        }
         Wiki wiki = wikiRedisService.getWikiById(wikiId);
         if (wiki == null) {
             return WikiResponseDTO.from(wikiFinder.getWiki(wikiId));

@@ -20,6 +20,7 @@ import com.real.backend.modules.wiki.domain.SortBy;
 import com.real.backend.modules.wiki.domain.Wiki;
 import com.real.backend.modules.wiki.dto.WikiCreateRequestDTO;
 import com.real.backend.modules.wiki.dto.WikiEditRequestDTO;
+import com.real.backend.modules.wiki.dto.WikiInfoRequestDTO;
 import com.real.backend.modules.wiki.dto.WikiListResponseDTO;
 import com.real.backend.modules.wiki.dto.WikiResponseDTO;
 import com.real.backend.modules.wiki.service.WikiCursorPaginationService;
@@ -78,9 +79,10 @@ public class WikiController {
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("/v1/wikis/{wikiId}")
     public DataResponse<WikiResponseDTO> getWikiById(
-        @PathVariable Long wikiId
+        @PathVariable Long wikiId,
+        @RequestBody WikiInfoRequestDTO wikiInfoRequestDTO
     ) {
-        return DataResponse.of(wikiService.getWikiById(wikiId));
+        return DataResponse.of(wikiService.getWikiById(wikiId, wikiInfoRequestDTO.getApiKey()));
     }
 
     // 위키 목록
