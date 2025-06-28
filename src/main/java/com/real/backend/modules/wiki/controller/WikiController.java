@@ -20,6 +20,8 @@ import com.real.backend.modules.wiki.domain.SortBy;
 import com.real.backend.modules.wiki.domain.Wiki;
 import com.real.backend.modules.wiki.dto.WikiCreateRequestDTO;
 import com.real.backend.modules.wiki.dto.WikiEditRequestDTO;
+import com.real.backend.modules.wiki.dto.WikiEditV2RequestDTO;
+import com.real.backend.modules.wiki.dto.WikiInfoRequestDTO;
 import com.real.backend.modules.wiki.dto.WikiListResponseDTO;
 import com.real.backend.modules.wiki.dto.WikiResponseDTO;
 import com.real.backend.modules.wiki.service.WikiCursorPaginationService;
@@ -62,6 +64,17 @@ public class WikiController {
         return StatusResponse.of(200, "문서가 redis에 정상적으로 저장되었습니다.");
     }
 
+    // 위키 편집 v2
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
+    @PutMapping(value = "/v2/wikis/{wikiId}")
+    public StatusResponse updateWiki(
+        @PathVariable Long wikiId,
+        @RequestBody WikiEditV2RequestDTO wikiEditRequestDTO
+    ) {
+        wikiRedisService.updateWiki(wikiId, wikiEditRequestDTO.getYdoc(), wikiEditRequestDTO.getHtml(), wikiEditRequestDTO.getEditorsId(), wikiEditRequestDTO.getApiKey());
+        return StatusResponse.of(200, "문서가 redis에 정상적으로 저장되었습니다.");
+    }
+
     // 위키 상세
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("/v1/wikis")
@@ -72,6 +85,16 @@ public class WikiController {
         Wiki wiki = wikiService.getWiki(title, method);
         WikiResponseDTO wikiResponseDTO = WikiResponseDTO.from(wiki);
         return DataResponse.of(wikiResponseDTO);
+    }
+
+    // 위키 id로 상세 검색
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
+    @GetMapping("/v1/wikis/{wikiId}")
+    public DataResponse<WikiResponseDTO> getWikiById(
+        @PathVariable Long wikiId,
+        @RequestBody WikiInfoRequestDTO wikiInfoRequestDTO
+    ) {
+        return DataResponse.of(wikiService.getWikiById(wikiId, wikiInfoRequestDTO.getApiKey()));
     }
 
     // 위키 목록
