@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.common.exception.ForbiddenException;
+import com.real.backend.modules.wiki.component.WikiFinder;
 import com.real.backend.modules.wiki.domain.Wiki;
 import com.real.backend.modules.wiki.repository.WikiRepository;
 
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class WikiRedisService {
+    private final WikiFinder wikiFinder;
     @Value("${spring.api.secret}")
     private String apiKey;
 
@@ -56,6 +58,7 @@ public class WikiRedisService {
         if(!apiKey.equals(key)) {
             throw new ForbiddenException("접근할 수 없는 api입니다.");
         }
+        wikiFinder.getWiki(wikiId);
         LocalDateTime now = LocalDateTime.now();
         String title = wikiRepository.getWikiTitleById(wikiId);
         Map<String, String> wikiMap = new HashMap<>();
