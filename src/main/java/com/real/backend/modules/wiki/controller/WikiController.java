@@ -20,6 +20,7 @@ import com.real.backend.modules.wiki.domain.SortBy;
 import com.real.backend.modules.wiki.domain.Wiki;
 import com.real.backend.modules.wiki.dto.WikiCreateRequestDTO;
 import com.real.backend.modules.wiki.dto.WikiEditRequestDTO;
+import com.real.backend.modules.wiki.dto.WikiEditV2RequestDTO;
 import com.real.backend.modules.wiki.dto.WikiInfoRequestDTO;
 import com.real.backend.modules.wiki.dto.WikiListResponseDTO;
 import com.real.backend.modules.wiki.dto.WikiResponseDTO;
@@ -60,6 +61,17 @@ public class WikiController {
         @RequestBody WikiEditRequestDTO wikiEditRequestDTO
     ) {
         wikiRedisService.updateWiki(wikiId, wikiEditRequestDTO.getYdoc(), wikiEditRequestDTO.getHtml(), session.getUsername());
+        return StatusResponse.of(200, "문서가 redis에 정상적으로 저장되었습니다.");
+    }
+
+    // 위키 편집 v2
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
+    @PutMapping(value = "/v2/wikis/{wikiId}")
+    public StatusResponse updateWiki(
+        @PathVariable Long wikiId,
+        @RequestBody WikiEditV2RequestDTO wikiEditRequestDTO
+    ) {
+        wikiRedisService.updateWiki(wikiId, wikiEditRequestDTO.getYdoc(), wikiEditRequestDTO.getHtml(), wikiEditRequestDTO.getEditorsId(), wikiEditRequestDTO.getApiKey());
         return StatusResponse.of(200, "문서가 redis에 정상적으로 저장되었습니다.");
     }
 

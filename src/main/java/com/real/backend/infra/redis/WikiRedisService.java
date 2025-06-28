@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.common.exception.ForbiddenException;
 import com.real.backend.modules.wiki.domain.Wiki;
 import com.real.backend.modules.wiki.repository.WikiRepository;
 
@@ -22,6 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class WikiRedisService {
+    @Value("${spring.api.secret}")
+    private String apiKey;
+
     private final WikiRepository wikiRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final String latestZSetKey = "wikis:sorted:latest";
@@ -36,6 +41,27 @@ public class WikiRedisService {
         wikiMap.put("title", title);
         wikiMap.put("html", html);
         wikiMap.put("editor_name", username);
+        wikiMap.put("updated_at", now.toString());
+        wikiMap.put("ydoc", ydoc);
+
+        redisTemplate.opsForHash().putAll("wiki:" + wikiId, wikiMap);
+
+        addZSetWikiUpdatedAt(wikiId, now.toEpochSecond(ZoneOffset.UTC));
+        addZSetWikiTitle(wikiId, title);
+    }
+
+    @Transactional
+    public void updateWiki(Long wikiId, String ydoc, String html, List<Long> editorsId, String key) {
+        // TODO 임시 보안. api key로 요청 허가 받는 방법 말고 다른 방법 생각하기
+        if(!apiKey.equals(key)) {
+            throw new ForbiddenException("접근할 수 없는 api입니다.");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        String title = wikiRepository.getWikiTitleById(wikiId);
+        Map<String, String> wikiMap = new HashMap<>();
+        wikiMap.put("title", title);
+        wikiMap.put("html", html);
+        wikiMap.put("editor_name", editorsId.toString());
         wikiMap.put("updated_at", now.toString());
         wikiMap.put("ydoc", ydoc);
 
