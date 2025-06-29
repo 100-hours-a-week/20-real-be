@@ -1,13 +1,16 @@
 package com.real.backend.common.interceptor;
 
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.servlet.HandlerInterceptor;
+
 import com.real.backend.security.JwtUtils;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.servlet.HandlerInterceptor;
 
 @RequiredArgsConstructor
 public class ApiAccessInterceptor implements HandlerInterceptor {
@@ -19,7 +22,7 @@ public class ApiAccessInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
         if (!uri.startsWith("/api/") || uri.startsWith("/api/v1/auth/") || uri.startsWith("/api/v1/oauth/")
-            || uri.startsWith("/api/vi/news/")) return true;
+            || uri.startsWith("/api/v1/news/")) return true;
 
         String token = extractTokenFromCookie(request);
         if (token == null || !jwtUtils.validateToken(token, response)) return false;
