@@ -66,7 +66,7 @@ public class WikiController {
 
     // 위키 편집 v2
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
-    @PutMapping(value = "/v2/wikis/{wikiId}")
+    @PutMapping(value = "/v2/auth/wikis/{wikiId}")
     public StatusResponse updateWiki(
         @PathVariable Long wikiId,
         @RequestBody WikiEditV2RequestDTO wikiEditRequestDTO
@@ -89,7 +89,7 @@ public class WikiController {
 
     // 위키 id로 상세 검색
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
-    @GetMapping("/v1/wikis/{wikiId}")
+    @PostMapping("/v1/auth/wikis/{wikiId}")
     public DataResponse<WikiResponseDTO> getWikiById(
         @PathVariable Long wikiId,
         @RequestBody WikiInfoRequestDTO wikiInfoRequestDTO

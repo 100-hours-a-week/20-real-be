@@ -21,7 +21,7 @@ public class ApiAccessInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
-        if (!uri.startsWith("/api/") || uri.startsWith("/api/v1/auth/") || uri.startsWith("/api/v1/oauth/")
+        if (!uri.startsWith("/api/") || uri.startsWith("/api/v1/auth/") || uri.startsWith("/api/v2/auth/") || uri.startsWith("/api/v1/oauth/")
             || uri.startsWith("/api/v1/news/")) return true;
 
         String token = extractTokenFromCookie(request);
