@@ -1,7 +1,9 @@
 name: Deploy to Prod (GitOps 방식)
 
 on:
-  workflow_dispatch
+  push:
+    branches:
+      - test/argocd
 
 env:
   ENV: prod
