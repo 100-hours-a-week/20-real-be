@@ -14,12 +14,14 @@ public class LoginResponseDTO {
     private String nickname;
     private Role role;
     private String profileUrl;
+    private Long userId;
 
     public static LoginResponseDTO from(User user) {
         return LoginResponseDTO.builder()
             .nickname(user.getNickname())
             .role(user.getRole())
             .profileUrl(user.getProfileUrl())
+            .userId(user.getId())
             .build();
     }
 }

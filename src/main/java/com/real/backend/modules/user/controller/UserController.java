@@ -26,7 +26,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/v1/users/info")
+    @GetMapping("/v2/users/info")
     public DataResponse<?> getUserInfo(@CurrentSession Session session) {
         LoginResponseDTO loginResponseDTO = userService.getUserInfo(session.getId());
 

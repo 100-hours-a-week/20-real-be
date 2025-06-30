@@ -54,13 +54,14 @@ class UserControllerTest {
     @WithMockUser
     @DisplayName("getUserInfo 성공: 유저 정보를 조회한다.")
     void getUserInfo_success() throws Exception {
-        LoginResponseDTO dto = new LoginResponseDTO("nickname", Role.STAFF, "profile.jpg");
+        LoginResponseDTO dto = new LoginResponseDTO("nickname", Role.STAFF, "profile.jpg", 1L);
         given(userService.getUserInfo(anyLong())).willReturn(dto);
 
         mockMvc.perform(get("/api/v1/users/info"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.nickname").value("nickname"))
-            .andExpect(jsonPath("$.data.role").value(Role.STAFF.toString()));
+            .andExpect(jsonPath("$.data.role").value(Role.STAFF.toString()))
+            .andExpect(jsonPath("$.data.userId").value(1L));
     }
 
     @Test
