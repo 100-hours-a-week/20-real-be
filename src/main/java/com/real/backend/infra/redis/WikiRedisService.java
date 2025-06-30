@@ -2,7 +2,10 @@ package com.real.backend.infra.redis;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,10 +64,11 @@ public class WikiRedisService {
         wikiFinder.getWiki(wikiId);
         LocalDateTime now = LocalDateTime.now();
         String title = wikiRepository.getWikiTitleById(wikiId);
+        List<Long> newEditorsId = updateEditorIds(wikiId, editorsId);
         Map<String, String> wikiMap = new HashMap<>();
         wikiMap.put("title", title);
         wikiMap.put("html", html);
-        wikiMap.put("editor_name", editorsId.toString());
+        wikiMap.put("editor_name", newEditorsId.toString());
         wikiMap.put("updated_at", now.toString());
         wikiMap.put("ydoc", ydoc);
 
@@ -185,5 +189,24 @@ public class WikiRedisService {
 
     public void deleteWikiHash(Long wikiId) {
         redisTemplate.opsForHash().delete("wiki:" + wikiId, "html", "title", "ydoc", "updated_at", "editor_name");
+    }
+
+    public List<Long> updateEditorIds(Long wikiId, List<Long> newEditorIds) {
+        Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
+        String editorIdsStr = wikiMap.isEmpty() ? "[]" : (String) wikiMap.get("editor_name");
+        List<Long> editorIds = editorIdsStr.replaceAll("[\\[\\]\\s]", "").isEmpty() ?
+            new ArrayList<>() :
+            Arrays.stream(editorIdsStr.replaceAll("[\\[\\]\\s]", "").split(","))
+                .map(Long::parseLong)
+                .toList();
+        Set<Long> newSet = new LinkedHashSet<>(newEditorIds);
+        List<Long> result = new ArrayList<>(newSet);
+
+        for (Long id : editorIds) {
+            if (!newSet.contains(id)) {
+                result.add(id);
+            }
+        }
+        return result;
     }
 }
