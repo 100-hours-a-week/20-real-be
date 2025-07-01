@@ -13,6 +13,8 @@ import com.real.backend.common.util.CookieUtils;
 import com.real.backend.modules.auth.dto.TokenDTO;
 import com.real.backend.modules.auth.kakao.KakaoUtil;
 import com.real.backend.modules.auth.service.TokenService;
+import com.real.backend.security.CurrentSession;
+import com.real.backend.security.Session;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,14 +35,15 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/v1/auth/logout")
-    public StatusResponse logout(HttpServletRequest request, HttpServletResponse response) {
+    @PostMapping("/v2/logout")
+    public StatusResponse logout(HttpServletRequest request, HttpServletResponse response, @CurrentSession Session session) {
         tokenService.deleteRefreshToken(cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN"));
+        notificationSseService.disconnect(session.getId());
         cookieUtils.deleteTokenCookies(response);
         return StatusResponse.of(204, "성공적으로 로그아웃 됐습니다.");
     }
 
-    @PostMapping("v1/auth/refresh")
+    @PostMapping("/v1/auth/refresh")
     public StatusResponse refresh(HttpServletRequest request, HttpServletResponse response) {
         TokenDTO tokenDTO = tokenService.refreshAccessToken(cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN"));
         cookieUtils.setTokenCookies(response, tokenDTO.accessToken(), tokenDTO.refreshToken());

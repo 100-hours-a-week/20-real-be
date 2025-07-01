@@ -57,7 +57,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/api/v1/oauth/**", "/api/v1/news").permitAll()
-                .requestMatchers("/api/v1/auth/**", "api/v2/auth/**").permitAll()
+                .requestMatchers("/api/v1/auth/**", "/api/v2/auth/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/api/healthz").permitAll()    //서버 헬스 체크용 API, Security Filter 우회
                 .requestMatchers("/monitoring-prod/health","/monitoring-prod/info","/monitoring-prod/prometheus").permitAll() // 모니터링 API, Security Filter 우회
