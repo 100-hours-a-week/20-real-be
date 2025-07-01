@@ -13,6 +13,7 @@ import com.real.backend.common.util.CookieUtils;
 import com.real.backend.modules.auth.dto.TokenDTO;
 import com.real.backend.modules.auth.kakao.KakaoUtil;
 import com.real.backend.modules.auth.service.TokenService;
+import com.real.backend.modules.notification.service.NotificationSseService;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
 
@@ -27,6 +28,7 @@ public class AuthController {
     private final KakaoUtil kakaoUtil;
     private final CookieUtils cookieUtils;
     private final TokenService tokenService;
+    private final NotificationSseService notificationSseService;
 
     @GetMapping("/v1/oauth/{provider}")
     public void oauthLogin(@PathVariable("provider") String provider, HttpServletResponse response) throws IOException {

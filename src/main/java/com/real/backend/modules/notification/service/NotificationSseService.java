@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.real.backend.common.util.CONSTANT;
 import com.real.backend.infra.sse.repository.SseEmitterRepository;
 import com.real.backend.modules.notification.dto.NotificationResponseDTO;
 
@@ -21,7 +20,7 @@ public class NotificationSseService {
 
     public SseEmitter connect(Long userId) {
         String emitterId = UUID.randomUUID().toString();
-        SseEmitter sseEmitter = new SseEmitter(CONSTANT.ACCESS_TOKEN_EXPIRED);
+        SseEmitter sseEmitter = new SseEmitter(-1L);
 
         sseEmitter.onCompletion(() -> sseEmitterRepository.delete(userId, emitterId));
         sseEmitter.onTimeout(() -> sseEmitterRepository.delete(userId, emitterId));
@@ -66,6 +65,15 @@ public class NotificationSseService {
                     sseEmitterRepository.delete(userId, emitterId);
                 }
             });
+        });
+    }
+
+    public void disconnect(Long userId) {
+        Map<String, SseEmitter> userEmitters = sseEmitterRepository.get(userId);
+        if (userEmitters == null) return;
+        userEmitters.forEach((emitterId, emitter) -> {
+            emitter.complete();
+            sseEmitterRepository.delete(userId, emitterId);
         });
     }
 }
