@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.real.backend.common.util.CONSTANT;
 import com.real.backend.infra.sse.repository.SseEmitterRepository;
 import com.real.backend.modules.notification.dto.NotificationResponseDTO;
 
@@ -20,7 +21,7 @@ public class NotificationSseService {
 
     public SseEmitter connect(Long userId) {
         String emitterId = UUID.randomUUID().toString();
-        SseEmitter sseEmitter = new SseEmitter(-1L);
+        SseEmitter sseEmitter = new SseEmitter(CONSTANT.REFRESH_TOKEN_EXPIRED);
 
         sseEmitter.onCompletion(() -> sseEmitterRepository.delete(userId, emitterId));
         sseEmitter.onTimeout(() -> sseEmitterRepository.delete(userId, emitterId));
