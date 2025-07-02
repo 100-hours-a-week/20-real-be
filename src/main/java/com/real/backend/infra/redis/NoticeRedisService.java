@@ -166,8 +166,10 @@ public class NoticeRedisService {
         String key = "notice:read:user:" + userId;
         if (!redisTemplate.hasKey(key)) {
             List<Long> ids = userNoticeReadRepository.findAllByUserId(userId);
-            redisTemplate.opsForSet().add(key, ids.toArray());
-            redisTemplate.expire(key, userNoticeReadTTL);
+            if(!ids.isEmpty()) {
+                redisTemplate.opsForSet().add(key, ids.toArray());
+                redisTemplate.expire(key, userNoticeReadTTL);
+            }
         }
     }
 }
