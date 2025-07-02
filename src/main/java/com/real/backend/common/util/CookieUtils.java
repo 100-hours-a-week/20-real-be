@@ -55,6 +55,7 @@ public class CookieUtils {
             .path(path) // RT 사용 경로 한정
             .sameSite(sameSite) // 크로스-사이트 재발급용
             .maxAge(CONSTANT.REFRESH_TOKEN_EXPIRED)
+            .domain(".kakaotech.com")
             .build();
     }
 
