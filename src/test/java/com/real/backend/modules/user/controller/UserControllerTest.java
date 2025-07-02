@@ -13,25 +13,23 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.real.backend.config.SecurityTestConfig;
 import com.real.backend.modules.user.domain.Role;
 import com.real.backend.modules.user.dto.ChangeUserInfoRequestDTO;
 import com.real.backend.modules.user.dto.ChangeUserRoleRequestDTO;
 import com.real.backend.modules.user.dto.LoginResponseDTO;
 import com.real.backend.modules.user.service.UserService;
 import com.real.backend.security.Session;
+import com.real.backend.util.SharedWebMvcTest;
 import com.real.backend.util.WithMockUser;
 
-@WebMvcTest(UserController.class)
-@Import(SecurityTestConfig.class)
+@SharedWebMvcTest(controllers = UserController.class)
 class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -41,6 +39,9 @@ class UserControllerTest {
 
     @MockitoBean
     private UserService userService;
+
+    @MockitoBean
+    private RedisTemplate<String, String> redisTemplate;
 
     private Session session;
 
@@ -53,13 +54,14 @@ class UserControllerTest {
     @WithMockUser
     @DisplayName("getUserInfo 성공: 유저 정보를 조회한다.")
     void getUserInfo_success() throws Exception {
-        LoginResponseDTO dto = new LoginResponseDTO("nickname", Role.STAFF, "profile.jpg");
+        LoginResponseDTO dto = new LoginResponseDTO("nickname", Role.STAFF, "profile.jpg", 1L);
         given(userService.getUserInfo(anyLong())).willReturn(dto);
 
         mockMvc.perform(get("/api/v1/users/info"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.nickname").value("nickname"))
-            .andExpect(jsonPath("$.data.role").value(Role.STAFF.toString()));
+            .andExpect(jsonPath("$.data.role").value(Role.STAFF.toString()))
+            .andExpect(jsonPath("$.data.userId").value(1L));
     }
 
     @Test

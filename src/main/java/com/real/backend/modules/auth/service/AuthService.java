@@ -1,8 +1,11 @@
 package com.real.backend.modules.auth.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.modules.auth.dto.KakaoProfileDTO;
 import com.real.backend.modules.auth.dto.KakaoTokenDTO;
 import com.real.backend.modules.auth.dto.TokenDTO;
@@ -19,6 +22,7 @@ public class AuthService {
     private final TokenService tokenService;
     private final UserRepository userRepository;
     private final KakaoUtil kakaoUtil;
+    private final NoticeRedisService noticeRedisService;
 
     @Transactional
     public TokenDTO oAuthLogin(String accessCode) {
@@ -28,6 +32,9 @@ public class AuthService {
         String email = kakaoProfile.getKakao_account().getEmail();
 
         User user = userRepository.findByEmail(email).orElseGet(() -> kakaoService.createKakaoUser(kakaoProfile));
+        user.updateLastLoginAt(LocalDateTime.now());
+
+        noticeRedisService.loadUserNoticeRead(user.getId());
 
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);

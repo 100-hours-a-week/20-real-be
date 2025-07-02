@@ -1,5 +1,7 @@
 package com.real.backend.modules.user.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +49,12 @@ public class UserService {
         }
 
         user.enroll(changeUserInfoRequestDTO.getUserName(), changeUserInfoRequestDTO.getRole());
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void updateLastLoginTime(User user) {
+        user.updateLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
     }
 }

@@ -1,12 +1,17 @@
 package com.real.backend.infra.redis;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.real.backend.common.util.CONSTANT;
 import com.real.backend.modules.notice.component.NoticeFinder;
 import com.real.backend.modules.notice.domain.NoticeLike;
 import com.real.backend.modules.notice.repository.NoticeLikeRepository;
@@ -25,9 +30,12 @@ public class NoticeRedisService {
     private final NoticeFinder noticeFinder;
     private final UserNoticeReadRepository userNoticeReadRepository;
 
+    private final Duration userNoticeReadTTL = Duration.ofSeconds(CONSTANT.REFRESH_TOKEN_EXPIRED);
+
     public void createUserNoticeRead(Long userId, Long noticeId) {
         String key = "notice:read:user:"+userId;
         redisTemplate.opsForSet().add(key, noticeId.toString());
+        redisTemplate.expire(key, userNoticeReadTTL);
     }
 
     public Boolean getUserRead(Long userId, Long noticeId) {
@@ -133,6 +141,33 @@ public class NoticeRedisService {
                     };
                 }
             }
+        }
+    }
+
+    public void loadAllUserNoticeRead() {
+        LocalDateTime lastLoginDate = LocalDateTime.now().minusDays(14);
+
+        List<UserNoticeRead> allReads = userNoticeReadRepository.findAllByUserLastLoginAtAfter(lastLoginDate);
+
+        Map<Long, List<String>> readsByUser = allReads.stream()
+            .collect(Collectors.groupingBy(
+                r -> r.getUser().getId(),
+                Collectors.mapping(r -> String.valueOf(r.getNotice().getId()), Collectors.toList())
+            ));
+
+        readsByUser.forEach((userId, noticeIds) -> {
+            String key = "notice:read:user:" + userId;
+            redisTemplate.opsForSet().add(key, noticeIds.toArray());
+            redisTemplate.expire(key, userNoticeReadTTL);
+        });
+    }
+
+    public void loadUserNoticeRead(Long userId) {
+        String key = "notice:read:user:" + userId;
+        if (!redisTemplate.hasKey(key)) {
+            List<Long> ids = userNoticeReadRepository.findAllByUserId(userId);
+            redisTemplate.opsForSet().add(key, ids.toArray());
+            redisTemplate.expire(key, userNoticeReadTTL);
         }
     }
 }

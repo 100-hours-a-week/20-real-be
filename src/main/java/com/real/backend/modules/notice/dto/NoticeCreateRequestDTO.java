@@ -3,26 +3,32 @@ package com.real.backend.modules.notice.dto;
 import com.real.backend.common.aop.Sanitizer;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Data
+@Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class NoticeCreateRequestDTO {
 	@NotBlank
 	@Sanitizer
-	@Size(min = 1, max = 26)
 	private String title;
 
 	@NotBlank
 	@Sanitizer
-	@Size(min = 1, max = 20000)
 	private String content;
 
 	@NotBlank
 	private String tag;
 
+	@NotBlank
+	private String userName;
+
 	@Sanitizer
 	private String originalUrl;
+	private String platform;
+	private String createdAt;
 }

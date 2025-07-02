@@ -56,10 +56,9 @@ public class SecurityConfig {
         // 경로별 인가 작업
         http
             .authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/signup").permitAll() // 필터 거치지 않고 통과
                 .requestMatchers("/api/v1/oauth/**", "/api/v1/news").permitAll()
+                .requestMatchers("/api/v1/auth/**", "api/v2/auth/**").permitAll()
                 .requestMatchers("/error").permitAll()
-                .requestMatchers("/api/v1/auth/refresh").permitAll()
                 .requestMatchers("/api/healthz").permitAll()    //서버 헬스 체크용 API, Security Filter 우회
                 .requestMatchers("/monitoring-prod/health","/monitoring-prod/info","/monitoring-prod/prometheus").permitAll() // 모니터링 API, Security Filter 우회
                 .requestMatchers("/monitoring-dev/health", "/monitoring-dev/info", "/monitoring-dev/prometheus").permitAll()

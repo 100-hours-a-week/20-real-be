@@ -61,6 +61,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<StatusResponse> handleUnauthorized(UnauthorizedException e) {
+        StatusResponse response = StatusResponse.of(401, e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<StatusResponse> handleForbidden(ForbiddenException e) {
+        StatusResponse response = StatusResponse.of(403, e);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<StatusResponse> handleNotFound(NotFoundException e) {
         StatusResponse response = StatusResponse.of(404, e);

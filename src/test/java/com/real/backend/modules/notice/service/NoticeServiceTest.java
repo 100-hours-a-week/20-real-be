@@ -1,6 +1,7 @@
 package com.real.backend.modules.notice.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,18 +11,24 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.common.config.RedisConfig;
 import com.real.backend.common.exception.NotFoundException;
 import com.real.backend.common.util.dto.SliceDTO;
 import com.real.backend.config.AiResponseConfig;
+import com.real.backend.infra.ai.dto.NoticeSummaryRequestDTO;
+import com.real.backend.infra.ai.dto.NoticeSummaryResponseDTO;
 import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.modules.notice.domain.Notice;
 import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
+import com.real.backend.modules.notice.dto.NoticeFileGroups;
 import com.real.backend.modules.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.modules.notice.dto.NoticeListResponseDTO;
 import com.real.backend.modules.notice.repository.NoticeRepository;
@@ -49,6 +56,12 @@ class NoticeServiceTest extends NoticeServiceTestIntegration {
 
     @Autowired
     private PostRedisService postRedisService;
+
+    @MockitoBean
+    private NoticeAiService noticeAiService;
+
+    @MockitoBean
+    private NoticeFileService noticeFileService;
 
     @DisplayName("getNoticeListByCursor 성공: 읽음 여부 확인 및 공지의 첫 페이지를 최대 10개까지 보여준다.")
     @Test
@@ -124,15 +137,26 @@ class NoticeServiceTest extends NoticeServiceTestIntegration {
         // given
         User user = createUser();
         Long userId = user.getId();
+        LocalDateTime now = LocalDateTime.now();
         NoticeCreateRequestDTO dto = NoticeCreateRequestDTO.builder()
             .title("제목")
             .content("내용")
             .tag("공지")
+            .userName("테스터")
             .originalUrl("https://example.com/original")
+            .platform("디스코드")
+            .createdAt(now.toString())
             .build();
 
+        List<MultipartFile> images = List.of(new MockMultipartFile("image1", "image1.png", "image/png", "fake image content".getBytes()));
+        List<MultipartFile> files = List.of(new MockMultipartFile("file1", "file1.pdf", "application/pdf", "fake file content".getBytes()));
+
+        NoticeSummaryResponseDTO mockSummary = new NoticeSummaryResponseDTO("요약된 내용", true);
+        given(noticeAiService.makeSummary(any(NoticeSummaryRequestDTO.class))).willReturn(mockSummary);
+
+
         // when
-        noticeService.createNotice(userId, dto);
+        noticeService.createNotice(dto, images, files);
 
         // then
         List<Notice> result = noticeRepository.findAll();
@@ -144,30 +168,46 @@ class NoticeServiceTest extends NoticeServiceTestIntegration {
         assertThat(notice.getUser().getId()).isEqualTo(userId);
         assertThat(notice.getTag()).isEqualTo("공지");
         assertThat(notice.getOriginalUrl()).isEqualTo("https://example.com/original");
-        assertThat(notice.getSummary()).isEqualTo("요약");
+        assertThat(notice.getSummary()).isEqualTo("요약된 내용");
         assertThat(notice.getDeletedAt()).isNull();
         assertThat(notice.getTotalViewCount()).isEqualTo(0);
         assertThat(notice.getCommentCount()).isEqualTo(0);
         assertThat(notice.getLikeCount()).isEqualTo(0);
+        assertThat(notice.getCreatedAt()).isEqualTo(now);
+
+        verify(noticeFileService, times(1)).uploadFilesToS3(images, notice, true);
+        verify(noticeFileService, times(1)).uploadFilesToS3(files, notice, false);
     }
 
-    @DisplayName("createNotice 실패: 유효하지 않은 사용자 id로 인해 공지를 작성할 사용자가 존재하지 않아서 실패")
+    @DisplayName("createNotice 실패: 유효하지 않은 작성자 이름으로 인해 공지 작성 실패")
     @Test
-    void createNotice_fail() {
+    void createNotice_fail_invalidUsername() throws JsonProcessingException {
         // given
-        Long userId = 999999L;
+        LocalDateTime createdAt = LocalDateTime.now();
         NoticeCreateRequestDTO dto = NoticeCreateRequestDTO.builder()
             .title("제목")
             .content("내용")
             .tag("공지")
+            .userName("없는 유저")
             .originalUrl("https://example.com/original")
+            .platform("디스코드")
+            .createdAt(createdAt.toString())
             .build();
 
+        List<MultipartFile> images = List.of(new MockMultipartFile("image1", "image1.png", "image/png", "fake image content".getBytes()));
+        List<MultipartFile> files = List.of(new MockMultipartFile("file1", "file1.pdf", "application/pdf", "fake file content".getBytes()));
+
+        NoticeSummaryResponseDTO mockSummary = new NoticeSummaryResponseDTO("요약된 내용", true);
+        given(noticeAiService.makeSummary(any(NoticeSummaryRequestDTO.class)))
+            .willReturn(mockSummary);
+
         // when & then
-        assertThatThrownBy(() -> noticeService.createNotice(userId, dto))
+        assertThatThrownBy(() -> noticeService.createNotice(dto, images, files))
             .isInstanceOf(NotFoundException.class)
-            .hasMessageContaining("해당 id를 가진 사용자가 없습니다.");
+            .hasMessageContaining("해당 이름을 가진 사용자가 없습니다.");
     }
+
+
 
     @DisplayName("getNoticeById 성공: 공지 하나의 정보를 성공적으로 불러옴")
     @Test
@@ -182,6 +222,9 @@ class NoticeServiceTest extends NoticeServiceTestIntegration {
         postRedisService.initCount("notice", "like", noticeId, 2L);
         postRedisService.initCount("notice", "comment", noticeId, 5L);
         postRedisService.toggleLikeInRedis("notice", userId, noticeId);
+
+        given(noticeFileService.getNoticeFileGroups(notice))
+            .willReturn(new NoticeFileGroups(List.of(), List.of()));
 
         // when
         NoticeInfoResponseDTO result = noticeService.getNoticeById(noticeId, userId);

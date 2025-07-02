@@ -2,16 +2,22 @@ package com.real.backend.infra.redis;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.real.backend.common.exception.ForbiddenException;
+import com.real.backend.modules.wiki.component.WikiFinder;
 import com.real.backend.modules.wiki.domain.Wiki;
 import com.real.backend.modules.wiki.repository.WikiRepository;
 
@@ -22,6 +28,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class WikiRedisService {
+    private final WikiFinder wikiFinder;
+    @Value("${spring.api.secret}")
+    private String apiKey;
+
     private final WikiRepository wikiRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final String latestZSetKey = "wikis:sorted:latest";
@@ -36,6 +46,29 @@ public class WikiRedisService {
         wikiMap.put("title", title);
         wikiMap.put("html", html);
         wikiMap.put("editor_name", username);
+        wikiMap.put("updated_at", now.toString());
+        wikiMap.put("ydoc", ydoc);
+
+        redisTemplate.opsForHash().putAll("wiki:" + wikiId, wikiMap);
+
+        addZSetWikiUpdatedAt(wikiId, now.toEpochSecond(ZoneOffset.UTC));
+        addZSetWikiTitle(wikiId, title);
+    }
+
+    @Transactional
+    public void updateWiki(Long wikiId, String ydoc, String html, List<Long> editorsId, String key) {
+        // TODO 임시 보안. api key로 요청 허가 받는 방법 말고 다른 방법 생각하기
+        if(!apiKey.equals(key)) {
+            throw new ForbiddenException("접근할 수 없는 api입니다.");
+        }
+        wikiFinder.getWiki(wikiId);
+        LocalDateTime now = LocalDateTime.now();
+        String title = wikiRepository.getWikiTitleById(wikiId);
+        List<Long> newEditorsId = updateEditorIds(wikiId, editorsId);
+        Map<String, String> wikiMap = new HashMap<>();
+        wikiMap.put("title", title);
+        wikiMap.put("html", html);
+        wikiMap.put("editor_name", newEditorsId.toString());
         wikiMap.put("updated_at", now.toString());
         wikiMap.put("ydoc", ydoc);
 
@@ -65,9 +98,32 @@ public class WikiRedisService {
     }
 
     @Transactional(readOnly = true)
-    public Wiki getWikiById(String title) {
+    public Wiki getWikiByTitle(String title) {
         Long wikiId = wikiRepository.getWikiIdByTitle(title);
         Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
+        String html = (String) wikiMap.get("html");
+        String editor = (String) wikiMap.get("editor_name");
+        String updatedAt = (String) wikiMap.get("updated_at");
+        String ydoc = (String) wikiMap.get("ydoc");
+
+        if (ydoc == null || html == null || editor == null || updatedAt == null) {
+            return null;
+        } else {
+            return Wiki.builder()
+                .id(wikiId)
+                .title(title)
+                .ydoc(ydoc)
+                .html(html)
+                .editorName(editor)
+                .updatedAt(LocalDateTime.parse(updatedAt))
+                .build();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public Wiki getWikiById(Long wikiId) {
+        Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
+        String title = wikiRepository.getWikiTitleById(wikiId);
         String html = (String) wikiMap.get("html");
         String editor = (String) wikiMap.get("editor_name");
         String updatedAt = (String) wikiMap.get("updated_at");
@@ -133,5 +189,24 @@ public class WikiRedisService {
 
     public void deleteWikiHash(Long wikiId) {
         redisTemplate.opsForHash().delete("wiki:" + wikiId, "html", "title", "ydoc", "updated_at", "editor_name");
+    }
+
+    public List<Long> updateEditorIds(Long wikiId, List<Long> newEditorIds) {
+        Map<Object, Object> wikiMap = redisTemplate.opsForHash().entries("wiki:" + wikiId);
+        String editorIdsStr = wikiMap.isEmpty() ? "[]" : (String) wikiMap.get("editor_name");
+        List<Long> editorIds = editorIdsStr.replaceAll("[\\[\\]\\s]", "").isEmpty() ?
+            new ArrayList<>() :
+            Arrays.stream(editorIdsStr.replaceAll("[\\[\\]\\s]", "").split(","))
+                .map(Long::parseLong)
+                .toList();
+        Set<Long> newSet = new LinkedHashSet<>(newEditorIds);
+        List<Long> result = new ArrayList<>(newSet);
+
+        for (Long id : editorIds) {
+            if (!newSet.contains(id)) {
+                result.add(id);
+            }
+        }
+        return result;
     }
 }

@@ -25,7 +25,6 @@ import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.modules.notice.dto.NoticeFileGroups;
 import com.real.backend.modules.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.modules.notice.dto.NoticeListResponseDTO;
-import com.real.backend.modules.notice.dto.NoticePasteRequestDTO;
 import com.real.backend.modules.notice.repository.NoticeRepository;
 import com.real.backend.modules.user.component.UserFinder;
 import com.real.backend.modules.user.domain.User;
@@ -71,28 +70,6 @@ public class NoticeService {
         );
     }
 
-    @Transactional
-    public void createNotice(Long userId, NoticeCreateRequestDTO noticeCreateRequestDTO) throws
-        JsonProcessingException {
-        User user = userFinder.getUser(userId);
-
-        NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.getContent(),
-            noticeCreateRequestDTO.getTitle());
-        NoticeSummaryResponseDTO noticeSummaryResponseDTO = noticeAiService.makeSummary(noticeSummaryRequestDTO);
-
-        noticeRepository.save(Notice.builder()
-            .user(user)
-            .title(noticeCreateRequestDTO.getTitle())
-            .content(noticeCreateRequestDTO.getContent())
-            .summary(noticeSummaryResponseDTO.summary())
-            .tag(noticeCreateRequestDTO.getTag())
-            .originalUrl(noticeCreateRequestDTO.getOriginalUrl())
-            .totalViewCount(0L)
-            .commentCount(0L)
-            .likeCount(0L)
-            .build());
-    }
-
     @Transactional(readOnly = true)
     public NoticeInfoResponseDTO getNoticeById(Long noticeId, Long userId) {
         Notice notice = noticeFinder.getNotice(noticeId);
@@ -119,24 +96,22 @@ public class NoticeService {
     }
 
     @Transactional
-    public void editNotice(Long noticeId, NoticePasteRequestDTO noticePasteRequestDTO) {
+    public void editNotice(Long noticeId, NoticeCreateRequestDTO noticeCreateRequestDTO) {
         Notice notice = noticeFinder.getNotice(noticeId);
         User user = userRepository.findById(notice.getUser().getId()).orElseThrow(() -> new NotFoundException("User not found"));
 
-        notice.updateNotice(noticePasteRequestDTO, user);
-        notice.updateCreatedAt(noticePasteRequestDTO.getCreatedAt());
+        notice.updateNotice(noticeCreateRequestDTO, user);
+        notice.updateCreatedAt(noticeCreateRequestDTO.getCreatedAt());
         noticeRepository.save(notice);
     }
 
     @Transactional
-    public void pasteNoticeTmp(NoticePasteRequestDTO noticeCreateRequestDTO, List<MultipartFile> images,
+    public void createNotice(NoticeCreateRequestDTO noticeCreateRequestDTO, List<MultipartFile> images,
         List<MultipartFile> files) throws JsonProcessingException {
 
-
         String userName = noticeCreateRequestDTO.getUserName();
-        User user = userRepository.findByNickname(userName);
+        User user = userRepository.findByNickname(userName).orElseThrow(() -> new NotFoundException("해당 이름을 가진 사용자가 없습니다."));
 
-        // ai에 summary 요청 로직
         NoticeSummaryRequestDTO noticeSummaryRequestDTO = new NoticeSummaryRequestDTO(noticeCreateRequestDTO.getContent(),
             noticeCreateRequestDTO.getTitle());
         NoticeSummaryResponseDTO noticeSummaryResponseDTO = noticeAiService.makeSummary(noticeSummaryRequestDTO);
