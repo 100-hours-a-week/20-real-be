@@ -10,9 +10,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.real.backend.common.util.CONSTANT;
+import com.real.backend.common.util.CookieUtils;
 import com.real.backend.security.JwtUtils;
 import com.real.backend.security.Session;
-import com.real.backend.common.util.CookieUtils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -40,7 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = cookieUtils.resolveTokenFromCookie(request, "ACCESS_TOKEN");
+        String token = cookieUtils.resolveTokenFromCookie(request, CONSTANT.ACCESS_TOKEN_COOKIE);
 
         if (!jwtUtils.validateToken(token, response)){
             return;

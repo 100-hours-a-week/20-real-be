@@ -2,6 +2,7 @@ package com.real.backend.common.util;
 
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
@@ -13,8 +14,12 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class CookieUtils {
 
+    @Value("${spring.cookie_domain}")
+    private String domain;
+
     private final boolean isSecure = true;
     private final boolean isHttpOnly = true;
+
 
     public String resolveTokenFromCookie(HttpServletRequest request, String type) {
         Cookie[] cookies = request.getCookies();
@@ -28,9 +33,9 @@ public class CookieUtils {
     }
 
     public void setTokenCookies(HttpServletResponse response, String accessToken, String refreshToken) {
-        ResponseCookie accessCookie = createResponseCookie("ACCESS_TOKEN", accessToken, isHttpOnly, isSecure, "/",
+        ResponseCookie accessCookie = createResponseCookie(CONSTANT.ACCESS_TOKEN_COOKIE, accessToken, isHttpOnly, isSecure, "/",
             "Lax");
-        ResponseCookie refreshCookie = createResponseCookie("REFRESH_TOKEN", refreshToken, isHttpOnly, isSecure,
+        ResponseCookie refreshCookie = createResponseCookie(CONSTANT.REFRESH_TOKEN_COOKIE, refreshToken, isHttpOnly, isSecure,
             "/api/v1/auth", "None");
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
@@ -38,9 +43,9 @@ public class CookieUtils {
     }
 
     public void deleteTokenCookies(HttpServletResponse response) {
-        ResponseCookie deleteAccessCookie = deleteResponseCookie("ACCESS_TOKEN",  isHttpOnly, isSecure, "/",
+        ResponseCookie deleteAccessCookie = deleteResponseCookie(CONSTANT.ACCESS_TOKEN_COOKIE,  isHttpOnly, isSecure, "/",
             "Lax");
-        ResponseCookie deleteRefreshCookie = deleteResponseCookie("REFRESH_TOKEN",  isHttpOnly, isSecure,
+        ResponseCookie deleteRefreshCookie = deleteResponseCookie(CONSTANT.REFRESH_TOKEN_COOKIE,  isHttpOnly, isSecure,
             "/api/v1/auth", "None");
 
         response.addHeader(HttpHeaders.SET_COOKIE, deleteAccessCookie.toString());
@@ -55,7 +60,7 @@ public class CookieUtils {
             .path(path) // RT 사용 경로 한정
             .sameSite(sameSite) // 크로스-사이트 재발급용
             .maxAge(CONSTANT.REFRESH_TOKEN_EXPIRED)
-            .domain(".kakaotech.com")
+            .domain(domain)
             .build();
     }
 
