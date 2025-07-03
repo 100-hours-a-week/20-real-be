@@ -1,18 +1,20 @@
 package com.real.backend.batch;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.real.backend.infra.redis.NewsRedisService;
+import com.real.backend.infra.redis.PostRedisService;
 import com.real.backend.modules.news.repository.NewsRepository;
 import com.real.backend.modules.news.service.NewsAiService;
 import com.real.backend.modules.user.repository.UserRepository;
-import com.real.backend.infra.redis.NewsRedisService;
-import com.real.backend.infra.redis.PostRedisService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,7 @@ public class NewsSyncScheduler {
     private final NewsRepository newsRepository;
     private final UserRepository userRepository;
     private final NewsAiService newsAiService;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
     @Scheduled(cron = "0 0 */3 * * *")
@@ -65,6 +68,15 @@ public class NewsSyncScheduler {
     @Transactional
     @Scheduled(cron = "0 10 12 * * *")
     public void createNewsAi() throws JsonProcessingException {
-        newsAiService.createNewsAiByRandomWiki();
+        String lockKey = "batch:news:lock";
+        Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, "locked", Duration.ofMinutes(10));
+
+        if (Boolean.TRUE.equals(lockAcquired)) {
+            try {
+                newsAiService.createNewsAiByRandomWiki();
+            } finally {
+                redisTemplate.delete(lockKey);
+            }
+        }
     }
 }
