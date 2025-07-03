@@ -63,16 +63,19 @@ public class NotificationSseService {
     }
 
     public void disconnect(Long userId) {
-        Map<String, SseEmitter> userEmitters = sseEmitterRepository.get(userId);
-        if (userEmitters == null) return;
-        userEmitters.forEach((emitterId, emitter) -> {
-            emitter.complete();
-            sseEmitterRepository.delete(userId, emitterId);
         SseEmitter emitter = sseEmitterRepository.get(userId);
         if (emitter == null) return;
         emitter.complete();
         sseEmitterRepository.delete(userId);
     }
+
+    public void sendHeartbeat() {
+        sseEmitterRepository.findAllEmitters().forEach((userId, emitter) -> {
+            try {
+                emitter.send(SseEmitter.event().comment("heartbeat").data("heartbeat sended"));
+            } catch (IOException e) {
+                sseEmitterRepository.delete(userId);
+            }
         });
     }
 }
