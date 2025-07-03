@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.common.response.StatusResponse;
+import com.real.backend.common.util.CONSTANT;
 import com.real.backend.common.util.CookieUtils;
 import com.real.backend.modules.auth.dto.TokenDTO;
 import com.real.backend.modules.auth.kakao.KakaoUtil;
@@ -35,14 +36,14 @@ public class AuthController {
 
     @PostMapping("/v1/auth/logout")
     public StatusResponse logout(HttpServletRequest request, HttpServletResponse response) {
-        tokenService.deleteRefreshToken(cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN"));
+        tokenService.deleteRefreshToken(cookieUtils.resolveTokenFromCookie(request, CONSTANT.REFRESH_TOKEN_COOKIE));
         cookieUtils.deleteTokenCookies(response);
         return StatusResponse.of(204, "성공적으로 로그아웃 됐습니다.");
     }
 
     @PostMapping("v1/auth/refresh")
     public StatusResponse refresh(HttpServletRequest request, HttpServletResponse response) {
-        TokenDTO tokenDTO = tokenService.refreshAccessToken(cookieUtils.resolveTokenFromCookie(request, "REFRESH_TOKEN"));
+        TokenDTO tokenDTO = tokenService.refreshAccessToken(cookieUtils.resolveTokenFromCookie(request, CONSTANT.REFRESH_TOKEN_COOKIE));
         cookieUtils.setTokenCookies(response, tokenDTO.accessToken(), tokenDTO.refreshToken());
         return StatusResponse.of(200, "OK");
     }
