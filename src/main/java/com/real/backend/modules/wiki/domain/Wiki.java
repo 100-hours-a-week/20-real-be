@@ -32,7 +32,7 @@ public class Wiki {
     @Column(columnDefinition = "MEDIUMTEXT")
     private String html;
 
-    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String editorName;
 
     @CreatedDate
