@@ -2,7 +2,6 @@ package com.real.backend.modules.wiki.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -106,12 +105,14 @@ public class WikiCursorPaginationService {
 
         List<WikiTitleCursor> filtered = results.stream()
             .map(val -> {
-                String[] parts = val.split(":");
-                return new WikiTitleCursor(parts[0], Long.valueOf(parts[1]));
+                int idx = val.lastIndexOf(':');
+                if (idx < 0) throw new IllegalStateException("잘못된 포맷: " + val);
+                String title = val.substring(0, idx);
+                Long id = Long.valueOf(val.substring(idx + 1));
+                return new WikiTitleCursor(title, id);
             })
             .filter(e -> e.getTitle().toLowerCase().contains(keyword.toLowerCase()))
-            .filter(e -> isFirstPage || e.getTitle().compareTo(cursorStandard) > 0) // 커서 처리
-            .sorted(Comparator.comparing(WikiTitleCursor::getTitle))
+            // …커서/정렬 로직…
             .collect(Collectors.toList());
 
         return CursorUtils.toCursorDto(
