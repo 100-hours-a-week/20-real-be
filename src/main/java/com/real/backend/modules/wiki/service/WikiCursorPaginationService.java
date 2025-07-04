@@ -2,6 +2,7 @@ package com.real.backend.modules.wiki.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -112,7 +113,8 @@ public class WikiCursorPaginationService {
                 return new WikiTitleCursor(title, id);
             })
             .filter(e -> e.getTitle().toLowerCase().contains(keyword.toLowerCase()))
-            // …커서/정렬 로직…
+            .filter(e -> isFirstPage || e.getTitle().compareTo(cursorStandard) > 0) // 커서 처리
+            .sorted(Comparator.comparing(WikiTitleCursor::getTitle))
             .collect(Collectors.toList());
 
         return CursorUtils.toCursorDto(
