@@ -3,35 +3,28 @@ name: Deploy to Prod
 on:
     push:
         branches:
-            main
+            - main
+
 env:
     ENV: prod
-
 
 jobs:
     deploy:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Wait for tag to be synced
-              run: sleep 15
-            
-            - name: Checkout
+            - name: Checkout 소스 레포
               uses: actions/checkout@v3
               with:
                   fetch-depth: 0
-
-            
 
             - name: Set variables
               run: |
                   TAG=$(git describe --tags --abbrev=0)
                   SHA=$(git rev-parse --short=6 HEAD)
                   echo "IMAGE_TAG=${ENV}-${TAG}-${SHA}" >> $GITHUB_ENV
-                  echo "S3_KEY=deploy-${ENV}-${TAG}-${SHA}.zip" >> $GITHUB_ENV
-                  echo "DEPLOYMENT_GROUP=${{ secrets.DEPLOYMENT_GROUP_PROD }}" >> $GITHUB_ENV
 
-            - name: Configure AWS credentials (via secrets)
+            - name: Configure AWS credentials
               uses: aws-actions/configure-aws-credentials@v2
               with:
                   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -49,54 +42,28 @@ jobs:
                   docker tag ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG
                   docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG
 
-            - name: Generate appspec.yml
+            - name: Install yq
               run: |
-                  cat <<EOF > appspec.yml
-                  version: 0.0
-                  os: linux
-                  files:
-                      - source: /
-                        destination: /home/ec2-user
-                        overwrite: yes
+                  sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+                  sudo chmod +x /usr/bin/yq
 
-                  permissions:
-                      - object: /
-                        pattern: "**"
-                        owner: ec2-user
-                        group: ec2-user
-                        mode: 755
+            - name: Clone GitOps Repository
+              uses: actions/checkout@v3
+              with:
+                  repository: 100-hours-a-week/20-real-gitops
+                  token: ${{ secrets.GITOPS_TOKEN }}
+                  path: gitops
 
-                  hooks:
-                      ApplicationStop:
-                        - location: scripts/stop.sh
-                          timeout: 60
-                          runas: ec2-user
-                      AfterInstall:
-                          - location: scripts/deploy.sh
-                            timeout: 60
-                            runas: ec2-user
-                  EOF
-
-            - name: Inject variables into deploy.sh
+            - name: Update image tag in values-prod.yaml
               run: |
-                  sed -i "s|<IMAGE_TAG>|$IMAGE_TAG|g" scripts/deploy.sh
-                  sed -i "s|<ENV>|$ENV|g" scripts/deploy.sh
-                  sed -i "s|<AWS_ACCOUNT_ID>|${{ secrets.AWS_ACCOUNT_ID }}|g" scripts/deploy.sh
-                  sed -i "s|<AWS_REGION>|${{ secrets.AWS_REGION }}|g" scripts/deploy.sh
-                  sed -i "s|<ECR_REPOSITORY>|${{ secrets.ECR_REPOSITORY }}|g" scripts/deploy.sh
-                  chmod +x scripts/deploy.sh
+                  cd gitops/env/prod/spring
+                  yq e '.image.tag = "${{ env.IMAGE_TAG }}"' -i values-prod.yaml
 
-
-            - name: Zip files
-              run: zip -r $S3_KEY appspec.yml scripts/
-
-            - name: Upload to S3
-              run: aws s3 cp $S3_KEY s3://${{ secrets.S3_BUCKET }}/$S3_KEY
-
-            - name: Trigger CodeDeploy
+            - name: Commit & Push changes
               run: |
-                  aws deploy create-deployment \
-                    --application-name ${{ secrets.APPLICATION_NAME_PROD }} \
-                    --deployment-group-name $DEPLOYMENT_GROUP \
-                    --s3-location bucket=${{ secrets.S3_BUCKET }},bundleType=zip,key=$S3_KEY \
-                    --file-exists-behavior OVERWRITE
+                  cd gitops
+                  git config user.name "GitHub Actions"
+                  git config user.email "actions@github.com"
+                  git add env/prod/spring/values-prod.yaml
+                  git commit -m "chore: Update spring-prod image tag to $IMAGE_TAG"
+                  git push origin main

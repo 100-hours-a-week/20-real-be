@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import com.real.backend.common.util.CONSTANT;
 import com.real.backend.security.JwtUtils;
 
 import jakarta.servlet.DispatcherType;
@@ -45,7 +46,7 @@ public class ApiAccessInterceptor implements HandlerInterceptor {
         if (request.getCookies() == null) return null;
 
         for (Cookie cookie : request.getCookies()) {
-            if ("ACCESS_TOKEN".equals(cookie.getName())) {
+            if (CONSTANT.ACCESS_TOKEN_COOKIE.equals(cookie.getName())) {
                 return cookie.getValue();
             }
         }

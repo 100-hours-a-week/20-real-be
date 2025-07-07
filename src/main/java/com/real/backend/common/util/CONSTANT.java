@@ -12,4 +12,7 @@ public class CONSTANT {
     public static final long CONNECTION_TIMEOUT = 5 * 60 * 1000L; // 5분
     public static final long HEARTBEAT_INTERVAL = 10 * 1000L; // 10초
 
+    // Cookie name
+    public static final String ACCESS_TOKEN_COOKIE = "ACCESS_TOKEN_V2";
+    public static final String REFRESH_TOKEN_COOKIE = "REFRESH_TOKEN_V2";
 }
