@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.real.backend.infra.sse.service.SseEmitterService;
 import com.real.backend.modules.notification.service.NotificationSseService;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.SecurityContextUtil;
@@ -22,11 +23,16 @@ import lombok.RequiredArgsConstructor;
 public class NotificationSseController {
 
     private final NotificationSseService notificationSseService;
+    private final SseEmitterService sseEmitterService;
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping(value="/v1/connect/notification", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter connect(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, @CurrentSession Session session) {
         SecurityContextUtil.propagateSecurityContextToRequest(httpServletRequest, httpServletResponse);
-        return notificationSseService.connect(session.getId());
+        Long lastEventId = sseEmitterService.parseLastEventId(httpServletRequest.getHeader("Last-Event-ID"));
+        SseEmitter sseEmitter = notificationSseService.connect(session.getId());
+        notificationSseService.recoverMissedNotification(session.getId(), lastEventId, sseEmitter);
+        notificationSseService.recoverMissedNoticeNotification(session.getId(), lastEventId, sseEmitter);
+        return sseEmitter;
     }
 }

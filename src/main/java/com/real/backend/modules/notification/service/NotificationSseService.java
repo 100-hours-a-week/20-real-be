@@ -114,4 +114,44 @@ public class NotificationSseService {
             }
         });
     }
+
+    @Transactional(readOnly = true)
+    public void recoverMissedNotification(Long userId, Long lastEventID, SseEmitter emitter) {
+        notificationRepository.findByUserIdAndIdGreaterThanOrderByIdAsc(userId, lastEventID)
+            .forEach(notification -> {
+                try {
+                    NotificationResponseDTO dto = NotificationResponseDTO.from(notification);
+                    emitter.send(SseEmitter.event()
+                        .id(dto.getNotificationId().toString())
+                        .name("notification")
+                        .data(dto));
+                } catch (IOException e) {
+                    disconnect(userId);
+                }
+            });
+    }
+
+    @Transactional(readOnly = true)
+    public void recoverMissedNoticeNotification(Long userId, Long lastEventID, SseEmitter emitter) {
+        List<Long> readList = noticeRedisService.getUserReadList(userId);
+
+        noticeRepository.findByIdGreaterThanOrderByIdAsc(lastEventID)
+            .stream()
+            .filter(notice -> !readList.contains(notice.getId()))
+            .forEach(notice -> {
+                try {
+                    emitter.send(SseEmitter.event()
+                        .id(notice.getId().toString())
+                        .name("newNotice")
+                        .data(NotificationResponseDTO.builder()
+                            .type(NotificationType.NOTICE_CREATED)
+                            .referenceId(notice.getId())
+                            .userId(userId)
+                            .message("새로운 공지가 생성되었습니다.")
+                            .build()));
+                } catch (IOException e) {
+                    disconnect(userId);
+                }
+            });
+    }
 }
