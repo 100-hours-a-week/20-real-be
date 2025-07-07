@@ -1,13 +1,23 @@
 package com.real.backend.modules.notification.service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.real.backend.common.util.CONSTANT;
+import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.infra.sse.repository.SseEmitterRepository;
+import com.real.backend.modules.notice.domain.Notice;
+import com.real.backend.modules.notice.repository.NoticeRepository;
+import com.real.backend.modules.notification.domain.NotificationType;
 import com.real.backend.modules.notification.dto.NotificationResponseDTO;
+import com.real.backend.modules.notification.repository.NotificationRepository;
+import com.real.backend.modules.user.domain.Role;
+import com.real.backend.modules.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +26,10 @@ import lombok.RequiredArgsConstructor;
 public class NotificationSseService {
 
     private final SseEmitterRepository sseEmitterRepository;
+    private final NotificationRepository notificationRepository;
+    private final NoticeRedisService noticeRedisService;
+    private final NoticeRepository noticeRepository;
+    private final UserRepository userRepository;
 
     public SseEmitter connect(Long userId) {
         SseEmitter sseEmitter = new SseEmitter(CONSTANT.CONNECTION_TIMEOUT);
@@ -48,6 +62,28 @@ public class NotificationSseService {
         } catch (IOException e) {
             sseEmitterRepository.delete(userId);
         }
+    }
+
+    public void sendNoticeNotification(Notice notice) {
+        Map<Long, SseEmitter> emitters = sseEmitterRepository.findAllEmitters();
+        emitters.forEach((userId, emitter) -> {
+            Role role = userRepository.findRoleById(userId);
+            if (!(role == Role.STAFF || role == Role.TRAINEE)) {
+                return;
+            }
+            try {
+                emitter.send(SseEmitter.event()
+                    .id(notice.getId().toString())
+                    .data(NotificationResponseDTO.builder()
+                        .referenceId(notice.getId())
+                        .type(NotificationType.NOTICE_CREATED)
+                        .userId(userId)
+                        .message("새로운 공지가 생성되었습니다.")
+                        .build()));
+            } catch (IOException e) {
+                sseEmitterRepository.delete(userId);
+            }
+        });
     }
 
     public void sendNotificationToAll(NotificationResponseDTO notificationResponseDTO) {

@@ -30,7 +30,6 @@ public class NotificationService {
             .type(notificationType)
             .build();
         notificationRepository.save(notification);
-
         notificationSseService.sendNotification(userId, NotificationResponseDTO.from(notification));
     }
 

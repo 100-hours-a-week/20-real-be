@@ -106,7 +106,7 @@ public class NoticeService {
     }
 
     @Transactional
-    public void createNotice(NoticeCreateRequestDTO noticeCreateRequestDTO, List<MultipartFile> images,
+    public Notice createNotice(NoticeCreateRequestDTO noticeCreateRequestDTO, List<MultipartFile> images,
         List<MultipartFile> files) throws JsonProcessingException {
 
         String userName = noticeCreateRequestDTO.getUserName();
@@ -131,9 +131,9 @@ public class NoticeService {
 
         noticeRepository.save(notice);
         notice.updateCreatedAt(noticeCreateRequestDTO.getCreatedAt());
-        noticeRepository.save(notice);
 
         noticeFileService.uploadFilesToS3(images, notice, true);
         noticeFileService.uploadFilesToS3(files, notice, false);
+        return noticeRepository.save(notice);
     }
 }
