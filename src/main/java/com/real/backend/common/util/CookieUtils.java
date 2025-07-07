@@ -71,6 +71,7 @@ public class CookieUtils {
             .path(path)
             .sameSite(sameSite)
             .maxAge(0)
+            .domain(domain)
             .build();
     }
 
