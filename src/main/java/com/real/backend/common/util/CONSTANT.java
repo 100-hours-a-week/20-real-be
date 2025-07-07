@@ -10,5 +10,5 @@ public class CONSTANT {
 
     // Cookie name
     public static final String ACCESS_TOKEN_COOKIE = "ACCESS_TOKEN_V2";
-    public static final String REFRESH_TOKEN_COOKIE = "ACCESS_TOKEN_V2";
+    public static final String REFRESH_TOKEN_COOKIE = "REFRESH_TOKEN_V2";
 }
