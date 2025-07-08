@@ -24,32 +24,6 @@ public class ChatbotService {
         this.webClient = webClientBuilder.baseUrl(aiUrl).build();
     }
 
-    public ChatbotResponseDataDTO makeQuestion(ChatbotRequestDTO chatbotRequestDTO) throws JsonProcessingException {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        // 요청
-        HttpEntity<ChatbotRequestDTO> requestEntity = new HttpEntity<>(chatbotRequestDTO, headers);
-        ResponseEntity<String> response = restTemplate.exchange(aiUrl+"/api/v2/chatbots", HttpMethod.POST, requestEntity, String.class);
-
-        if (! response.getStatusCode().is2xxSuccessful()) {
-
-            throw new ResponseStatusException(
-                response.getStatusCode(),
-                "FastAPI 호출 실패: status=" + response.getStatusCode() + ", body=" + response.getBody()
-            );
-        }
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode body = objectMapper.readTree(response.getBody());
-
-        JsonNode dataNode = body.path("data");
-
-        ChatbotResponseDataDTO data = objectMapper.treeToValue(dataNode, ChatbotResponseDataDTO.class);
-
-        return new ChatbotResponseDataDTO(data.answer());
-    }
-
     public Flux<ServerSentEvent<String>> streamAnswer(String question, Long userId) {
         ChatbotRequestDTO chatbotRequestDTO = ChatbotRequestDTO.of(question, userId);
         return webClient.post()
