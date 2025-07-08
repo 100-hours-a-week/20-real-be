@@ -7,6 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+
 import com.real.backend.modules.notice.repository.NoticeRepository;
 import com.real.backend.modules.user.repository.UserRepository;
 import com.real.backend.infra.redis.NoticeRedisService;
@@ -25,7 +27,7 @@ public class NoticeSyncScheduler {
 
     @Transactional
     @Scheduled(cron = "0 0 */3 * * *")
-    // @Scheduled(cron = "*/1 * * * * *")
+    @SchedulerLock(name = "syncNoticeCountsToDBTask", lockAtLeastFor = "PT1S", lockAtMostFor = "PT3H1M")
     public void syncNoticeCountsToDB() {
         List<Long> noticeIds = postRedisService.getIds("notice", "totalView");
 
@@ -40,7 +42,7 @@ public class NoticeSyncScheduler {
 
     @Transactional
     @Scheduled(cron = "0 0 */3 * * *")
-    // @Scheduled(cron = "* 14 15 * * *")
+    @SchedulerLock(name = "syncNoticeLikeToDBTask", lockAtLeastFor = "PT1S", lockAtMostFor = "PT3H1M")
     public void SyncNoticeLikeToDB(){
         LocalDateTime threshold = LocalDateTime.now().minusMinutes(181); // 최근 3시간 1분 로그인한 유저
         List<Long> activeUserIds = userRepository.findRecentlyActiveUserIds(threshold);
@@ -50,7 +52,7 @@ public class NoticeSyncScheduler {
 
     @Transactional
     @Scheduled(cron = "0 0 */3 * * *")
-    // @Scheduled(cron = "* 42 17 * * *")
+    @SchedulerLock(name = "syncNoticeReadToDBTask", lockAtLeastFor = "PT1S", lockAtMostFor = "PT3H1M")
     public void syncNoticeReadToDB() {
         noticeRedisService.syncNoticeRead();
     }

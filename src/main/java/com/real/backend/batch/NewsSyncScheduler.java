@@ -9,6 +9,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.infra.redis.NewsRedisService;
 import com.real.backend.infra.redis.PostRedisService;
@@ -31,7 +33,7 @@ public class NewsSyncScheduler {
 
     @Transactional
     @Scheduled(cron = "0 0 */3 * * *")
-    // @Scheduled(cron = "*/1 * * * * *")
+    @SchedulerLock(name = "syncNewsCountsToDBTask", lockAtLeastFor = "PT1S", lockAtMostFor = "PT3H1M")
     public void syncNewsCountsToDB() {
         List<Long> newsIds = postRedisService.getIds("news", "totalView");
 
@@ -57,7 +59,7 @@ public class NewsSyncScheduler {
 
     @Transactional
     @Scheduled(cron = "0 0 */3 * * *")
-    // @Scheduled(cron = "*/1 * * * * *")
+    @SchedulerLock(name = "syncNewsLikeToDBTask", lockAtLeastFor = "PT1S", lockAtMostFor = "PT3H1M")
     public void SyncNewsLikeToDB(){
         LocalDateTime threshold = LocalDateTime.now().minusMinutes(181); // 최근 3시간 1분 로그인한 유저
         List<Long> activeUserIds = userRepository.findRecentlyActiveUserIds(threshold);
@@ -66,7 +68,8 @@ public class NewsSyncScheduler {
     }
 
     @Transactional
-    @Scheduled(cron = "0 10 12 * * *")
+    // @Scheduled(cron = "0 10 12 * * *")
+    @Scheduled(cron = "0 53 9 * * *")
     public void createNewsAi() throws JsonProcessingException {
         String lockKey = "batch:news:lock";
         Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, "locked", Duration.ofMinutes(10));

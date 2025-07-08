@@ -58,6 +58,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator' // 액추에이터
 	implementation 'io.micrometer:micrometer-registry-prometheus' // 프로메테우스 마이크로미터 구현체 추가
     implementation 'io.micrometer:micrometer-core'
+    // 분산락
+    implementation 'net.javacrumbs.shedlock:shedlock-spring:4.40.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:4.40.0'
 }
 
 tasks.named('test') {
