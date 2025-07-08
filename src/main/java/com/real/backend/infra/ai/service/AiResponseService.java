@@ -15,7 +15,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.real.backend.infra.s3.S3FileInfoResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,12 +26,16 @@ public class AiResponseService {
     @Value("${spring.ai_url}")
     private String aiUrl;
 
+    @Value("${spring.api.secret}")
+    private String apiKey;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate = new RestTemplate();
 
     public <T, R> R postForAiResponse(String path, T requestDto, Class<R> responseType) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-api-key", apiKey);
         HttpEntity<T> requestEntity = new HttpEntity<>(requestDto, headers);
 
         int maxAttempts = 3;
@@ -67,7 +70,6 @@ public class AiResponseService {
                     );
                 }
 
-                // 정상 응답
                 JsonNode body = objectMapper.readTree(response.getBody());
                 JsonNode dataNode = body.path("data");
                 return objectMapper.treeToValue(dataNode, responseType);
@@ -76,35 +78,9 @@ public class AiResponseService {
                 if (attempt >= maxAttempts) {
                     throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "FastAPI 호출 실패 (RestClientException)", e);
                 }
-                // log.info("AI 호출에 실패했습니다.");
             }
         }
 
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "FastAPI 호출 재시도 실패");
-    }
-
-
-    public S3FileInfoResponse getS3FileInfo(String path) throws JsonProcessingException {
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-            aiUrl + path,
-            HttpMethod.POST,
-            requestEntity,
-            String.class
-        );
-
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new ResponseStatusException(
-                response.getStatusCode(),
-                "FastAPI 호출 실패: status=" + response.getStatusCode() + ", body=" + response.getBody()
-            );
-        }
-
-        JsonNode body = objectMapper.readTree(response.getBody());
-        JsonNode dataNode = body.path("data");
-
-        return objectMapper.treeToValue(dataNode, S3FileInfoResponse.class);
     }
 }

@@ -1,22 +1,12 @@
 package com.real.backend.modules.chatbot.service;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.real.backend.infra.ai.dto.ChatbotRequestDTO;
-import com.real.backend.infra.ai.dto.ChatbotResponseDataDTO;
 
 import reactor.core.publisher.Flux;
 
@@ -25,10 +15,13 @@ public class ChatbotService {
     @Value("${spring.ai_url}")
     private String aiUrl;
 
+    @Value("${spring.api.secret}")
+    private String apiKey;
+
     private final WebClient webClient;
 
     public ChatbotService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl(aiUrl).build(); // FastAPI URL
+        this.webClient = webClientBuilder.baseUrl(aiUrl).build();
     }
 
     public ChatbotResponseDataDTO makeQuestion(ChatbotRequestDTO chatbotRequestDTO) throws JsonProcessingException {
@@ -61,6 +54,7 @@ public class ChatbotService {
         ChatbotRequestDTO chatbotRequestDTO = ChatbotRequestDTO.of(question, userId);
         return webClient.post()
             .uri(aiUrl +"/api/v3/chatbots")
+            .header("x-api-key", apiKey)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(chatbotRequestDTO)
             .retrieve()
