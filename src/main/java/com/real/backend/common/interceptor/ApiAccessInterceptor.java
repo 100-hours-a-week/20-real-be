@@ -31,7 +31,7 @@ public class ApiAccessInterceptor implements HandlerInterceptor {
         Long userId = jwtUtils.getId(token);
         if (userId != null) {
             String key = "user:" + "active:" + userId;
-            redisTemplate.opsForValue().set(key, "active", 1, TimeUnit.MINUTES);
+            redisTemplate.opsForValue().set(key, "active", 3, TimeUnit.MINUTES);
         }
 
         return true;
