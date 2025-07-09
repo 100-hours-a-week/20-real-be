@@ -134,6 +134,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AsyncRequestTimeoutException.class)
     public void handleAsyncRequestTimeoutException(AsyncRequestTimeoutException e) {
-        log.warn("SSE 연결 시간이 너무 짧습니다. - " + e.getMessage());
+        log.warn("SSE가 설정된 시간보다 빨리 끊겼습니다. - " + e.getMessage());
     }
 }
