@@ -19,10 +19,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.real.backend.common.response.DataResponse;
 import com.real.backend.common.response.StatusResponse;
 import com.real.backend.common.util.dto.SliceDTO;
+import com.real.backend.modules.notice.domain.Notice;
+import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.modules.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.modules.notice.dto.NoticeListResponseDTO;
-import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.modules.notice.service.NoticeService;
+import com.real.backend.modules.notification.service.NotificationSseService;
 import com.real.backend.modules.user.service.UserNoticeService;
 import com.real.backend.security.CurrentSession;
 import com.real.backend.security.Session;
@@ -36,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class NoticeController {
     private final UserNoticeService userNoticeService;
     private final NoticeService noticeService;
+    private final NotificationSseService notificationSseService;
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("/v1/notices")
@@ -90,7 +93,8 @@ public class NoticeController {
         @RequestPart(value = "images", required = false) List<MultipartFile> images,
         @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) throws JsonProcessingException {
-        noticeService.createNotice(noticeCreateRequestDTO, images, files);
+        Notice notice = noticeService.createNotice(noticeCreateRequestDTO, images, files);
+        notificationSseService.sendNoticeNotification(notice);
         return StatusResponse.of(201, "공지가 성공적으로 생성되었습니다.");
     }
 }
