@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.modules.notification.domain.Notification;
 import com.real.backend.modules.notification.domain.NotificationType;
-import com.real.backend.modules.notification.dto.NotificationResponseDTO;
+import com.real.backend.modules.notification.dto.NotificationEventDTO;
 import com.real.backend.modules.notification.repository.NotificationRepository;
 import com.real.backend.modules.user.component.UserFinder;
 import com.real.backend.modules.user.domain.User;
@@ -30,7 +30,7 @@ public class NotificationService {
             .type(notificationType)
             .build();
         notificationRepository.save(notification);
-        notificationSseService.sendNotification(userId, NotificationResponseDTO.from(notification));
+        notificationSseService.sendNotification(userId, NotificationEventDTO.from(notification));
     }
 
 }

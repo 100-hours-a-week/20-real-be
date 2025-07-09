@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NotificationResponseDTO {
+public class NotificationEventDTO {
     private Long notificationId;
     private Long userId;
     private NotificationType type;
@@ -20,8 +20,8 @@ public class NotificationResponseDTO {
     private String message;
     private boolean isRead;
 
-    public static NotificationResponseDTO from(Notification notification) {
-        return NotificationResponseDTO.builder()
+    public static NotificationEventDTO from(Notification notification) {
+        return NotificationEventDTO.builder()
             .notificationId(notification.getId())
             .userId(notification.getUser().getId())
             .type(notification.getType())

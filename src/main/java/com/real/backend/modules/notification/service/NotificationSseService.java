@@ -14,7 +14,7 @@ import com.real.backend.infra.sse.repository.SseEmitterRepository;
 import com.real.backend.modules.notice.domain.Notice;
 import com.real.backend.modules.notice.repository.NoticeRepository;
 import com.real.backend.modules.notification.domain.NotificationType;
-import com.real.backend.modules.notification.dto.NotificationResponseDTO;
+import com.real.backend.modules.notification.dto.NotificationEventDTO;
 import com.real.backend.modules.notification.repository.NotificationRepository;
 import com.real.backend.modules.user.domain.Role;
 import com.real.backend.modules.user.repository.UserRepository;
@@ -58,14 +58,14 @@ public class NotificationSseService {
         return sseEmitter;
     }
 
-    public void sendNotification(Long userId, NotificationResponseDTO notificationResponseDTO) {
+    public void sendNotification(Long userId, NotificationEventDTO notificationEventDTO) {
         SseEmitter emitter = sseEmitterRepository.get(userId);
         if (emitter == null) return;
 
         try {
             emitter.send(SseEmitter.event()
                 .name("notification")
-                .data(notificationResponseDTO));
+                .data(notificationEventDTO));
         } catch (IOException e) {
             sseEmitterRepository.delete(userId);
         }
@@ -82,7 +82,7 @@ public class NotificationSseService {
                 emitter.send(SseEmitter.event()
                     .id(notice.getId().toString())
                     .name("notice")
-                    .data(NotificationResponseDTO.builder()
+                    .data(NotificationEventDTO.builder()
                         .referenceId(notice.getId())
                         .type(NotificationType.NOTICE_CREATED)
                         .userId(userId)
@@ -94,12 +94,12 @@ public class NotificationSseService {
         });
     }
 
-    public void sendNotificationToAll(NotificationResponseDTO notificationResponseDTO) {
+    public void sendNotificationToAll(NotificationEventDTO notificationEventDTO) {
         sseEmitterRepository.findAllEmitters().forEach((userId, emitter) -> {
             try {
                 emitter.send(SseEmitter.event()
                     .name("notification")
-                    .data(notificationResponseDTO));
+                    .data(notificationEventDTO));
             } catch (IOException e) {
                 sseEmitterRepository.delete(userId);
             }
@@ -128,7 +128,7 @@ public class NotificationSseService {
         notificationRepository.findByUserIdAndIdGreaterThanOrderByIdAsc(userId, lastEventID)
             .forEach(notification -> {
                 try {
-                    NotificationResponseDTO dto = NotificationResponseDTO.from(notification);
+                    NotificationEventDTO dto = NotificationEventDTO.from(notification);
                     emitter.send(SseEmitter.event()
                         .id(dto.getNotificationId().toString())
                         .name("notification")
@@ -151,7 +151,7 @@ public class NotificationSseService {
                     emitter.send(SseEmitter.event()
                         .id(notice.getId().toString())
                         .name("notice")
-                        .data(NotificationResponseDTO.builder()
+                        .data(NotificationEventDTO.builder()
                             .type(NotificationType.NOTICE_CREATED)
                             .referenceId(notice.getId())
                             .userId(userId)
