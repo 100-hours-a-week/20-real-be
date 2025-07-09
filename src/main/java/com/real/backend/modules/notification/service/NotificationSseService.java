@@ -35,7 +35,10 @@ public class NotificationSseService {
         SseEmitter sseEmitter = new SseEmitter(CONSTANT.CONNECTION_TIMEOUT);
 
         sseEmitter.onCompletion(() -> sseEmitterRepository.delete(userId));
-        sseEmitter.onTimeout(() -> sseEmitterRepository.delete(userId));
+        sseEmitter.onTimeout(() -> {
+            sseEmitter.complete();
+            sseEmitterRepository.delete(userId);
+        });
         sseEmitter.onError((e) -> sseEmitterRepository.delete(userId));
 
         sseEmitterRepository.save(userId, sseEmitter);
