@@ -81,6 +81,7 @@ public class NotificationSseService {
             try {
                 emitter.send(SseEmitter.event()
                     .id(notice.getId().toString())
+                    .name("notice")
                     .data(NotificationResponseDTO.builder()
                         .referenceId(notice.getId())
                         .type(NotificationType.NOTICE_CREATED)
@@ -149,7 +150,7 @@ public class NotificationSseService {
                 try {
                     emitter.send(SseEmitter.event()
                         .id(notice.getId().toString())
-                        .name("newNotice")
+                        .name("notice")
                         .data(NotificationResponseDTO.builder()
                             .type(NotificationType.NOTICE_CREATED)
                             .referenceId(notice.getId())
