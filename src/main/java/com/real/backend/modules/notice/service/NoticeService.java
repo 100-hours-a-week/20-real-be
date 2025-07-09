@@ -134,10 +134,10 @@ public class NoticeService {
 
         noticeRepository.save(notice);
         notice.updateCreatedAt(noticeCreateRequestDTO.getCreatedAt());
+        noticeRepository.save(notice);
 
         noticeFileService.uploadFilesToS3(images, notice, true);
         noticeFileService.uploadFilesToS3(files, notice, false);
-        noticeRepository.save(notice);
 
         publisher.publishEvent(new NoticeCreatedEvent(notice));
     }

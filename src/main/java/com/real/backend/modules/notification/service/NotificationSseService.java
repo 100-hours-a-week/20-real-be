@@ -31,7 +31,8 @@ public class NotificationSseService {
     private final NoticeRepository noticeRepository;
     private final UserRepository userRepository;
 
-    public SseEmitter connect(Long userId) {
+    @Transactional
+    public SseEmitter connect(Long userId, Long lastEventId) {
         SseEmitter sseEmitter = new SseEmitter(CONSTANT.CONNECTION_TIMEOUT);
 
         sseEmitter.onCompletion(() -> sseEmitterRepository.delete(userId));
@@ -50,6 +51,9 @@ public class NotificationSseService {
         } catch (IOException e) {
             sseEmitterRepository.delete(userId);
         }
+
+        recoverMissedNotification(userId, lastEventId, sseEmitter);
+        recoverMissedNoticeNotification(userId, lastEventId, sseEmitter);
 
         return sseEmitter;
     }
