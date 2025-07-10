@@ -27,4 +27,6 @@ public class SseEmitterRepository {
     public Map<Long, SseEmitter> findAllEmitters() {
         return emitters;
     }
+
+    public boolean isExist(Long userId) { return emitters.containsKey(userId); }
 }

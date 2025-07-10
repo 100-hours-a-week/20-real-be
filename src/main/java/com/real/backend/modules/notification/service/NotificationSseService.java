@@ -33,6 +33,11 @@ public class NotificationSseService {
 
     @Transactional
     public SseEmitter connect(Long userId, Long lastEventId) {
+        if (sseEmitterRepository.isExist(userId)) {
+            sseEmitterRepository.get(userId).complete();
+            sseEmitterRepository.delete(userId);
+        }
+
         SseEmitter sseEmitter = new SseEmitter(CONSTANT.CONNECTION_TIMEOUT);
 
         sseEmitter.onCompletion(() -> sseEmitterRepository.delete(userId));
