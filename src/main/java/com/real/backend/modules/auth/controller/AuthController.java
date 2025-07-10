@@ -14,6 +14,8 @@ import com.real.backend.common.util.CookieUtils;
 import com.real.backend.modules.auth.dto.TokenDTO;
 import com.real.backend.modules.auth.kakao.KakaoUtil;
 import com.real.backend.modules.auth.service.TokenService;
+import com.real.backend.modules.notification.service.NotificationSseService;
+import com.real.backend.security.JwtUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +28,8 @@ public class AuthController {
     private final KakaoUtil kakaoUtil;
     private final CookieUtils cookieUtils;
     private final TokenService tokenService;
+    private final NotificationSseService notificationSseService;
+    private final JwtUtils jwtUtils;
 
     @GetMapping("/v1/oauth/{provider}")
     public void oauthLogin(@PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
@@ -36,12 +40,16 @@ public class AuthController {
 
     @PostMapping("/v1/auth/logout")
     public StatusResponse logout(HttpServletRequest request, HttpServletResponse response) {
+
         tokenService.deleteRefreshToken(cookieUtils.resolveTokenFromCookie(request, CONSTANT.REFRESH_TOKEN_COOKIE));
+        notificationSseService.disconnect(jwtUtils.getId(cookieUtils.resolveTokenFromCookie(request, CONSTANT.ACCESS_TOKEN_COOKIE)));
+
+        
         cookieUtils.deleteTokenCookies(response);
         return StatusResponse.of(204, "성공적으로 로그아웃 됐습니다.");
     }
 
-    @PostMapping("v1/auth/refresh")
+    @PostMapping("/v1/auth/refresh")
     public StatusResponse refresh(HttpServletRequest request, HttpServletResponse response) {
         TokenDTO tokenDTO = tokenService.refreshAccessToken(cookieUtils.resolveTokenFromCookie(request, CONSTANT.REFRESH_TOKEN_COOKIE));
         cookieUtils.setTokenCookies(response, tokenDTO.accessToken(), tokenDTO.refreshToken());

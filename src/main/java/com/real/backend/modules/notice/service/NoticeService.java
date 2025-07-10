@@ -5,6 +5,7 @@ import static com.real.backend.common.util.CursorUtils.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import com.real.backend.modules.notice.dto.NoticeFileGroups;
 import com.real.backend.modules.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.modules.notice.dto.NoticeListResponseDTO;
 import com.real.backend.modules.notice.repository.NoticeRepository;
+import com.real.backend.modules.notification.dto.NoticeCreatedEvent;
 import com.real.backend.modules.user.component.UserFinder;
 import com.real.backend.modules.user.domain.User;
 import com.real.backend.modules.user.repository.UserRepository;
@@ -43,6 +45,7 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final NoticeFinder noticeFinder;
     private final UserFinder userFinder;
+    private final ApplicationEventPublisher publisher;
 
     @Transactional(readOnly = true)
     public SliceDTO<NoticeListResponseDTO> getNoticeListByCursor(Long cursorId, int limit, String cursorStandard, Long userId) {
@@ -135,5 +138,7 @@ public class NoticeService {
 
         noticeFileService.uploadFilesToS3(images, notice, true);
         noticeFileService.uploadFilesToS3(files, notice, false);
+
+        publisher.publishEvent(new NoticeCreatedEvent(notice));
     }
 }
