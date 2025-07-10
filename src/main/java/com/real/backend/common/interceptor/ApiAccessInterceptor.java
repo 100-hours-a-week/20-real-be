@@ -8,7 +8,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import com.real.backend.common.util.CONSTANT;
 import com.real.backend.security.JwtUtils;
 
-import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,12 +22,9 @@ public class ApiAccessInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
-        if (request.getDispatcherType() == DispatcherType.ASYNC) {
-            return true;
-        }
 
         if (!uri.startsWith("/api/") || uri.startsWith("/api/v1/auth/") || uri.startsWith("/api/v2/auth/") || uri.startsWith("/api/v1/oauth/")
-            || uri.startsWith("/api/v1/news/")) return true;
+            || uri.startsWith("/api/v1/news/") || uri.startsWith("/api/v1/notification/")) return true;
 
         String token = extractTokenFromCookie(request);
         if (token == null || !jwtUtils.validateToken(token, response)) return false;

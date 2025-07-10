@@ -30,9 +30,6 @@ public class NotificationSseController {
     public SseEmitter connect(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, @CurrentSession Session session) {
         SecurityContextUtil.propagateSecurityContextToRequest(httpServletRequest, httpServletResponse);
         Long lastEventId = sseEmitterService.parseLastEventId(httpServletRequest.getHeader("Last-Event-ID"));
-        SseEmitter sseEmitter = notificationSseService.connect(session.getId());
-        notificationSseService.recoverMissedNotification(session.getId(), lastEventId, sseEmitter);
-        notificationSseService.recoverMissedNoticeNotification(session.getId(), lastEventId, sseEmitter);
-        return sseEmitter;
+        return notificationSseService.connect(session.getId(), lastEventId);
     }
 }
