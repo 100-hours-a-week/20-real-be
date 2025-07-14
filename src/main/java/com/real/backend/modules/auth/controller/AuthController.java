@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.real.backend.common.response.StatusResponse;
 import com.real.backend.common.util.CONSTANT;
 import com.real.backend.common.util.CookieUtils;
+import com.real.backend.infra.sse.service.SseEmitterService;
 import com.real.backend.modules.auth.dto.TokenDTO;
 import com.real.backend.modules.auth.kakao.KakaoUtil;
 import com.real.backend.modules.auth.service.TokenService;
@@ -30,6 +31,7 @@ public class AuthController {
     private final TokenService tokenService;
     private final NotificationSseService notificationSseService;
     private final JwtUtils jwtUtils;
+    private final SseEmitterService sseEmitterService;
 
     @GetMapping("/v1/oauth/{provider}")
     public void oauthLogin(@PathVariable("provider") String provider, HttpServletResponse response) throws IOException {
@@ -42,9 +44,9 @@ public class AuthController {
     public StatusResponse logout(HttpServletRequest request, HttpServletResponse response) {
 
         tokenService.deleteRefreshToken(cookieUtils.resolveTokenFromCookie(request, CONSTANT.REFRESH_TOKEN_COOKIE));
-        notificationSseService.disconnect(jwtUtils.getId(cookieUtils.resolveTokenFromCookie(request, CONSTANT.ACCESS_TOKEN_COOKIE)));
+        sseEmitterService.disconnect(jwtUtils.getId(cookieUtils.resolveTokenFromCookie(request, CONSTANT.ACCESS_TOKEN_COOKIE)));
 
-        
+
         cookieUtils.deleteTokenCookies(response);
         return StatusResponse.of(204, "성공적으로 로그아웃 됐습니다.");
     }

@@ -1,12 +1,16 @@
 package com.real.backend.infra.sse.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import com.real.backend.infra.sse.repository.SseEmitterRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class SseEmitterService {
+    private final SseEmitterRepository sseEmitterRepository;
 
     public Long parseLastEventId(String lastEventIdHeader) {
         long lastEventId = 0L;
@@ -16,5 +20,12 @@ public class SseEmitterService {
             } catch (NumberFormatException ignored) {}
         }
         return lastEventId;
+    }
+
+    public void disconnect(Long userId) {
+        SseEmitter emitter = sseEmitterRepository.get(userId);
+        if (emitter == null) return;
+        emitter.complete();
+        sseEmitterRepository.delete(userId);
     }
 }
