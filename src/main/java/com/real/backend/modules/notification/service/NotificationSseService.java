@@ -1,21 +1,16 @@
 package com.real.backend.modules.notification.service;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.real.backend.common.util.CONSTANT;
-import com.real.backend.infra.redis.NoticeRedisService;
 import com.real.backend.infra.sse.repository.SseEmitterRepository;
 import com.real.backend.modules.notice.domain.Notice;
-import com.real.backend.modules.notice.repository.NoticeRepository;
 import com.real.backend.modules.notification.domain.NotificationType;
 import com.real.backend.modules.notification.dto.NotificationEventDTO;
-import com.real.backend.modules.notification.repository.NotificationRepository;
 import com.real.backend.modules.user.domain.Role;
 import com.real.backend.modules.user.repository.UserRepository;
 
@@ -26,12 +21,9 @@ import lombok.RequiredArgsConstructor;
 public class NotificationSseService {
 
     private final SseEmitterRepository sseEmitterRepository;
-    private final NotificationRepository notificationRepository;
-    private final NoticeRedisService noticeRedisService;
-    private final NoticeRepository noticeRepository;
     private final UserRepository userRepository;
+    private final NotificationRecoveryService notificationRecoveryService;
 
-    @Transactional
     public SseEmitter connect(Long userId, Long lastEventId) {
         if (sseEmitterRepository.isExist(userId)) {
             sseEmitterRepository.get(userId).complete();
@@ -57,8 +49,8 @@ public class NotificationSseService {
             sseEmitterRepository.delete(userId);
         }
 
-        recoverMissedNotification(userId, lastEventId, sseEmitter);
-        recoverMissedNoticeNotification(userId, lastEventId, sseEmitter);
+        notificationRecoveryService.recoverMissedNotification(userId, lastEventId, sseEmitter);
+        notificationRecoveryService.recoverMissedNoticeNotification(userId, lastEventId, sseEmitter);
 
         return sseEmitter;
     }
@@ -111,13 +103,6 @@ public class NotificationSseService {
         });
     }
 
-    public void disconnect(Long userId) {
-        SseEmitter emitter = sseEmitterRepository.get(userId);
-        if (emitter == null) return;
-        emitter.complete();
-        sseEmitterRepository.delete(userId);
-    }
-
     public void sendHeartbeat() {
         sseEmitterRepository.findAllEmitters().forEach((userId, emitter) -> {
             try {
@@ -126,45 +111,5 @@ public class NotificationSseService {
                 sseEmitterRepository.delete(userId);
             }
         });
-    }
-
-    @Transactional(readOnly = true)
-    public void recoverMissedNotification(Long userId, Long lastEventID, SseEmitter emitter) {
-        notificationRepository.findByUserIdAndIdGreaterThanOrderByIdAsc(userId, lastEventID)
-            .forEach(notification -> {
-                try {
-                    NotificationEventDTO dto = NotificationEventDTO.from(notification);
-                    emitter.send(SseEmitter.event()
-                        .id(dto.getNotificationId().toString())
-                        .name("notification")
-                        .data(dto));
-                } catch (IOException e) {
-                    disconnect(userId);
-                }
-            });
-    }
-
-    @Transactional(readOnly = true)
-    public void recoverMissedNoticeNotification(Long userId, Long lastEventID, SseEmitter emitter) {
-        List<Long> readList = noticeRedisService.getUserReadList(userId);
-
-        noticeRepository.findByIdGreaterThanOrderByIdAsc(lastEventID)
-            .stream()
-            .filter(notice -> !readList.contains(notice.getId()))
-            .forEach(notice -> {
-                try {
-                    emitter.send(SseEmitter.event()
-                        .id(notice.getId().toString())
-                        .name("notice")
-                        .data(NotificationEventDTO.builder()
-                            .type(NotificationType.NOTICE_CREATED)
-                            .referenceId(notice.getId())
-                            .userId(userId)
-                            .message("새로운 공지가 생성되었습니다.")
-                            .build()));
-                } catch (IOException e) {
-                    disconnect(userId);
-                }
-            });
     }
 }
