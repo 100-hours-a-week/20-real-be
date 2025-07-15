@@ -26,6 +26,5 @@ public class SseEmitterService {
         SseEmitter emitter = sseEmitterRepository.get(userId);
         if (emitter == null) return;
         emitter.complete();
-        sseEmitterRepository.delete(userId);
     }
 }

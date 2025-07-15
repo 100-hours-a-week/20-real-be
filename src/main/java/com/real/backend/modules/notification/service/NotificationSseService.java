@@ -18,7 +18,9 @@ import com.real.backend.modules.user.domain.User;
 import com.real.backend.modules.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationSseService {
@@ -28,33 +30,33 @@ public class NotificationSseService {
     private final NotificationRecoveryService notificationRecoveryService;
 
     public SseEmitter connect(Long userId, Long lastEventId) {
-        if (sseEmitterRepository.isExist(userId)) {
-            sseEmitterRepository.get(userId).complete();
-            sseEmitterRepository.delete(userId);
-        }
+        SseEmitter newEmitter = new SseEmitter(CONSTANT.CONNECTION_TIMEOUT);
 
-        SseEmitter sseEmitter = new SseEmitter(CONSTANT.CONNECTION_TIMEOUT);
-
-        sseEmitter.onCompletion(() -> sseEmitterRepository.delete(userId));
-        sseEmitter.onTimeout(() -> {
-            sseEmitter.complete();
-            sseEmitterRepository.delete(userId);
+        newEmitter.onCompletion(() -> {
+            sseEmitterRepository.delete(userId, newEmitter);
         });
-        sseEmitter.onError((e) -> sseEmitterRepository.delete(userId));
+        newEmitter.onTimeout(newEmitter::complete);
+        newEmitter.onError(e -> {
+            newEmitter.complete();
+        });
 
-        sseEmitterRepository.save(userId, sseEmitter);
+        SseEmitter oldEmitter = sseEmitterRepository.save(userId, newEmitter);
+        if (oldEmitter != null) {
+            log.warn("User {} is reconnecting. Closing the previous connection.", userId);
+            oldEmitter.complete();
+        }
 
         try {
-            sseEmitter.send(SseEmitter.event()
-                .name("connect")
-                .data("SSE 연결 성공"));
+            newEmitter.send(SseEmitter.event().name("connect").data("SSE connection established."));
         } catch (IOException e) {
-            sseEmitterRepository.delete(userId);
+            log.warn("Failed to send initial connect event for user {}. The client may have disconnected. Completing emitter.", userId, e);
+            newEmitter.complete();
         }
 
-        notificationRecoveryService.findLatestUnreadNotice(userId, lastEventId).ifPresent(this::sendNoticeNotification);
+        notificationRecoveryService.findLatestUnreadNotice(userId, lastEventId)
+            .ifPresent(this::sendNoticeNotification);
 
-        return sseEmitter;
+        return newEmitter;
     }
 
     public void sendNotification(Long userId, NotificationEventDTO notificationEventDTO) {
@@ -66,7 +68,7 @@ public class NotificationSseService {
                 .name("notification")
                 .data(notificationEventDTO));
         } catch (IOException e) {
-            sseEmitterRepository.delete(userId);
+            emitter.complete();
         }
     }
 
@@ -107,7 +109,7 @@ public class NotificationSseService {
                     .name("notification")
                     .data(notificationEventDTO));
             } catch (IOException e) {
-                sseEmitterRepository.delete(userId);
+                emitter.complete();
             }
         });
     }
@@ -115,9 +117,10 @@ public class NotificationSseService {
     public void sendHeartbeat() {
         sseEmitterRepository.findAllEmitters().forEach((userId, emitter) -> {
             try {
-                emitter.send(SseEmitter.event().comment("heartbeat").data("heartbeat sended"));
-            } catch (IOException e) {
-                sseEmitterRepository.delete(userId);
+                emitter.send(SseEmitter.event()
+                    .comment("heartbeat"));
+            } catch (IOException | IllegalStateException e) {
+                sseEmitterRepository.delete(userId, emitter);
             }
         });
     }
