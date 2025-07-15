@@ -1,7 +1,9 @@
 package com.real.backend.modules.notification.service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -12,6 +14,7 @@ import com.real.backend.modules.notice.domain.Notice;
 import com.real.backend.modules.notification.domain.NotificationType;
 import com.real.backend.modules.notification.dto.NotificationEventDTO;
 import com.real.backend.modules.user.domain.Role;
+import com.real.backend.modules.user.domain.User;
 import com.real.backend.modules.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -68,12 +71,19 @@ public class NotificationSseService {
     }
 
     public void sendNoticeNotification(Notice notice) {
-        Map<Long, SseEmitter> emitters = sseEmitterRepository.findAllEmitters();
-        emitters.forEach((userId, emitter) -> {
-            Role role = userRepository.findRoleById(userId);
+        List<Long> allUserIds = sseEmitterRepository.findAllEmitters().keySet().stream().toList();
+        if (allUserIds.isEmpty()) {
+            return;
+        }
+        Map<Long, Role> userRoles = userRepository.findAllById(allUserIds).stream()
+            .collect(Collectors.toMap(User::getId, User::getRole));
+
+        sseEmitterRepository.findAllEmitters().forEach((userId, emitter) -> {
+            Role role = userRoles.get(userId);
             if (!(role == Role.STAFF || role == Role.TRAINEE)) {
                 return;
             }
+
             try {
                 emitter.send(SseEmitter.event()
                     .id(notice.getId().toString())
@@ -84,8 +94,8 @@ public class NotificationSseService {
                         .userId(userId)
                         .message("새로운 공지가 생성되었습니다.")
                         .build()));
-            } catch (IOException e) {
-                sseEmitterRepository.delete(userId);
+            } catch (Exception e) {
+                emitter.complete();
             }
         });
     }
