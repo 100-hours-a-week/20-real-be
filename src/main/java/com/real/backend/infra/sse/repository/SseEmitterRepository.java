@@ -12,21 +12,19 @@ public class SseEmitterRepository {
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     public SseEmitter save(Long userId, SseEmitter emitter) {
-        emitters.put(userId, emitter);
-        return emitter;
+        return emitters.put(userId, emitter);
     }
 
     public SseEmitter get(Long userId) {
         return emitters.get(userId);
     }
 
-    public void delete(Long userId) {
-        emitters.remove(userId);
+    public void delete(Long userId, SseEmitter emitter) {
+        emitters.remove(userId, emitter);
     }
+
 
     public Map<Long, SseEmitter> findAllEmitters() {
         return emitters;
     }
-
-    public boolean isExist(Long userId) { return emitters.containsKey(userId); }
 }
