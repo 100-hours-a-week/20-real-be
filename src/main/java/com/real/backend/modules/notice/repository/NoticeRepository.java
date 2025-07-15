@@ -99,5 +99,5 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Query("select n.id from Notice n")
     List<Long> findAllNoticeIds();
 
-    List<Notice> findByIdGreaterThanOrderByIdAsc(Long idIsGreaterThan);
+    List<Notice> findByIdGreaterThanOrderByIdDesc(Long idIsGreaterThan);
 }
