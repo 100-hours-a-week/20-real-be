@@ -49,8 +49,7 @@ public class NotificationSseService {
             sseEmitterRepository.delete(userId);
         }
 
-        notificationRecoveryService.recoverMissedNotification(userId, lastEventId, sseEmitter);
-        notificationRecoveryService.recoverMissedNoticeNotification(userId, lastEventId, sseEmitter);
+        notificationRecoveryService.findLatestUnreadNotice(userId, lastEventId).ifPresent(this::sendNoticeNotification);
 
         return sseEmitter;
     }
