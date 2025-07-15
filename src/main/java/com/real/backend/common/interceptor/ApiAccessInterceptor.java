@@ -24,7 +24,7 @@ public class ApiAccessInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
 
         if (!uri.startsWith("/api/") || uri.startsWith("/api/v1/auth/") || uri.startsWith("/api/v2/auth/") || uri.startsWith("/api/v1/oauth/")
-            || uri.startsWith("/api/v1/news/") || uri.startsWith("/api/v1/notification/")) return true;
+            || uri.startsWith("/api/v1/news/") || uri.startsWith("/api/v1/connect/")) return true;
 
         String token = extractTokenFromCookie(request);
         if (token == null || !jwtUtils.validateToken(token, response)) return false;
