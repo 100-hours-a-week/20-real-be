@@ -1,7 +1,9 @@
 package com.real.backend.modules.notice.repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -99,5 +101,5 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Query("select n.id from Notice n")
     List<Long> findAllNoticeIds();
 
-    List<Notice> findByIdGreaterThanOrderByIdDesc(Long idIsGreaterThan);
+    Optional<Notice> findTopByIdGreaterThanAndIdNotInOrderByIdDesc(Long id, Collection<Long> noticeIds);
 }
