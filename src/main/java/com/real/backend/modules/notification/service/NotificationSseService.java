@@ -36,21 +36,21 @@ public class NotificationSseService {
             sseEmitterRepository.delete(userId, newEmitter);
         });
         newEmitter.onTimeout(() -> {
-            log.info("User {} is Timed out. Closing the connection.", userId);
+            // log.info("User {} is Timed out. Closing the connection.", userId);
             newEmitter.complete();
         });
         newEmitter.onError(e -> {
-            log.info("User {} is Error. Closing the connection. Reason: ", userId, e);
+            // log.info("User {} is Error. Closing the connection. Reason: ", userId, e);
             newEmitter.complete();
         });
 
         SseEmitter oldEmitter = sseEmitterRepository.save(userId, newEmitter);
         if (oldEmitter != null) {
-            log.warn("User {} is reconnecting. Closing the previous connection.", userId);
+            // log.warn("User {} is reconnecting. Closing the previous connection.", userId);
             oldEmitter.complete();
         }
 
-        log.info("User {} is connected successfully", userId);
+        // log.info("User {} is connected successfully", userId);
 
         try {
             newEmitter.send(SseEmitter.event()
@@ -61,13 +61,13 @@ public class NotificationSseService {
             newEmitter.complete();
         }
 
-        if (notificationRecoveryService.findLatestUnreadNotice(userId)) {
-            sendNotification(userId, NotificationEventDTO.builder()
-                .type(NotificationType.NOTICE_CREATED)
-                .message("새로운 공지가 생성되었습니다.")
-                .userId(userId)
-                .build());
-        }
+        // if (notificationRecoveryService.hasUnreadLatestNotice(userId)) {
+        //     sendNotification(userId, NotificationEventDTO.builder()
+        //         .type(NotificationType.NOTICE_CREATED)
+        //         .message("새로운 공지가 생성되었습니다.")
+        //         .userId(userId)
+        //         .build());
+        // }
 
         return newEmitter;
     }

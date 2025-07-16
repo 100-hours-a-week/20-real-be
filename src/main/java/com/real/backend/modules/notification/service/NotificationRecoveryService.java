@@ -1,11 +1,13 @@
 package com.real.backend.modules.notification.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.real.backend.infra.redis.NoticeRedisService;
+import com.real.backend.modules.notice.domain.Notice;
 import com.real.backend.modules.notice.repository.NoticeRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -17,18 +19,17 @@ public class NotificationRecoveryService {
     private final NoticeRedisService noticeRedisService;
 
     @Transactional(readOnly = true)
-    public boolean findLatestUnreadNotice(Long userId) {
+    public boolean hasUnreadLatestNotice(Long userId) {
         List<Long> readList = noticeRedisService.getUserReadList(userId);
 
-        if (readList.isEmpty()) {
+        Optional<Notice> latestOpt = noticeRepository
+            .findTopByDeletedAtIsNullOrderByIdDesc();
+
+        if (latestOpt.isEmpty()) {
             return false;
-        } else {
-            return noticeRepository.findTopByIdGreaterThanAndIdNotInOrderByIdDesc(userId, readList).isPresent();
         }
 
-        // return noticeRepository
-        //     .findFirstByOrderByCreatedAtDesc()
-        //     .map(notice -> !readList.contains(notice.getId()))
-        //     .orElse(false);
+        Long latestId = latestOpt.get().getId();
+        return !readList.contains(latestId);
     }
 }

@@ -1,7 +1,6 @@
 package com.real.backend.modules.notice.repository;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,5 +100,5 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Query("select n.id from Notice n")
     List<Long> findAllNoticeIds();
 
-    Optional<Notice> findTopByIdGreaterThanAndIdNotInOrderByIdDesc(Long id, Collection<Long> noticeIds);
+    Optional<Notice> findTopByDeletedAtIsNullOrderByIdDesc();
 }
