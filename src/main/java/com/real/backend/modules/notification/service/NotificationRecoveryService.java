@@ -19,13 +19,17 @@ public class NotificationRecoveryService {
     private final NoticeRedisService noticeRedisService;
 
     @Transactional(readOnly = true)
-    public Optional<Notice> findLatestUnreadNotice(Long userId, Long lastEventID) {
+    public boolean hasUnreadLatestNotice(Long userId) {
         List<Long> readList = noticeRedisService.getUserReadList(userId);
 
-        return noticeRepository
-            .findByIdGreaterThanOrderByIdDesc(lastEventID)
-            .stream()
-            .filter(notice -> !readList.contains(notice.getId()))
-            .findFirst();
+        Optional<Notice> latestOpt = noticeRepository
+            .findTopByDeletedAtIsNullOrderByIdDesc();
+
+        if (latestOpt.isEmpty()) {
+            return false;
+        }
+
+        Long latestId = latestOpt.get().getId();
+        return !readList.contains(latestId);
     }
 }
