@@ -35,8 +35,12 @@ public class NotificationSseService {
         newEmitter.onCompletion(() -> {
             sseEmitterRepository.delete(userId, newEmitter);
         });
-        newEmitter.onTimeout(newEmitter::complete);
+        newEmitter.onTimeout(() -> {
+            log.info("User {} is Timed out. Closing the connection.", userId);
+            newEmitter.complete();
+        });
         newEmitter.onError(e -> {
+            log.info("User {} is Error. Closing the connection. Reason: ", userId, e);
             newEmitter.complete();
         });
 
@@ -46,15 +50,24 @@ public class NotificationSseService {
             oldEmitter.complete();
         }
 
+        log.info("User {} is connected successfully", userId);
+
         try {
-            newEmitter.send(SseEmitter.event().name("connect").data("SSE connection established."));
+            newEmitter.send(SseEmitter.event()
+                .name("connect")
+                .data("SSE connection established."));
         } catch (IOException e) {
             log.warn("Failed to send initial connect event for user {}. The client may have disconnected. Completing emitter.", userId, e);
             newEmitter.complete();
         }
 
-        notificationRecoveryService.findLatestUnreadNotice(userId, lastEventId)
-            .ifPresent(this::sendNoticeNotification);
+        if (notificationRecoveryService.findLatestUnreadNotice(userId)) {
+            sendNotification(userId, NotificationEventDTO.builder()
+                .type(NotificationType.NOTICE_CREATED)
+                .message("새로운 공지가 생성되었습니다.")
+                .userId(userId)
+                .build());
+        }
 
         return newEmitter;
     }
@@ -118,6 +131,7 @@ public class NotificationSseService {
         sseEmitterRepository.findAllEmitters().forEach((userId, emitter) -> {
             try {
                 emitter.send(SseEmitter.event()
+                    .name("heartbeat")
                     .comment("heartbeat"));
             } catch (IOException | IllegalStateException e) {
                 sseEmitterRepository.delete(userId, emitter);
