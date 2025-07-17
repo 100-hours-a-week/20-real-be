@@ -10,11 +10,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import com.real.backend.modules.notice.domain.Notice;
 
-@Repository
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Query("""
         SELECT n FROM Notice n
@@ -80,18 +78,16 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
         Pageable pageable
     );
 
-    @Query("""
-        SELECT n
-          FROM Notice n
-         WHERE n.deletedAt IS NULL
-           AND NOT EXISTS (
-               SELECT 1
-                 FROM UserNoticeRead unr
-                WHERE unr.notice = n
-                  AND unr.user.id = :userId
-           )
-        """)
-    List<Notice> findAllUnreadNotices(@Param("userId") Long userId);
+    @Query("select n from Notice n " +
+        "where n.title like %:keyword% or n.content like %:keyword% " +
+        "order by n.createdAt desc, n.id desc")
+    Slice<Notice> searchByKeywordFirst(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("select n from Notice n " +
+        "where (n.title like %:keyword% or n.content like %:keyword%) " +
+        "and (n.createdAt < :cursorStandard or (n.createdAt = :cursorStandard and n.id < :cursorId)) " +
+        "order by n.createdAt desc, n.id desc")
+    Slice<Notice> searchByKeyword(@Param("keyword") String keyword, @Param("cursorStandard") LocalDateTime cursorStandard, @Param("cursorId") Long cursorId, Pageable pageable);
 
     @Modifying
     @Query("UPDATE Notice n SET n.totalViewCount = :totalView, n.likeCount = :likeCount, n.commentCount = :commentCount WHERE n.id = :id")
