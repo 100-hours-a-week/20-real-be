@@ -137,7 +137,7 @@ public class NoticeRedisService {
                 user = userFinder.getUser(userId);
             } catch (NotFoundException e) {
                 log.warn("존재하지 않는 사용자입니다. Redis 키를 삭제합니다. userId={}", userId);
-                redisTemplate.delete("");
+                redisTemplate.delete(keyTemplate+userId);
                 return;
             }
 
