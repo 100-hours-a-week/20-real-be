@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 public class NoticeFinder {
     private final NoticeRepository noticeRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional(noRollbackFor = NotFoundException.class, readOnly = true)
     public Notice getNotice(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new NotFoundException("해당 id를 가진 공지가 존재하지 않습니다."));
         if (notice.getDeletedAt() != null) {

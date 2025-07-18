@@ -22,6 +22,7 @@ import com.real.backend.common.util.dto.SliceDTO;
 import com.real.backend.modules.notice.dto.NoticeCreateRequestDTO;
 import com.real.backend.modules.notice.dto.NoticeInfoResponseDTO;
 import com.real.backend.modules.notice.dto.NoticeListResponseDTO;
+import com.real.backend.modules.notice.service.NoticeCursorPaginationService;
 import com.real.backend.modules.notice.service.NoticeService;
 import com.real.backend.modules.notification.service.NotificationSseService;
 import com.real.backend.modules.user.service.UserNoticeService;
@@ -38,6 +39,7 @@ public class NoticeController {
     private final UserNoticeService userNoticeService;
     private final NoticeService noticeService;
     private final NotificationSseService notificationSseService;
+    private final NoticeCursorPaginationService noticeCursorPaginationService;
 
     @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
     @GetMapping("/v1/notices")
@@ -49,6 +51,21 @@ public class NoticeController {
     ) {
         SliceDTO<NoticeListResponseDTO> noticeList = noticeService.getNoticeListByCursor(cursorId, limit,
             cursorStandard, session.getId());
+        return DataResponse.of(noticeList);
+    }
+
+    // keyword를 이용한 공지 목록 검색
+    @PreAuthorize("!hasAnyAuthority('OUTSIDER')")
+    @GetMapping("/v2/notices")
+    public DataResponse<SliceDTO<NoticeListResponseDTO>> getNoticeListByCursor(
+        @RequestParam(value = "cursorId", required = false) Long cursorId,
+        @RequestParam(value = "cursorStandard", required = false) String cursorStandard,
+        @RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
+        @RequestParam(value = "keyword", required = false) String keyword,
+        @CurrentSession Session session
+    ) {
+        SliceDTO<NoticeListResponseDTO> noticeList = noticeCursorPaginationService.getNoticeListByCursor(cursorId, limit,
+            cursorStandard, session.getId(), keyword);
         return DataResponse.of(noticeList);
     }
 
