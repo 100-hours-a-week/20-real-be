@@ -15,7 +15,7 @@ public class UserFinder {
 
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional(noRollbackFor = NotFoundException.class, readOnly = true)
     public User getUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("해당 id를 가진 사용자가 없습니다."));
         if (user.getWithdrawAt() != null) {

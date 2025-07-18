@@ -11,18 +11,22 @@ import java.util.stream.Collectors;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.real.backend.common.exception.NotFoundException;
 import com.real.backend.common.util.CONSTANT;
 import com.real.backend.modules.notice.component.NoticeFinder;
 import com.real.backend.modules.notice.domain.NoticeLike;
 import com.real.backend.modules.notice.repository.NoticeLikeRepository;
 import com.real.backend.modules.user.component.UserFinder;
+import com.real.backend.modules.user.domain.User;
 import com.real.backend.modules.user.domain.UserNoticeRead;
 import com.real.backend.modules.user.repository.UserNoticeReadRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NoticeRedisService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final NoticeLikeRepository noticeLikeRepository;
@@ -117,28 +121,43 @@ public class NoticeRedisService {
     }
 
     public void syncNoticeRead() {
-        String str = "notice:read:user:*";
+        String keyTemplate = "notice:read:user:";
+        String str = keyTemplate + "*";
+        User user;
 
         Set<String> keys = redisTemplate.keys(str);
         List<Long> ids = keys.stream()
-            .map(k -> (k.substring(("notice:read:user:").length())))
+            .map(k -> (k.substring((keyTemplate).length())))
             .map(Long::parseLong)
             .toList();
 
         for (Long userId : ids) {
 
-            Set<Object> noticeIds = redisTemplate.opsForSet().members("notice:read:user:"+userId);
+            try {
+                user = userFinder.getUser(userId);
+            } catch (NotFoundException e) {
+                log.warn("존재하지 않는 사용자입니다. Redis 키를 삭제합니다. userId={}", userId);
+                redisTemplate.delete("");
+                return;
+            }
+
+            Set<Object> noticeIds = redisTemplate.opsForSet().members(keyTemplate+userId);
 
             if (noticeIds != null) {
                 for (Object noticeIdObj : noticeIds) {
-                    Long noticeId = Long.valueOf((String) noticeIdObj);
-                    if (!userNoticeReadRepository.existsByUserIdAndNoticeId(userId, noticeId)) {
-                        userNoticeReadRepository.save(
-                            UserNoticeRead.builder()
-                                .user(userFinder.getUser(userId))
-                                .notice(noticeFinder.getNotice(noticeId))
-                                .build());
-                    };
+                    try {
+                        Long noticeId = Long.valueOf((String) noticeIdObj);
+                        if (!userNoticeReadRepository.existsByUserIdAndNoticeId(userId, noticeId)) {
+                            userNoticeReadRepository.save(
+                                UserNoticeRead.builder()
+                                    .user(user)
+                                    .notice(noticeFinder.getNotice(noticeId))
+                                    .build());
+                        }
+                    } catch (NotFoundException e) {
+                        log.warn("존재하지 않는 공지를 읽음 처리 시도합니다. notice:read:user 에서 삭제합니다. noticeId={}", noticeIdObj);
+                        redisTemplate.opsForSet().remove(keyTemplate+userId, noticeIdObj);
+                    }
                 }
             }
         }
