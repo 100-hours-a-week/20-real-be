@@ -79,12 +79,12 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     );
 
     @Query("select n from Notice n " +
-        "where n.title like %:keyword% or n.content like %:keyword% " +
+        "where n.deletedAt is null and (n.title like %:keyword% or n.content like %:keyword%) " +
         "order by n.createdAt desc, n.id desc")
     Slice<Notice> searchByKeywordFirst(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("select n from Notice n " +
-        "where (n.title like %:keyword% or n.content like %:keyword%) " +
+        "where n.deletedAt is null and (n.title like %:keyword% or n.content like %:keyword%) " +
         "and (n.createdAt < :cursorStandard or (n.createdAt = :cursorStandard and n.id < :cursorId)) " +
         "order by n.createdAt desc, n.id desc")
     Slice<Notice> searchByKeyword(@Param("keyword") String keyword, @Param("cursorStandard") LocalDateTime cursorStandard, @Param("cursorId") Long cursorId, Pageable pageable);
