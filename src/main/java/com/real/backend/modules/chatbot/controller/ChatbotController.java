@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.real.backend.modules.chatbot.service.ChatbotService;
 import com.real.backend.security.CurrentSession;
+import com.real.backend.security.SecurityContextUtil;
 import com.real.backend.security.Session;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 
@@ -26,9 +29,11 @@ public class ChatbotController {
     @GetMapping(value = "/v2/chatbots", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> streamChatResponse(
         @RequestParam String question,
-        @CurrentSession Session session
+        @CurrentSession Session session,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse
     ) {
-
+        SecurityContextUtil.propagateSecurityContextToRequest(httpServletRequest, httpServletResponse);
         return chatbotService.streamAnswer(question, session.getId());
     }
 }
